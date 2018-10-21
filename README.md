@@ -65,7 +65,7 @@ The above picture shows auto layout change when a new stream joined in (from 2 c
 #### **Backgroud dynamically change during mixing by request**
 ![Backgroud dynamically change via request](asset/backgroudChange.gif)
 
-The above picture shows backgroud picture changed by a request. 
+The above picture shows backgroud picture changed by a request (the text 'FFdynami' in backgroud changes font and size) 
 
 Both changes are quite smooth, without any stuck or frozen effect.
 

@@ -1,4 +1,4 @@
-### FFdynamic: Extending FFmpeg's power with video/audio process composition and on the fly state changing 
+### FFdynamic: Extending FFmpeg's power with video/audio process composition and state changing on the fly 
 ------------
 ### Contents
 - [Overview](#overview)
@@ -13,9 +13,9 @@
 -----------
 ### `Overview`
 
-* **Extending**: FFdynamic extends FFmpeg in the manner of doing video/audio process **compositionally** and each component can be **dynamically** changed on the fly.
+* **Extending**: FFdynamic extends FFmpeg in the manner of doing video/audio process **compositionally** and each component's state can be **dynamically** changed on the fly.
 
-#### *compositional*
+- **compositional**
   _FFdynamic_ is structured in a modular way. It takes each component (demux, decode, filter, encode, muxer, and cutomized component) as a building block and they can be combined together as desired at creationg time or run time.  
   For instance, if we are developing a dehaze algorithm and would like to know how good the dehazed algorithm visually (in compare to original one). FFdynamic provides facilities that allow one to easily realize following composition:
 
@@ -29,11 +29,11 @@ Demux |-> Audio Decode -> |-> Audio Encode -------------------------------------
   As shown, after demux the input stream, we do video decode which will output to two components: 'Dehaze Filter' component and 'mix video' component; after dehaze, its image also output to 'mix video' component, in there we mix original and dehazed image into one. The whole example is [here](#write-a-plugin-component). 
   Normally, one can freely combine components as long as the input data can be processed.
 
-#### *on the fly*
+* **on the fly**
   _FFdynamic_ has a runtime event dispatch module, which can pass request to the component needs dynamical state change. For instance, one could set dynamical 'Key Frame' request to video encoder or 'mute' one audio stream.  
   _FFdynamic_ also has a runtime components pub-sub module, which each component can subscribe interesed events from other components. For instance, one video encoder in a live show is willing to know the region of people faces in the incoming image', so that it could set more bitrate to this region. We can do this by subscribe events to a face detecting component and get published event with ROI.
 
-#### *customization*
+- **customization**
    One can define their own components, for instance
    - a RTP demuxer with private fields
    - a object detection module
@@ -48,8 +48,8 @@ It is suitable for two kind of applications:
 -----------
 ## `An application Interactive Live`
 
-Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and show how to use this library to develop complication program. It does video and audio mixing, then streams it out. It could be run in phones and cloud servers.
-Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream. 
+Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and show how to use this library to develop complicated program. It does video and audio mixing, then streams it out. It could be run in phones and cloud servers.
+Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream.
 
 #### **Interactive live scenario**
 ![Interactive live with two people](asset/peers-broadcast.jpg )
@@ -214,7 +214,7 @@ static int reap_filters(int flush)
 As shown, if we have 5 outputs (which is normal in live broadcast field, output 1080p60, 1080p30, 720p, 540p, 320p for diffrent devices), FFmpeg will do encode one by one (takes more time, cpu not fully used). Of cause, this is because FFmpeg not targeting this scenario.
 
 -----------
-- [Write a plugin component](#write-a-plugin-component)
+## [Write a plugin component](#write-a-plugin-component)
 
 Here we introduce how to write a plugin. We develop a dehaze algorithm and make it as a FFdynamic's component. Then we could compose it with other components freely. the following image shows the diagram we mentioned above, mix original and dehazed image together to check the result visually.
 
@@ -266,7 +266,7 @@ brew install cmake glog protobuf boost
 #### Others 
 iOS and Android build is not implemented, pull request is welcome.
 
-## Optional Installation - TODO
+#### Optional Installation - TODO
 * nvidia driver, cuda tookit, if you prefer using nvidia codec
 
 ### `A docker build`

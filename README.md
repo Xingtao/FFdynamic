@@ -256,15 +256,15 @@ sudo make install && sudo ldconfig
 
 #### For Ubuntu
 Install FFmpeg as usal, then  
-apt install -y cmake glog-dev boost-dev
+apt install -y cmake libgflags-dev libgoogle-glog-dev libboost-dev
 
 #### For CentOS
 Install FFmpeg as usal, then  
-yum install -y glog-devel cmake boost-devel  
+yum install -y glog-devel gflags-devel cmake boost-devel  
 
 #### For Mac
 Install FFmpeg as usal, then  
-brew install cmake glog protobuf boost 
+brew install cmake glog gflags protobuf boost 
 
 #### Others 
 iOS and Android build is not implemented, pull request is welcome.
@@ -273,7 +273,7 @@ iOS and Android build is not implemented, pull request is welcome.
 * nvidia driver, cuda tookit, if you prefer using nvidia codec
 
 ### `A docker build`
-To alleviate the build process, there is a [docker](#tools/dockerlize/README.md) build all dependencies that you can play with.
+To alleviate the build process, there is a [docker](tools/dockerlize/README.md) with all dependencies installed that you can play with.
 
 -----------------
 ## `Contribution`

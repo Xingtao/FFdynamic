@@ -1,0 +1,9 @@
+# h264 1080p to h2641080p:
+ffmpeg -re -hwaccel cuvid -vcodec h264_cuvid -i 'input' -vcodec h264_nvenc -profile:v high -b:v 3000k -maxrate:v 6000k -bufsize:v 6000k -g 50 -an -f flv -y 'output'
+
+# h264 1080p to h264 720p & 576p & 360p:
+./ffmpeg -re -hwaccel cuvid -vcodec h264_cuvid  -i 'input' \
+        -vf scale_npp=1280:720 -vcodec h264_nvenc -profile:v high -b:v 1000k -maxrate:v 3000k -bufsize:v 3000k -g 50 -an -f flv -y 'output1' \
+        -vf scale_npp=480:360  -vcodec h264_nvenc -profile:v high -b:v 500k -maxrate:v 1000k -bufsize:v 1000k -g 50 -an -f flv -y 'output2' \
+        -vf scale_npp=720:576  -vcodec h264_nvenc -profile:v high -b:v 800k  -maxrate:v 1500k -bufsize:v 1500k -g 50 -an -f flv -y 'output3'
+

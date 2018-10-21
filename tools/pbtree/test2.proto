@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package DavWaveSetting;
+
+message DemuxSetting {
+    string demux_type = 1;  /* auto, ffmpeg, or your own defined demuxer. normaly; auto will use ffmpeg */
+    int32 read_timeout = 2;
+    int32 reconnect_times = 3;
+    map<string, string> avdict_demux_option = 4; /* options that ffmpeg's demuxer can set via AVDict */
+}
+
+message VideoFilterSetting {
+    string filter_type = 1; /* auto, ffmpeg or custom defined video filter;  auto will use ffmpeg */
+    string filter_arg = 2;  /* for instance, a ffmpeg video filter description: blackdetect=d=2:pix_th=0.00;
+                              sets the maximum pixel threshold to the minimum value,
+                              and detects only black intervals of 2 or more seconds */
+}
+
+message AudioFilterSetting {
+    string filter_type = 1; /* auto, ffmpeg or custom defined audio filter */
+    string filter_arg = 2;  /* for instance, a ffmpeg audio filter description: afade=t=out:st=875:d=25;
+                              this iwll fade out last 25 seconds of a 900 seconds audio */
+}
+
+message VideoMixSetting {
+     /* whether regenerate pts from 0 or use coming streams' pts. if coming streams use real
+        time timestamp, leave it false. otherwise, for instance, to mix several video clips, set true */
+    bool b_regenerate_pts = 1;
+    int32 width = 2;
+    int32 height = 3;
+    int32 margin = 4;
+    int32 border_width = 5;
+    int32 border_color = 6;
+    int32 fillet_radius = 7; /* whether make cell with fillet, radius = 0 will do nothing */
+    string backgroud_image_path = 8;
+    VideoMixLayoutInfo layout_info = 9;
+}
+
+message AudioMixSetting {
+    int32 frame_size = 1; /* output how may pcm samples one time */
+}
+
+message VideoEncodeSetting {
+    string encode_type = 1; /* auto, ffmpeg, or your own defined encoders */
+    string codec_name = 2; /* A ffmpeg codec name, such as libx264, hevc_nvenc */
+    int32 framerate = 3;  /* explicit setup framerate, if use default(0), it will use the fps passing down */
+    map<string, string> avdict_encode_option = 4; /* options that ffmpeg's encoder can set via AVDict */
+    /* For instance:  "width" : "1920", "height" : "1080", "b" : "4000k", "preset" : "veryfast",
+                      "profile" : "auto", "lookahead" : "1", "x264param" : "" */
+}
+
+message AudioEncodeSetting {
+    string encode_type = 1; /* auto, ffmpeg, or your own defined encoders */
+    string codec_name = 2; /* A ffmpeg codec name, such as acc-he, mp3 */
+    map<string, string> avdict_encode_option = 3; /* options that ffmpeg's encoder can set via AVDict */
+    /* for instance: "channel" : 2, "b" : "128k", "samplerate" : "44100" */
+}
+
+message MuxSetting {
+    string mux_type = 1; /* auto ffmpeg or your own defined muxers */
+    string mux_fmt = 2;  /* flv, mp4, mpegts, hls, could be null, etc... */
+    map<string, string> avdict_mux_option = 3; /* options that ffmpeg's muxer can set via AVDict */
+}
+
+/* helpers */
+message VideoMixLayoutInfo {
+    /* the layout coordinates relies one this enum cast to int, so if the following enum is modified,
+       please changes corresponding part in VideoCellSetting module */
+    EVideoMixLayout layout = 1;
+    /* besides fixed layout, could set layout by explicitly set each cell or some cells' position */
+    repeated VideoCellCoordinate cells = 2;
+};
+
+message VideoCellCoordinate {
+    int32 x = 1;
+    int32 y = 2;
+    int32 w = 3;
+    int32 h = 4;
+    int32 layer = 5;
+}
+enum EVideoMixLayout {
+    /* specific layout use coordinates setup via 'repeated VideoCellCoordinate cells' */
+    eLayoutAuto = 0;            eLayoutUnknown = -1;
+    eSingle_1 = 1;              eHorizonal_2 = 2;
+    eLeft1SmallRight1Big_2 = 3; eLeft2SsmallRight1Big_3 = 4;
+    eEqual4_4 = 5;              eLeft1BigRight3Small_4 = 6;
+    eEqualCenter_5 = 7;         eRow2Col3_6 = 8;
+    eEqual_9 = 9;               eRow3Col4_12 = 10;
+    eEqual_16 = 11;             eEqual_25 = 12;
+    eEqual_36 = 13;
+    eLayoutSpecific = 14;
+}

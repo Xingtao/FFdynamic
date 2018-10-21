@@ -1,0 +1,79 @@
+FROM nvidia/cuda:9.0-devel-centos7
+RUN yum update -y
+RUN yum install -y epel-release
+RUN yum install -y git autoconf automake libtool curl wget make g++ gcc-c++ unzip bzip2-devel pcre-devel \
+                   cmake3 boost-devel nasm yasm python-devel libgomp bzip2
+
+RUN ln -s /usr/bin/cmake3 /usr/bin/cmake
+
+####################################################
+# build ffmpeg
+ARG        PKG_CONFIG_PATH=/opt/ffmpeg/lib/pkgconfig
+ARG        LD_LIBRARY_PATH=/opt/ffmpeg/lib
+ARG        PREFIX=/opt/ffmpeg
+
+ENV        FFMPEG_VERSION=4.0.2 \
+           X265_VERSION=2.3
+
+## x264 http://www.videolan.org/developers/x264.html
+RUN \
+        mkdir -p /tmp/x264 && cd /tmp/x264 && \
+        curl -sL https://download.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20170226-2245-stable.tar.bz2 | \
+        tar -jx --strip-components=1 && \
+        ./configure --prefix="${PREFIX}" --enable-shared --enable-pic --disable-cli && \
+        make && \
+        make install && \
+        rm -rf /tmp/x264
+
+### x265 http://x265.org/
+RUN \
+        DIR=/tmp/x265 && \
+        mkdir -p ${DIR} && \
+        cd ${DIR} && \
+        curl -sL https://download.videolan.org/pub/videolan/x265/x265_${X265_VERSION}.tar.gz  | \
+        tar -zx && \
+        cd x265_${X265_VERSION}/build/linux && \
+        sed -i "/-DEXTRA_LIB/ s/$/ -DCMAKE_INSTALL_PREFIX=\${PREFIX}/" multilib.sh && \
+        sed -i "/^cmake/ s/$/ -DENABLE_CLI=OFF/" multilib.sh && \
+        ./multilib.sh && \
+        make -C 8bit install && \
+        rm -rf ${DIR}
+
+## build ffmpeg
+RUN \
+        DIR=$(mktemp -d) && cd ${DIR} && \
+        git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git && \
+        cd nv-codec-headers && make && make install PREFIX=${PREFIX}
+
+RUN  \
+        DIR=$(mktemp -d) && cd ${DIR} && \
+        curl -sLO https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 && \
+        tar -jx --strip-components=1 -f ffmpeg-${FFMPEG_VERSION}.tar.bz2 && \
+        ./configure \
+        --enable-nonfree --enable-gpl --disable-debug --disable-doc \
+        --enable-version3 --enable-shared --enable-postproc \
+        --enable-libx264 --enable-libx265 \
+        --enable-libnpp --enable-nvenc --enable-cuvid --enable-cuda \
+        --extra-cflags="-I/usr/local/cuda/include -I${PREFIX}/include -I/usr/local/ -I/usr/local/include" \
+        --extra-cxxflags='-std=c++11' \
+        --extra-ldflags="-L${PREFIX}/lib -L/usr/local/cuda/lib64"\
+        --extra-libs=-ldl \
+        --prefix="${PREFIX}" && \
+        make && make install
+
+RUN \
+        ldd ${PREFIX}/bin/ffmpeg | grep "opt/ffmpeg" | cut -d ' ' -f 3 | xargs -i cp {} /usr/local/lib64/ && \
+        cp ${PREFIX}/bin/* /usr/local/bin/ && \
+        cp ${PREFIX}/lib/lib* /usr/local/lib64/ && \
+        cp -r ${PREFIX}/share/ffmpeg /usr/local/share/ && \
+        LD_LIBRARY_PATH=/usr/local/lib64 ffmpeg -buildconf
+
+####################################################
+# build protobuf 3
+RUN  \
+        DIR=$(mktemp -d) && cd ${DIR} && \
+        git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf && \
+        git submodule update --init --recursive && \
+        ./autogen.sh && \
+        ./configure && make && make check && make install && \
+        ldconfig

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+import "davWaveSetting.proto";
+
+package DavStreamletSetting;
+
+message InputStreamletSetting {
+    DavWaveSetting.DemuxSetting demux = 1;
+    DavWaveSetting.VideoFilterSetting post_decode_video_filter = 2;
+    DavWaveSetting.AudioFilterSetting post_decode_audio_filter = 3;
+    DavWaveSetting.VideoDecodeSetting video_decode = 4;
+    DavWaveSetting.AudioDecodeSetting audio_decode = 5;
+}
+
+message MixStreamletSetting {
+    DavWaveSetting.VideoMixSetting video_mix = 1;
+    DavWaveSetting.AudioMixSetting audio_mix = 2;
+    DavWaveSetting.VideoFilterSetting post_mix_video_filter = 3;
+    DavWaveSetting.AudioFilterSetting post_mix_audio_filter = 4;
+}
+
+message OutputStreamletSetting {
+    DavWaveSetting.VideoEncodeSetting video_encode = 1;
+    DavWaveSetting.AudioEncodeSetting audio_encode = 2;
+    DavWaveSetting.VideoFilterSetting pre_encode_video_filter = 3;
+    DavWaveSetting.AudioFilterSetting pre_encode_audio_filter = 4;
+    repeated DavWaveSetting.MuxSetting mux_outputs = 5;
+}

@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+import "davWaveSetting.proto";
+import "davStreamletSetting.proto";
+
+package IalRequest;
+
+/*************** Ial Task Dynamic Change Requests ***************/
+
+/* Create the ial task room, ususally this is the starting of the task */
+message CreateRoom {
+    string room_id = 1; /* create an unique string type room id */
+
+    /* optional, could provided later via 'AddNewInputStream';
+       if provided, the task will start right away */
+    repeated string input_urls = 2;
+
+    /* output base uri, such as: '/home/dev/out/' or "rtmp://127.0.0.1:1935/live/",
+       the full output uri will be: base_url + room_id + "_" + output_setting_id + ["." + mux_fmt];
+       the url extention part is optional depends on the output.
+       If specific output url preferred, ignore this field and see field 4: AddNewOutput */
+    string room_output_base_url = 3;
+
+    /* which output setting used, selected by name id;
+       so the name id must exist, add it first if not */
+    repeated AddNewOutput output_stream_infos = 4;
+}
+
+/* input part */
+message AddNewInputStream {
+    string input_url = 1;
+    /* special setting only apply to this input; if this field is empty, use default input setting; */
+    DavStreamletSetting.InputStreamletSetting specific_setting = 2;
+}
+
+message CloseOneInputStream {
+    string input_url = 1;
+}
+
+message GetOneInputStreamInfo {
+    string input_url = 1;
+}
+
+message GetAllInputStreamInfos {
+    string format = 1; /* */
+}
+
+/* output part */
+/* if 'new_output_setting' not empty, add or override existing; then enable this output setting;
+   if it is empty, and cannot find in existing output settings, then failed */
+message AddNewOutput {
+    string output_setting_id = 1;
+    /* if this field is empty; use default one:
+       default full output url: base_url + room_id + "_" + output_setting_id + ["." + mux_fmt]; */
+    repeated string output_urls = 2;
+    /* if this one exist, will not use existing output setting associated with this id, but this specific one */
+    DavStreamletSetting.OutputStreamletSetting specific_setting = 3;
+}
+
+message CloseOneOutput {
+    /* Righr now, one output setting id only associated with one output streamlet;
+       TODO: one output setting could have several straemlet's */
+    string output_setting_id = 1;
+}
+
+message GetOneOutputStreamInfo {
+    string output_setting_ids = 1;
+}
+
+message GetAllOutputStreamInfos {
+    string format = 1; /* */
+}
+
+message StreamInfo {
+    string stream_name = 1;
+    map<string, string> stream_info = 2;
+}
+
+/* audio mix */
+message AudioMixMuteUnMute {
+    repeated string mute_input_urls = 1;
+    repeated string unmute_input_urls = 2;
+}
+
+/* video mix */
+message VideoMixChangeLayout {
+    DavWaveSetting.VideoMixLayoutUpdate new_layout = 1; /* could set specific coordinates for each input */
+}
+
+message VideoMixUpdateBackgroud {
+    string backgroud_image_url = 1; /* local or web url, jpg, png, etc..  */
+};
+
+/* filters: TODO */
+
+
+/*************** Ial Setting Requests ***************/
+
+/* Update current ial's input setting, there is only one 'input setting' */
+message UpdateInputSetting {
+    DavStreamletSetting.InputStreamletSetting input_setting = 1;
+}
+
+/* Add a new output setting to the current ial task; if 'id' already exists, will override it */
+message AddOutputSetting {
+    string output_setting_id = 1;
+    DavStreamletSetting.OutputStreamletSetting output_setting = 2;
+}
+
+/* Update current ial's input setting  */
+message UpdateMixSetting {
+    string output_setting_id = 1;
+    DavStreamletSetting.MixStreamletSetting mix_setting = 2;
+}
+
+message CommonResponse {
+    int32 code = 1; /* error code, 0 means success, for others please refer to 'error code' part */
+    string msg = 2; /* detailed error message */
+    bool b_sync_resp = 3; /* sync or async response */
+}

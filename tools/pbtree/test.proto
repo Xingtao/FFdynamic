@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package test;
+
+//message DavVideoKeyFrameRequest {
+//}
+
+message DavSetVideoResolution {
+    int32 resWidth = 1;
+    int32 resHeight = 2;
+}
+
+message DavSetAVBitrate {
+    int32 bitrate = 1;
+}
+
+message VideoCellCoordinate {
+    int32 x = 1;
+    int32 y = 2;
+    int32 w = 3;
+    int32 h = 4;
+    int32 layer = 5;
+}
+
+enum EVideoMixLayout {
+    /* specific layout use coordinates setup via 'repeated VideoCellCoordinate cells' */
+    eLayoutAuto = 0;            eLayoutUnknown = -1;
+    eSingle_1 = 1;              eHorizonal_2 = 2;
+    eLeft1SmallRight1Big_2 = 3; eLeft2SsmallRight1Big_3 = 4;
+    eEqual4_4 = 5;              eLeft1BigRight3Small_4 = 6;
+    eEqualCenter_5 = 7;         eRow2Col3_6 = 8;
+    eEqual_9 = 9;               eRow3Col4_12 = 10;
+    eEqual_16 = 11;             eEqual_25 = 12;
+    eEqual_36 = 13;
+    eLayoutSpecific = 14;
+}
+
+message DavSetVideoMixLayout {
+    /* the layout coordinates relies one this enum cast to int, so if the following enum is modified,
+       please changes corresponding part in VideoCellSetting module */
+    EVideoMixLayout layout = 1;
+    /* besides fixed layout, could set layout by explicitly set each cell or some cells' position */
+    repeated VideoCellCoordinate cells = 2;
+};

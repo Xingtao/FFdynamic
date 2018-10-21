@@ -226,7 +226,7 @@ Here we introduce how to write a plugin. We develop a dehaze algorithm and make 
 
 ![dehazed mix image](asset/dehze.gif)
 
-Refer to [here](#FFdynamic/pluginExample/README.md) for whole plugin sources.
+Refer to [here](#pluginExample/README.md) for plugin source files.
 
 -----------
 ## `Installation`

@@ -60,12 +60,14 @@ Besides mixing, **Interactive Live** give more flexiable control over the proces
 #### **Layout auto change or set to certain pattern during mixing by request**
 ![Layout auto change or set as request](asset/layoutChange.gif)
 
-The above picture shows auto layout change when join an new stream (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
+The above picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
 
 #### **Backgroud dynamically change during mixing by request**
 ![Backgroud dynamically change via request](asset/backgroudChange.gif)
 
-The above picture shows backgroud picture changed by a request.
+The above picture shows backgroud picture changed by a request. 
+
+Both changes are quite smooth, without any stuck or frozen effect.
 
 #### For more details, please refer to [the application](apps/interactiveLive/README.md)
 

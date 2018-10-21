@@ -1,4 +1,4 @@
-### FFdynamic: Extending FFmpeg's power with video/audio process composition and state changing on the fly 
+### FFdynamic - Extending FFmpeg's power with video/audio process composition and run time control 
 ------------
 ### Contents
 - [Overview](#overview)
@@ -220,7 +220,7 @@ Here we introduce how to write a plugin. We develop a dehaze algorithm and make 
 
 ![dehazed mix image](asset/dehze.gif)
 
-Refer to [here](#FFdynamic/plugin_example/README.md) for whole plugin sources.
+Refer to [here](#FFdynamic/pluginExample/README.md) for whole plugin sources.
 
 -----------
 ## `Installation`

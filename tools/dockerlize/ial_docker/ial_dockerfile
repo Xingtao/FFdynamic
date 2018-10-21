@@ -1,8 +1,14 @@
 FROM nvidia/cuda:9.0-devel-centos7
+
+####################################################
+# install dependency and tools
 RUN yum update -y
 RUN yum install -y epel-release
 RUN yum install -y git autoconf automake libtool curl wget make g++ gcc-c++ unzip bzip2-devel pcre-devel \
-                   cmake3 boost-devel nasm yasm python-devel libgomp bzip2
+                   cmake3 boost-devel gflags-devel glog-devel pkgconfig nasm yasm python-devel libgomp bzip2
+# update g++
+ADD ./FedoraRepo.repo /etc/yum.repos.d/
+RUN yum -y update gcc gcc-c++
 
 RUN ln -s /usr/bin/cmake3 /usr/bin/cmake
 
@@ -80,13 +86,6 @@ RUN  \
 
 #################
 # build FFdynamic
-
-RUN yum install -y gflags-devel glog-devel pkgconfig
-
-# update g++
-ADD ./FedoraRepo.repo /etc/yum.repos.d/
-RUN yum -y update gcc gcc-c++
-
 RUN  \
         git clone https://github.com/Xingtao/FFdynamic.git && cd FFdynamic && \
         cd apps/interactiveLive && ./build.sh

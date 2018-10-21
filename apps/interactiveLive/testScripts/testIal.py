@@ -5,7 +5,7 @@ import sys
 import json
 from requests import request
 from google.protobuf.json_format import MessageToJson
-sys.path.append("../build/FFdynamic/protos")
+sys.path.append("../build/protos")
 
 import davStreamletSetting_pb2 as streamlet
 import davWaveSetting_pb2 as wave
@@ -36,13 +36,13 @@ out_setting_id_720p = "rtmp_720p_2000kb"
 out_setting_id_1080p = "rtmpHls_1080p_4000kb"
 out_setting_id_udp_720p = "udp_720p"
 
-input1 = "../tests/testClips/bigbunny_360.mp4"
-input2 = "../tests/testClips/soccer_adidas_ad.mp4"
-input3 = "../tests/testClips/nba_ad.mp4"
+input1 = "../testScripts/bigbunny_360.mp4"
+input2 = "../testScripts/soccer_adidas_ad.mp4"
+input3 = "../testScripts/nba_ad.mp4"
 
-output_dir = "../tests"
-fullurl_output_720 = "../tests/output_rtmp_720p.flv"
-fullurl_output_1080 = "../tests/output_rtmp_720p.flv"
+output_dir = "../testScripts"
+fullurl_output_720 = "../testScripts/output_rtmp_720p.flv"
+fullurl_output_1080 = "../testScripts/output_rtmp_720p.flv"
 fullurl_output_udp_720 = "udp://127.0.0.1:12345"
 
 def get_new_output(output_setting_id, output_full_url):

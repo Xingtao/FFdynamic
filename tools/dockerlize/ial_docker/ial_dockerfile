@@ -77,3 +77,16 @@ RUN  \
         ./autogen.sh && \
         ./configure && make && make check && make install && \
         ldconfig
+
+#################
+# build FFdynamic
+
+RUN yum install -y gflags-devel glog-devel pkgconfig
+
+# update g++
+ADD ./FedoraRepo.repo /etc/yum.repos.d/
+RUN yum -y update gcc gcc-c++
+
+RUN  \
+        git clone https://github.com/Xingtao/FFdynamic.git && cd FFdynamic && \
+        cd apps/interactiveLive && ./build.sh

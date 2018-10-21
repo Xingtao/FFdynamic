@@ -15,7 +15,7 @@ using namespace DavStreamletSetting;
 class PbWaveSettingToDavOption {
 public:
     static int toDemuxOption(const DemuxSetting & ds, DavWaveOption & o, const string & inputUrl = "") {
-        o.setDavWaveCategory((DavWaveClassDemux()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassDemux());
         o.set(DavOptionImplType(), ds.demux_type().empty() ? "auto" : ds.demux_type());
         o.set(DavOptionInputFpsEmulate(), ds.input_fps_emulate() ? "true" : "false");
         o.set(DavOptionReconnectRetries(), std::to_string(ds.reconnect_times()));
@@ -28,21 +28,21 @@ public:
     }
 
     static int toVideoFilterOption(const VideoFilterSetting & vfs, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassVideoFilter()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassVideoFilter());
         o.set(DavOptionImplType(), vfs.filter_type().empty() ? "auto" : vfs.filter_type());
         o.set(DavOptionFilterDesc(), vfs.filter_arg());
         return 0;
     }
 
     static int toAudioFilterOption(const AudioFilterSetting & afs, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassAudioFilter()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassAudioFilter());
         o.set(DavOptionImplType(), afs.filter_type().empty() ? "auto" : afs.filter_type());
         o.set(DavOptionFilterDesc(), afs.filter_arg());
         return 0;
     }
 
     static int toVideoDecodeOption(const VideoDecodeSetting & vds, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassVideoDecode()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassVideoDecode());
         o.set(DavOptionImplType(), vds.decode_type().empty() ? "auto" : vds.decode_type());
         for (const auto & m : vds.avdict_decode_option())
             o.set(m.first, m.second, 0);
@@ -50,7 +50,7 @@ public:
     }
 
     static int toAudioDecodeOption(const AudioDecodeSetting & ads, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassAudioDecode()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassAudioDecode());
         o.set(DavOptionImplType(), ads.decode_type().empty() ? "auto" : ads.decode_type());
         for (const auto & m : ads.avdict_decode_option())
             o.set(m.first, m.second, 0);
@@ -58,7 +58,7 @@ public:
     }
 
     static int toVideoMixOption(const VideoMixSetting & vms, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassVideoMix()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassVideoMix());
         o.set(DavOptionImplType(), "auto");
         o.setVideoSize(vms.width(), vms.height());
         o.setAVRational("framerate", {vms.fps_num(), vms.fps_den()});
@@ -78,14 +78,14 @@ public:
     }
 
     static int toAudioMixOption(const AudioMixSetting & ams, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassAudioMix()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassAudioMix());
         o.set(DavOptionImplType(), "auto");
         o.setInt("frame_size", ams.frame_size(), 0);
         return 0;
     }
 
     static int toVideoEncodeOption(const VideoEncodeSetting & ves, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassVideoEncode()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassVideoEncode());
         o.set(DavOptionImplType(), ves.encode_type().empty() ? "auto" : ves.encode_type());
         o.set(DavOptionCodecName(), ves.codec_name());
         o.setAVRational("framerate", {ves.fps_num(), ves.fps_den()});
@@ -95,7 +95,7 @@ public:
     }
 
     static int toAudioEncodeOption(const AudioEncodeSetting & aes, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassAudioEncode()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassAudioEncode());
         o.set(DavOptionImplType(), aes.encode_type().empty() ? "auto" : aes.encode_type());
         o.set(DavOptionCodecName(), aes.codec_name());
         for (auto & d : aes.avdict_encode_option())
@@ -104,7 +104,7 @@ public:
     }
 
     static int toMuxOption(const MuxSetting & ms, const string & outputUrl, DavWaveOption & o) {
-        o.setDavWaveCategory((DavWaveClassMux()));
+        o.setCategory(DavOptionClassCategory(), DavWaveClassMux());
         o.set(DavOptionImplType(), ms.mux_type().empty() ? "auto" :ms.mux_type());
         o.set(DavOptionContainerFmt(), ms.mux_fmt());
         o.set(DavOptionOutputUrl(), outputUrl);

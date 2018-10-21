@@ -1,0 +1,6 @@
+[warning:fedora]
+name=fedora
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-23&arch=$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://getfedora.org/static/34EC9CBA.txt

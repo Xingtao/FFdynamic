@@ -222,7 +222,7 @@ As shown, if we have 5 outputs (which is normal in live broadcast field, output 
 -----------
 ## [Write a plugin component](#write-a-plugin-component)
 
-Here we introduce how to write a plugin. We develop a dehaze algorithm and make it as a FFdynamic's component. Then we could compose it with other components freely. the following image shows the diagram we mentioned above, mix original and dehazed image together to check the result visually.
+Here we introduce how to write a plugin. We develop a dehaze algorithm and make it as a FFdynamic's component. Then we could compose it with other components freely. the following image shows the diagram we mentioned in the 'Overview' part, mix original and dehazed image together to check the result visually.
 
 ![dehazed mix image](asset/dehze.gif)
 
@@ -235,9 +235,9 @@ Refer to [here](#FFdynamic/pluginExample/README.md) for whole plugin sources.
 * FFMpeg, glog, cmake (minimal version 3.2)
 - compiler supports at least c++14 (GCC version 5 or above, Clang 3.4 or above, MSVC 19.0 or above)
 * boost, protobuf3 (optional, only for the application 'Interactive Live')
+- opencv (optional, if you would like to run plugin example)
 
 protobuf3 is not well supports by some linux distributions' package manager, here is how to manually compile it(sudo required):
-
 ```
 DIR=$(mktemp -d) && cd ${DIR} && \
 git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf && \
@@ -258,12 +258,9 @@ sudo make install && sudo ldconfig
 Install FFmpeg as usal, then  
 apt install -y cmake glog-dev boost-dev
 
-If protobuf3 is not provided via apt, you can refer to this [link](https://gist.github.com/sofyanhadia/37787e5ed098c97919b8c593f0ec44d8)
-
 #### For CentOS
 Install FFmpeg as usal, then  
 yum install -y glog-devel cmake boost-devel  
-For protobuf3 installation, one can refer [here](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md)
 
 #### For Mac
 Install FFmpeg as usal, then  

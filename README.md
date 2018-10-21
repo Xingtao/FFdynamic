@@ -2,10 +2,10 @@
 ------------
 ### Contents
 - [Overview](#overview)
-- [Starting with simple application Transcoding](#starting-with-simple-application-transcoding)
+- [An application Interactive Live](#an-application-interactive-live)
+- [Getting start with simple application Transcoding](#getting-start-with-simple-application-transcoding)
   - [Full feature transcoding in a dozen lines of code](#full-feature-transcoding-in-a-dozen-lines-of-code)
   - [Transcoding in parallel](#transcoding-in-parallel)
-- [An advanced application Interactive Live](#an-advanced-application-interactive-live)
 - [Write a plugin component](#write-a-plugin-component)
 - [Installation](#installation)
 - [Contribution](#contribution)
@@ -46,7 +46,27 @@ It is suitable for two kind of applications:
 * develop new video/audio process algorithm which needs video clips as inputs and video clips as outputs, and communication or coorperation needed between video and audio streams;
 
 -----------
-## **Getting started with transcoding example** 
+## `An application Interactive Live`
+
+Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and show how to use this library to develop complication program. It does video and audio mixing, then streams it out. It could be run in phones and cloud servers.
+Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream. 
+
+#### **Interactive live scenario**
+![Interactive live with two people](asset/peers-broadcast.jpg )
+
+Besides mixing, **Interactive Live** give more flexiable control over the process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
+
+#### **Layout auto change or set to certain pattern during mixing by request**
+![Layout auto change or set as request](asset/layoutChange.gif)
+
+#### **Backgroud dynamically change during mixing by request**
+![Backgroud dynamically change via request](asset/backgroudChange.gif)
+
+
+#### For more details, please refer to [the application](apps/interactiveLive/README.md)
+
+-----------
+## **Getting start with simple application Transcoding** 
 
 We start with a simple scenario, transcoding, to take a flavor of FFdynamic.
 
@@ -192,26 +212,6 @@ static int reap_filters(int flush)
 ```
 
 As shown, if we have 5 outputs (which is normal in live broadcast field, output 1080p60, 1080p30, 720p, 540p, 320p for diffrent devices), FFmpeg will do encode one by one (takes more time, cpu not fully used). Of cause, this is because FFmpeg not targeting this scenario.
-
------------
-## `An advanced application Interactive Live`
-
-**Interactive Live** (Ial hereafter) is based on FFdynamic, do video/audio mixing. It could be run in phones and cloud servers.
-Here is an image got from an mobile app show its scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream. 
-
-#### **Interactive live scenario**
-![Interactive live with two people](asset/peers-broadcast.jpg)
-
-**Interactive Live** can do the same, and further give more flexiable control over the process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
-
-#### **Layout auto change or set to certain pattern during mixing by request**
-![Layout auto change or set as request](asset/layoutChange.gif)
-
-#### **Backgroud dynamically change during mixing by request**
-![Backgroud dynamically change via request](asset/backgroudChange.gif)
-
-
-#### For more details, please refer to [the whole application](apps/interactiveLive/README.md)
 
 -----------
 - [Write a plugin component](#write-a-plugin-component)

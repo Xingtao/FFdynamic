@@ -8,6 +8,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 ## find Boost::system
 # find_package(FFdynamic REQUIRED)
 if (TARGET ffdynamic::ffdynamic)
@@ -66,4 +69,4 @@ target_compile_options(ialService
   PUBLIC $<$<CXX_COMPILER_ID:Clang>: -Wall -Wpedantic>)
 target_link_libraries(ialService
   PUBLIC ffdynamic::ffdynamic httputil::httputil pbtree::pbtree boost_system
-  PRIVATE ffdynaProto::ffdynaProto)
+  PRIVATE ffdynaProto::ffdynaProto Threads::Threads)

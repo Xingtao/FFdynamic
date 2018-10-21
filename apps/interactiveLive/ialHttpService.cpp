@@ -133,7 +133,7 @@ int IalHttpService::onAddNewInputStream(shared_ptr<Response> & response,
     vector<shared_ptr<DavStreamlet>> inputStreamlets =
         m_river.getStreamletsByCategory(DavDefaultInputStreamletTag());
     /* TODO: async building one is not in count */
-    if (inputStreamlets.size() + 1 >= m_ialGlobalSetting.max_participants()) {
+    if ((int)inputStreamlets.size() + 1 >= m_ialGlobalSetting.max_participants()) {
         const string detail = "exceed max join participants: " + inputUrl;
         ERRORIT(IAL_ERROR_EXCEED_MAX_JOINS, detail);
         return failResponse(response, API_ERRCODE_EXCEED_MAX_PARTICIPANTS, detail);
@@ -704,20 +704,13 @@ vector<string> IalHttpService::mkFullOutputUrl(const string & outputBaseUrl,
                      const string & roomId, const string & outputId,
                      const DavStreamletSetting::OutputStreamletSetting & outputStreamletSetting) {
     vector<string> outputUrls;
-    int k = 0;
-    for (const auto & m : outputStreamletSetting.mux_outputs()) {
+    for (size_t k=0; k < outputStreamletSetting.mux_outputs().size(); k++) {
         // TODO: may add an extension m.mux_fmt();
         const string oneOutUrl = outputBaseUrl + "/" + roomId + "_" + outputId + "_" + std::to_string(k);
         LOG(INFO) << m_logtag << "--> one out " << oneOutUrl;
         outputUrls.emplace_back(oneOutUrl);
-        k++;
     }
     return outputUrls;
 }
 
 } // namespace ial_service
-
-
-/*
-vector to protobuf repeated fields: *fMessage.mutable_samples() = {fData.begin(), fData.end()};
-*/

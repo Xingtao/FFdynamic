@@ -33,7 +33,7 @@
   },
 
   "output_settings" : {
-    "rtmp_720p_2000kb" : {
+    "720p_2000kb" : {
       "video_encode" : {
         "encode_type": "ffmpeg",
         "codec_name": "libx264",
@@ -82,7 +82,7 @@
       ]
     },
 
-    "rtmpHls_1080p_4000kb" : {
+    "1080p_4000kb" : {
       "video_encode" : {
         "encode_type": "ffmpeg",
         "codec_name": "libx264",

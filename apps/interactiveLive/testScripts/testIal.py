@@ -32,17 +32,17 @@ uri_update_input_setting = "/api1/ial/update_input_setting"
 uri_add_output_setting = "/api1/ial/add_output_setting"
 uri_update_mix_setting = "/api1/ial/update_mix_setting"
 
-out_setting_id_720p = "rtmp_720p_2000kb"
-out_setting_id_1080p = "rtmpHls_1080p_4000kb"
+out_setting_id_720p = "720p_2000kb"
+out_setting_id_1080p = "1080p_4000kb"
 out_setting_id_udp_720p = "udp_720p"
 
-input1 = "../testScripts/bigbunny_360.mp4"
-input2 = "../testScripts/soccer_adidas_ad.mp4"
-input3 = "../testScripts/nba_ad.mp4"
+input1 = "http://118.89.196.57/bigbunny_360.mp4"
+input2 = "http://118.89.196.57/soccer_adidas_ad.mp4"
+input3 = "http://118.89.196.57/nba_ad.mp4"
 
-output_dir = "../testScripts"
-fullurl_output_720 = "../testScripts/output_rtmp_720p.flv"
-fullurl_output_1080 = "../testScripts/output_rtmp_720p.flv"
+output_dir = "./" #"../testScripts"
+fullurl_output_720 = "output_720p.flv"
+fullurl_output_1080 = "output_1080p.flv"
 fullurl_output_udp_720 = "udp://127.0.0.1:12345"
 
 def get_new_output(output_setting_id, output_full_url):

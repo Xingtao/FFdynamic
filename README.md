@@ -1,8 +1,11 @@
 ### FFdynamic - Extending FFmpeg's power with video/audio process composition and run time control 
+
+This project shipped with two parts: **FFdynamic** library, and "Interactive Live" application build on **FFdynamic**
+
 ------------
 ### Contents
-- [Overview](#overview)
-- [An application Interactive Live](#an-application-interactive-live)
+- [An application *Interactive Live*](#an-application-interactive-live)
+- [FFdynamic library Overview](#ffdynamic-library-overview)
 - [Getting start with simple application Transcoding](#getting-start-with-simple-application-transcoding)
   - [Full feature transcoding in a dozen lines of code](#full-feature-transcoding-in-a-dozen-lines-of-code)
   - [Transcoding in parallel](#transcoding-in-parallel)
@@ -11,7 +14,35 @@
 - [Contribution](#contribution)
 
 -----------
-### `Overview`
+-----------
+## `An application Interactive Live`
+
+Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and shows how to use this library to develop complicated program.    
+Ial does video and audio mixing, then streams it out. It could be run in phones or cloud servers.
+Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream.
+
+#### **Interactive live scenario**
+![Interactive live with two people](asset/peers-broadcast.jpg )
+
+**Interactive Live** give more flexiable control over the mixing process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
+
+#### **Layout auto change or set to certain pattern during mixing broadcast by request**
+![Layout auto change or set as request](asset/layoutChange.gif)
+
+The above picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
+
+#### **Backgroud dynamically change during mixing broadcast by request**
+![Backgroud dynamically change via request](asset/backgroudChange.gif)
+
+The above picture shows backgroud picture changed by a request (the text 'FFdynami' in backgroud changes font and size) 
+
+Both changes are quite smooth, without any frozen or stuck.
+
+#### For more details, please refer to [the application](apps/interactiveLive/README.md)
+
+-----------------
+
+### `FFdynamic library Overview`
 
 * **Extending**: FFdynamic extends FFmpeg in the manner of doing video/audio process **compositionally** and each component's state can be **dynamically** changed on the fly.
 
@@ -44,32 +75,6 @@ In short, *FFdynamic* is a scaffold allows develop complex audio/video applicati
 It is suitable for two kind of applications:
 * real time audio/video process: live broadcast, video conference backend, transcoding, etc.. with run time control;
 * develop new video/audio process algorithm which needs video clips as inputs and video clips as outputs, and communication or coorperation needed between video and audio streams;
-
------------
-## `An application Interactive Live`
-
-Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and shows how to use this library to develop complicated program.    
-It does video and audio mixing, then streams it out. It could be run in phones and cloud servers.
-Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream.
-
-#### **Interactive live scenario**
-![Interactive live with two people](asset/peers-broadcast.jpg )
-
-Besides mixing, **Interactive Live** give more flexiable control over the process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
-
-#### **Layout auto change or set to certain pattern during mixing by request**
-![Layout auto change or set as request](asset/layoutChange.gif)
-
-The above picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
-
-#### **Backgroud dynamically change during mixing by request**
-![Backgroud dynamically change via request](asset/backgroudChange.gif)
-
-The above picture shows backgroud picture changed by a request (the text 'FFdynami' in backgroud changes font and size) 
-
-Both changes are quite smooth, without any stuck or frozen effect.
-
-#### For more details, please refer to [the application](apps/interactiveLive/README.md)
 
 -----------
 ## **Getting start with simple application Transcoding** 

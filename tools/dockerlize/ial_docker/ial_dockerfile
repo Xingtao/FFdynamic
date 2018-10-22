@@ -77,11 +77,12 @@ RUN \
 ####################################################
 # build protobuf 3
 RUN  \
+        yum install -y libatomic libatomic_ops-devel && \
         DIR=$(mktemp -d) && cd ${DIR} && \
         git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf && \
         git submodule update --init --recursive && \
         ./autogen.sh && \
-        ./configure  && make && make check && make install && \
+        ./configure CXXFLAGS=-Wno-unused-variable && make && make check && make install && \
         ldconfig
 
 #################

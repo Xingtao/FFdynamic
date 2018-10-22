@@ -25,6 +25,22 @@ endif()
 ## find Boost::system
 find_package(Boost REQUIRED COMPONENTS system)
 
+## find protobuf.
+## if 'FindProtobuf' is an old version, define the target protobuf::libprotobuf as imported
+find_package(Protobuf REQUIRED)
+if (NOT TARGET protobuf::libprotobuf)
+  message("protobuf::libprotobuf not a target, make it manully. location: "
+    ${PROTOBUF_LIBRARY} ", include " ${PROTOBUF_INCLUDE_DIRS})
+  add_library(protobuf::libprotobuf SHARED IMPORTED GLOBAL)
+  set_target_properties(protobuf::libprotobuf PROPERTIES
+    IMPORTED_LOCATION ${PROTOBUF_LIBRARY}
+    INTERFACE_LINK_LIBRARIES ${PROTOBUF_LIBRARY}
+    INTERFACE_INCLUDE_DIRECTORIES ${PROTOBUF_INCLUDE_DIRS}
+    )
+else (NOT TARGET protobuf::libprotobuf)
+  message("target protobuf::libprotobuf found")
+endif()
+
 ## use libraries from tools: httpUtil a& pbtree
 # find_package(FFdynamic REQUIRED)
 if (TARGET httputil::httputil)
@@ -68,5 +84,5 @@ target_compile_options(ialService
   PUBLIC $<$<CXX_COMPILER_ID:GNU>: -Wall -Wpedantic>
   PUBLIC $<$<CXX_COMPILER_ID:Clang>: -Wall -Wpedantic>)
 target_link_libraries(ialService
-  PUBLIC ffdynamic::ffdynamic httputil::httputil pbtree::pbtree boost_system
-  PRIVATE ffdynaProto::ffdynaProto Threads::Threads)
+  PUBLIC ffdynamic::ffdynamic httputil::httputil pbtree::pbtree ffdynaProto::ffdynaProto protobuf::libprotobuf
+  PUBLIC boost_system Threads::Threads)

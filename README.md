@@ -14,7 +14,6 @@ This project shipped with two parts: **FFdynamic** library, and "Interactive Liv
 - [Contribution](#contribution)
 
 -----------
------------
 ## `An application Interactive Live`
 
 Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and shows how to use this library to develop complicated program.    
@@ -231,7 +230,7 @@ Here we introduce how to write a plugin. We develop a dehaze algorithm and make 
 
 ![dehazed mix image](asset/dehze.gif)
 
-Refer to [here](pluginExample/README.md) for plugin source files.
+Refer to [here](examplePlugin/README.md) for plugin source files.
 
 -----------
 ## `Installation`

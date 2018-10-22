@@ -31,18 +31,11 @@ int main(int argc, char **argv) {
     videoMixOption.setAVRational("framerate", {25, 1});
     videoMixOption.setVideoSize(1280, 720);
     videoMixOption.setBool("b_regenerate_pts", false, 0);
-    videoMixOption.set("backgroud_image_path", "../ffdynamic-bg1.jpg");
+    videoMixOption.set("backgroud_image_path", "../../asset/ffdynamic-bg1.jpg");
 
     // 7. video dehaze: this is the one we jsut defined
     DavWaveOption videoDehazeOption((DavWaveClassDehaze()));
     videoDehazeOption.setDouble(DavOptionDehazeFogFactor(), 0.94);
-    /* For options passing, beside using DavOption (which needs defined derived clsss from DavOption),
-       we could also use AVDictionary (but this is not type checked, be aware of this):
-       videoDehazeOption.setDouble("FogFactor", 0.94);
-       // then in dehaze component, we could:
-       double fogFactor;
-       options.getDouble("FogFactor", fogFactor);
-    */
 
     ////////////////////////////////////////////////////////////////////////////
     DavDefaultInputStreamletBuilder inputBuilder;

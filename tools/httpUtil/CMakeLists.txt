@@ -7,6 +7,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # only depends one Boost::system
 find_package(Boost REQUIRED COMPONENTS system)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+
 # header only library
 add_library(httputil INTERFACE)
 add_library(httputil::httputil ALIAS httputil)
@@ -24,7 +28,7 @@ target_compile_options(httputil INTERFACE $<$<CXX_COMPILER_ID:GNU>: -Wall -Wpeda
 
 # Boost::system: may be of problem if FindBoost shipped with CMake is not consistent
 # with installed boost version, so use boost_system directly. not as a target.
-target_link_libraries(httputil INTERFACE boost_system)
+target_link_libraries(httputil INTERFACE boost_system Threads::Threads)
 
 # Installation instructions
 include(GNUInstallDirs)

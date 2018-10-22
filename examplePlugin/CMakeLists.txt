@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(dehaze VERSION 1.0 LANGUAGES CXX)
 
 # find opencv required by dehaze
-find_package(opencv REQUIRED COMPONENTS system)
+find_package(opencv REQUIRED)
 
 ## find FFdynamic; set FFdynamic's cmake path (change it to your build)
 list(INSERT CMAKE_MODULE_PATH 0 /usr/local/FFdynamic/cmake)
@@ -19,7 +19,6 @@ endif()
 
 find_package(FFdynamic REQUIRED)
 
-# header only library
 add_executable(testDehazor testDehazor.cpp ffdynaDehazor.cpp dehazor.cpp testCommon.cpp)
 target_include_directories(testDehazor
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

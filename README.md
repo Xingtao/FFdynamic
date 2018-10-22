@@ -250,7 +250,7 @@ sudo make install && sudo ldconfig
 ### Build after install dependencies
 
 ``` sh
-    Under FFdynamic folder: 'sh build.sh'  will build FFdynamic library.
+    Under FFdynamic folder: 'sh build.sh'  will build FFdynamic library (need sudo when install)
     Under app/interactiveLive folder: 'sh build.sh'  will build FFdynamic library and Ial program.
 ```
 

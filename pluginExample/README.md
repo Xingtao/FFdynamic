@@ -3,29 +3,21 @@
 
 ### Dehaze Plugin
 
-Suppose we have developed a dehaze algorightm with openCV dependency, and we would like to use it in transcoding pipeline, namely, run it after video decode, encode the dehazed stream and then publish it. So the pattern may like this:
-
-```
-Demux |-> Audio Decode  |-> Audio Encode  ------------------------------> |
-                                                                          |
-      |-> Video Decode  |-> Dehaze Filter -> | Scale1 -> Video Encode1 -> | -> Muxer1
-                                             | Scale2 -> Video Encode2 -> | -> Muxer2
-                                             | Scale3 -> Video Encode3 -> | -> Muxer3
-```
+Suppose we have developed a dehaze algorightm with openCV dependency, and we would like to use it in transcoding pipeline, namely, run it after video decode, encode the dehazed stream and then publish it.   
 
 In FFmpeg, we would make dehaze as a filter, do according coding and makefile changing, then re-compile the FFmpeg.
 In FFdynamic, we could write dehaze as a plugin and then link FFdynamic library without modify existing code.
 
-#### Dehaze Plugin - FFdynamic implementation register and coding
+#### FFdynamic implementation register and coding
 
 There are two things needed:
 1. coding dehaze implementation (inherits from FFdynamic's DavImpl class and implement according interface)
 2. register this implementation
 
-For **coding** part, it is just a make dehaze fit the data flow requirement of FFdynamic, please refer to the source.
+For **coding** part, it is just making dehaze fit the data flow requirement of FFdynamic, please refer to the [source](ffdynaDehazor.cpp)
 
-For **register**, we have two ways, register it to an existing component category as an implementation or create an new component category and register it as implementation to the newly created category.
-* register to existing one
+For **register**, we have two ways. Register it to an existing component category as an implementation, or create an new component category and register it as implementation to the newly created category.
+* method 1: register dehaze to existing component (here register 'PluginDehazor' an implementation of component 'VideoFilter')
 
 ``` c++
 DavImplRegister g_dehazeReg(DavWaveClassVideoFilter(), vector<string>({"pluginDehazor"}),
@@ -34,9 +26,8 @@ DavImplRegister g_dehazeReg(DavWaveClassVideoFilter(), vector<string>({"pluginDe
                                      return p;
                             });
 ```
-Here, we register 'PluginDehazor' as an implementation of component 'VideoFilter';
 
-* create new category and do register
+* method 2: create new category and do register
 
 ``` c++
 /* create dehaze component category */
@@ -56,8 +47,10 @@ DavImplRegister g_dehazeReg(DavWaveClassVideoDehaze(), vector<string>({"auto", "
 
 #### Define an static option (used when create the component)
 
-For options passing, there are two ways.  
-* Define derived clsss from DavOption:
+Most of case, the component needs passing some paramters to do initialization or the runtime behavior.
+There are also two ways to do options passing.
+
+* Method 1: Define derived clsss from DavOption (normally for component level options)
 
 ``` c++
 struct DavOptionDehazeFogFactor : public DavOption {
@@ -75,7 +68,7 @@ videoDehazeOption.getDouble(DavOptionDehazeFogFactor(), fogFactor);
 
 ```
 
-* Use 'AVDictionary' (just the FFmpeg's way, flexiable but not type checked)
+* Method 2: Use 'AVDictionary' (just the FFmpeg's way, flexiable but not type checked)
 
 ``` c++
        videoDehazeOption.setDouble("FogFactor", 0.94);
@@ -92,7 +85,7 @@ So, the rule of thumb:
 
 #### Register an dynamic event
 
-We could register dynamic event to change the paramters settings during running.  
+We could register dynamic event to change the parameters settings during running.  
 This is an example that we register an run time event that would change Dehaze's FogFacotr during process.
 
 ``` c++
@@ -103,13 +96,17 @@ This is an example that we register an run time event that would change Dehaze's
 
 #### Test dehaze with visualization
 
-For instance, if we would like to know how good is a dehaze filter visually (in compare to original one), we could use the following pattern to mix dehazed and original video frame in one screen by following composition.
+That is all for writing a plugin, here is the testing for our developed 'dehaze' pulgin.
+
+It will be nice to knwo how good the dehaze filter visually (in compare to original one), 
+So use the following pattern to mix dehazed and original video frame in one screen by following composition.
 
 ```
-Demux |-> Audio Decode  |-> Audio Encode  ---------------------------> |
-                                                                       | -> Muxer
-      |-> Video Decode  |-> Dehaze Filter -> | Video Mix and Encode -> |
-                        |->----------------> |
+Demux |-> Audio Decode -> |-> Audio Encode -----------------------------------------> |
+      |                                                                               | -> Muxer
+      |                   |-> Dehaze Filter -> |                                      |
+      |-> Video Decode -> |                    | Mix original and dehzed ->| Encode ->|
+                          | -----------------> |
 ```
 
 The result is this (the dehaze effect is not good, but it is not the point).
@@ -121,6 +118,7 @@ You can refer to the source file [here](ffdynaDehazor.cpp). (NOTE: the dehazed a
 #### Run the dehazed example
 
 ``` 
+    under pluginExample folder: (opencv needed)
     mkdir build && cmake ../ && make
     ./testDehazor theInputFile
 ```

@@ -1,6 +1,6 @@
 ### FFdynamic - Extending FFmpeg's power with video/audio process composition and run time control 
 
-This project shipped with two parts: **FFdynamic** library, and "Interactive Live" application build on **FFdynamic**
+This project shipped with two parts: **FFdynamic** library, and **_Interactive Live_** application build on **FFdynamic**
 
 ------------
 ### Contents
@@ -14,7 +14,7 @@ This project shipped with two parts: **FFdynamic** library, and "Interactive Liv
 - [Contribution](#contribution)
 
 -----------
-## `An application Interactive Live`
+## `An application *Interactive Live*`
 
 Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and shows how to use this library to develop complicated program.    
 Ial does video and audio mixing, then streams it out. It could be run in phones or cloud servers.

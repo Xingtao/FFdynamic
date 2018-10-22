@@ -26,7 +26,7 @@ private: /* data process */
     int receiveEncodeFrames(DavProcCtx & ctx);
 
 private: /* event process */
-    // int keyFrameRequest(const DavEvent & event);
+    // int keyFrameRequest(const KeyFrameRequestEvent & event);
 
 private:
     AVCodecContext *m_encCtx = nullptr;

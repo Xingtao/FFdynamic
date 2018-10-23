@@ -105,9 +105,9 @@ int VideoMix::onConstruct() {
 
     /* output */
     auto out = make_shared<DavTravelStatic>();
-    m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
     out->setupVideoStatic(m_pixfmt, m_width, m_height, s_timebase, m_framerate, s_sar, nullptr);
-    m_outputMediaMap.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO));
+    m_outputMediaMap.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO);
+    m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
 
     /* register event: setLayout */
     std::function<int (const DavDynaEventVideoMixLayoutUpdate &)> f =

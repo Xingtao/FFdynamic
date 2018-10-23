@@ -133,12 +133,12 @@ int AudioMix::onProcess(DavProcCtx & ctx) {
     auto & inFrame = ctx.m_inRefFrame;
     if (!inFrame) {
         ctx.m_bInputFlush = true;
-        /* TODO: won't release here, but wait for video's end event */
-        m_syncers.erase(from);
         if (m_syncers.count(from))
             m_muteGroups.erase(std::remove(m_muteGroups.begin(), m_muteGroups.end(),
                                            m_syncers.at(from)->getGroupId()),
                                m_muteGroups.end());
+        /* TODO: won't release here, but wait for video's end event */
+        // m_syncers.erase(from);
         LOG(INFO) << m_logtag << "audio mix recive one flush frame from " << from;
     } else {
         ret = m_syncers.at(from)->sendFrame(inFrame);

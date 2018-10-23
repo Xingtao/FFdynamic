@@ -27,8 +27,8 @@ using namespace ff_dynamic;
 int main(int argc, char **argv) {
     testInit(argv[0]);
 
-    string inUrl1 = "../test.ts";
-    string inUrl2 = "../sd.flv"; //"../sd2.mp4";
+    string inUrl1 = "http://118.89.196.57/nba_ad.mp4";
+    string inUrl2 = "http://118.89.196.57/sd.flv";
     if (argc >= 2) {
         int theTestType = std::stoi(argv[1]);
         if (theTestType == 1) {

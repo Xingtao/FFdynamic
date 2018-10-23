@@ -41,32 +41,31 @@ int FFmpegAudioDecode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
         onDestruct();
 
     CHECK(m_inputTravelStatic.size() == ctx.m_froms.size() && ctx.m_froms.size() == 1);
-    DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(ctx.m_froms[0]);
-    if (!in.m_codecpar && in.m_samplefmt == AV_SAMPLE_FMT_NONE) {
+    auto & in = m_inputTravelStatic.at(ctx.m_froms[0]);
+    if (!in->m_codecpar && in->m_samplefmt == AV_SAMPLE_FMT_NONE) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
                 m_logtag + "audio decode cannot get valid codecpar");
         return DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR;
     }
 
     // 2. let's open the decoder
-    int ret = dynamicallyInitialize(in.m_codecpar.get());
+    int ret = dynamicallyInitialize(in->m_codecpar.get());
     if (ret < 0)
         return ret;
 
     // 3. ok then, set output infos
     m_timestampMgr.clear();
     m_outputTravelStatic.clear();
-    DavImplTravel::TravelStatic out;
+    auto out = make_shared<DavTravelStatic>();
     AVRational outTimebase = {1, m_decCtx->sample_rate};
-    out.setupAudioStatic(m_decCtx, outTimebase);
-    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in.m_timebase, outTimebase)));
-    m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out));
+    out->setupAudioStatic(m_decCtx, outTimebase);
+    m_timestampMgr.emplace(ctx.m_froms[0], DavImplTimestamp(in->m_timebase, outTimebase));
+    m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
 
     m_bDynamicallyInitialized = true;
     LOG(INFO) << m_logtag << "dynamically create AudioDecode done. in static: " << in << "\nout: " << out;
     return 0;
 }
-
 
 ///////////////////////////////////
 // [construct - destruct - process]
@@ -107,7 +106,7 @@ int FFmpegAudioDecode::onProcess(DavProcCtx & ctx) {
     do
     {
         auto outBuf = make_shared<DavProcBuf>();
-        outBuf->m_travel.m_static = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+        outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
         AVFrame *frame = outBuf->mkAVFrame();
         CHECK(frame != nullptr);
         ret = avcodec_receive_frame(m_decCtx, frame);

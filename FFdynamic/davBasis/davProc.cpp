@@ -78,7 +78,7 @@ int DavProc::preProcess(shared_ptr<DavProcBuf> & inBuf) {
             }
         }
         /* get input data */
-        bGet = m_dataTransmitor->expect(inBuf, m_expectInput, (int)EUSleepTime::e5ms);
+        bGet = m_dataTransmitor->expect(inBuf, m_expectInput, (int)ETimeUs::e5ms);
     } while(!bGet);
     return 0;
 }
@@ -116,9 +116,7 @@ int DavProc::postProcess(DavProcCtx & ctx) {
     }
     /* limit output buf number if needed.
        TODO: if stop at this point, may block here; should use timeout wait */
-    //do {
     m_outbufLimiter->limit(ctx.m_outBufs); /* with 100ms timeout */
-    //} while(m_bAlive);
     return 0;
 }
 
@@ -139,11 +137,11 @@ int DavProc::runDavProcThread() {
             std::unique_lock<mutex> lock(m_runLock);
             m_runCondVar.wait(lock, [this](){return (this->m_bOnFire ? true : false);});
             getProcessStartTime();
-            //if (inBuf && !m_dataTransmitor->isSenderStillValid(inBuf->getAddress())) {
-            //    m_dataTransmitor->farwell(inBuf);
-            //    continue; /* external event process may delete input peer */
-            //}
-            //else
+            /*
+            if (inBuf && !m_dataTransmitor->isSenderStillValid(inBuf->getAddress())) {
+                m_dataTransmitor->farwell(inBuf);
+                continue; // external event process may delete input peer
+            } */
             ctx.m_inBuf = inBuf;
             ret = process(ctx);
             getProcessEndTime();

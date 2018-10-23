@@ -91,7 +91,8 @@ struct DavProcBuf {
 
 public:
     /* travel info passing to connected peers */
-    DavImplTravel m_travel;
+    shared_ptr<DavTravelStatic> m_travelStatic;
+    shared_ptr<DavTravelDynamic> m_travelDynamic;
 
 private:
     std::mutex m_mutex;

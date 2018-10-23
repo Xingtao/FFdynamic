@@ -21,8 +21,8 @@ private: /* data process */
     virtual int onProcess(DavProcCtx & ctx);
     virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
-    int dynamicallyInitialize(const DavImplTravel::TravelStatic & in);
-    int setupScaleFilter(const DavImplTravel::TravelStatic & in, const DavImplTravel::TravelStatic & out);
+    int dynamicallyInitialize(const DavTravelStatic & in);
+    int setupScaleFilter(const DavTravelStatic & in, const DavTravelStatic & out);
     int receiveEncodeFrames(DavProcCtx & ctx);
 
 private: /* event process */

@@ -55,19 +55,19 @@ int AudioMix::processMuteUnute(const DavDynaEventAudioMixMuteUnmute & event) {
 int AudioMix::addOneSyncerStream(DavProcCtx & ctx) {
     int ret = 0;
     const DavProcFrom & from = ctx.m_inBuf->getAddress();
-    DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(from);
+    auto in = m_inputTravelStatic.at(from);
 
     /* output */
-    m_timestampMgr.insert(std::make_pair(from, DavImplTimestamp(in.m_timebase, {1, m_dstSamplerate})));
+    m_timestampMgr.insert(std::make_pair(from, DavImplTimestamp(in->m_timebase, {1, m_dstSamplerate})));
 
     unique_ptr<AudioSyncer> syncer(new AudioSyncer());
     CHECK(syncer != nullptr);
     AudioResampleParams arp;
     arp.m_logtag = m_logtag + toStringViaOss(from);
-    arp.m_srcFmt = in.m_samplefmt;
-    arp.m_srcSamplerate = in.m_samplerate;
-    arp.m_srcLayout = in.m_channelLayout == 0 ?
-        av_get_default_channel_layout (in.m_channels) : in.m_channelLayout;
+    arp.m_srcFmt = in->m_samplefmt;
+    arp.m_srcSamplerate = in->m_samplerate;
+    arp.m_srcLayout = in->m_channelLayout == 0 ?
+        av_get_default_channel_layout (in->m_channels) : in->m_channelLayout;
     arp.m_dstFmt = m_dstFmt;
     arp.m_dstSamplerate = m_dstSamplerate;
     arp.m_dstLayout = m_dstLayout;
@@ -76,7 +76,7 @@ int AudioMix::addOneSyncerStream(DavProcCtx & ctx) {
         ERRORIT(ret, "failed to create audio syncer with " + toStringViaOss(arp));
         return ret;
     }
-    m_syncers.insert(std::make_pair(from, std::move(syncer)));
+    m_syncers.emplace(from, std::move(syncer));
     LOG(INFO) << m_logtag << "add new audio syncer " << from;
     return 0;
 }
@@ -96,9 +96,9 @@ int AudioMix::onConstruct() {
     m_implEvent.registerEvent(m);
 
     /* */
-    m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, DavImplTravel::TravelStatic()));
-    auto & out = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
-    out.setupAudioStatic(m_dstFmt, {1, m_dstSamplerate}, m_dstSamplerate,
+    auto out = make_shared<DavTravelStatic>();
+    m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
+    out->setupAudioStatic(m_dstFmt, {1, m_dstSamplerate}, m_dstSamplerate,
                          av_get_channel_layout_nb_channels(m_dstLayout), m_dstLayout);
     m_outputMediaMap.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_AUDIO));
 
@@ -201,7 +201,7 @@ int AudioMix::mixFrameByFramePts(DavProcCtx & ctx) {
         toMixFrame(mixFrame, frame.get());
     }
     m_outputMixFrames++;
-    outBuf->m_travel.m_static = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+    outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
     ctx.m_outBufs.push_back(outBuf);
     return 0;
 }

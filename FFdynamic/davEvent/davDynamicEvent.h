@@ -7,14 +7,9 @@ namespace ff_dynamic {
 using ::std::vector;
 using ::std::string;
 
-/*
-  The Options passing consists of two parts, static options and dynamic options;
-
-  1. Static options are passing via DavDict, a wrapper (also extend) of FFmpeg's AVDictionary:
-     'DavDict' passes each component's option via DavOption and
-     pass FFmpeg's options uses an internal field AVDictionary;
-  2. Dynamic Events are runtime requests get from external, normally through http;
-     The Events defined here will be passed to FFdynamic's components and change they are behavior on the fly;
+/* Dynamic event process
+  Dynamic Events are runtime requests get from external, normally through http;
+  The Events defined here will be passed to FFdynamic's components and change their behavior on the fly;
 
   Application level options passing.
   Normally, static starting configurations and dynamic request get from external, is usually using Json or Protobuf;
@@ -29,12 +24,10 @@ using ::std::string;
   For 'dynamic event', we could define all 'dynamic event' in protobuf format, then no convertion is required.
   But this will introdue Protobuf3 dependency. It is not needed and friendly (need manually
   compile for most system) for some users
- */
-
+*/
 
 /* To get rid of protobuf3 dependency for FFdynamic,
    few structures are defined bothe in here and application level proto files */
-
 /* used for dynamic layout change */
 enum class EDavVideoMixLayout {
     eLayoutUnknown = -1,    eLayoutAuto = 0,        eSingle_1 = 1, eHorizonal_2 = 2,

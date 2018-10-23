@@ -59,7 +59,7 @@ private:
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) = 0;
 
 private: /* the following ones could be optional overrided depends on implementations */
-    /* pre-process set inputTravelStatic info and input data's timestamp */
+    /* pre-process set inputDavTravelStatic info and input data's timestamp */
     virtual int onPreProcess(DavProcCtx & ctx);
     /* post-porcess remove inputTravelstatic and timestamp info after this peer is flushed */
     virtual int onPostProcess(DavProcCtx & ctx);
@@ -113,7 +113,7 @@ protected: /* will call this in implementation's constructor */
 protected:
     string m_implType;
     string m_logtag;
-    /* ok not all necessary options are given, could also refer to incoming TravelStatic info */
+    /* ok not all necessary options are given, could also refer to incoming DavTravelStatic info */
     DavWaveOption m_options;
     DavMsgError m_implErr;
     /* external / subscribed events process */
@@ -122,9 +122,9 @@ protected:
     std::atomic<bool> m_bDynamicallyInitialized = ATOMIC_VAR_INIT(false);
     /* some impls' may cache bufs before fully initialized */
     deque<shared_ptr<DavProcBuf>> m_preInitCacheInBufs;
-    map<DavProcFrom, DavImplTravel::TravelStatic> m_inputTravelStatic;
+    map<DavProcFrom, shared_ptr<DavTravelStatic>> m_inputTravelStatic;
     map<DavProcFrom, DavImplTimestamp> m_timestampMgr;
-    map<int, DavImplTravel::TravelStatic> m_outputTravelStatic;
+    map<int, shared_ptr<DavTravelStatic>> m_outputTravelStatic;
     /* impl output one or more audio/video streams to next peers */
     map<int, enum AVMediaType> m_outputMediaMap; /* TODO: may kill this one later*/
 

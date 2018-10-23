@@ -104,9 +104,9 @@ int VideoMix::onConstruct() {
         return ret;
 
     /* output */
-    m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, DavImplTravel::TravelStatic()));
-    auto & out = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
-    out.setupVideoStatic(m_pixfmt, m_width, m_height, s_timebase, m_framerate, s_sar, nullptr);
+    auto out = make_shared<DavTravelStatic>();
+    m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
+    out->setupVideoStatic(m_pixfmt, m_width, m_height, s_timebase, m_framerate, s_sar, nullptr);
     m_outputMediaMap.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO));
 
     /* register event: setLayout */
@@ -180,7 +180,7 @@ int VideoMix::onProcess(DavProcCtx & ctx) {
     for (auto & f : outFrames) {
         auto outBuf = make_shared<DavProcBuf>();
         outBuf->mkAVFrame(f);
-        outBuf->m_travel.m_static = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+        outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
         ctx.m_outBufs.push_back(outBuf);
         m_outputCount++;
         if (m_outputCount == 1) {

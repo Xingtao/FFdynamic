@@ -122,7 +122,7 @@ enum class EVideoParams {
 };
 
 // misc helpers
-enum class EUSleepTime : int {
+enum class ETimeUs : int {
     e1ms = 1000, e2ms = 2000, e5ms = 5000,
     e10ms = 10000, e20ms = 20000, e50ms = 50000,
     e100ms = 10000, e200ms = 200000, e500ms = 500000,

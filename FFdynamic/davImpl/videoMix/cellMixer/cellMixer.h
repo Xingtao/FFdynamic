@@ -18,18 +18,18 @@ public:
     CellMixer() = default;
     virtual ~CellMixer() {closeMixer();}
     struct OneMixCell {
-        DavImplTravel::TravelStatic m_in;
+        shared_ptr<DavTravelStatic> m_in;
         unique_ptr<CellScaleSyncer> m_syncer;
         CellPaster m_cellPaster;
         CellArchor m_archor;
     };
 
 public: /* called with lock */
-    int initMixer(const DavImplTravel::TravelStatic & outStatic, EDavVideoMixLayout initLayout,
+    int initMixer(shared_ptr<DavTravelStatic> & outStatic, EDavVideoMixLayout initLayout,
                   const CellAdornment & adornment, const bool bReGeneratePts, const string & logtag);
     int sendFrame(const DavProcFrom & from, AVFrame *frame);
     int receiveFrames(vector<AVFrame *> & outFrames, vector<shared_ptr<DavPeerEvent>> & pubEvents);
-    int onJoin(const DavProcFrom & from, const DavImplTravel::TravelStatic & in);
+    int onJoin(const DavProcFrom & from, shared_ptr<DavTravelStatic> & in);
     int onLeft(const DavProcFrom & from);
     int onUpdateLayoutEvent(const DavDynaEventVideoMixLayoutUpdate & event);
     int onUpdateBackgroudEvent(const DavDynaEventVideoMixSetNewBackgroud & event);
@@ -44,8 +44,7 @@ private:
     int closeMixer();
     int updateCellSettings(std::function<int (int & cellArchorPos)> posOp);
     int updateOneMixCellSettings(unique_ptr<OneMixCell> & oneMixCell, const int pos,
-                                 const DavImplTravel::TravelStatic & in,
-                                 const DavImplTravel::TravelStatic & out);
+                                 shared_ptr<DavTravelStatic> & in, shared_ptr<DavTravelStatic> & out);
 
 private: /* process mix syncers */
     int doMixCells();
@@ -66,7 +65,7 @@ private:
     string m_logtag;
     std::mutex m_mutex;
     /* mix video sync related */
-    DavImplTravel::TravelStatic m_outStatic;
+    shared_ptr<DavTravelStatic> m_outStatic;
     bool m_bReGeneratePts = true; /* by default generate pts from 0. if use stream timestamp, set this as false */
     int64_t m_startMixPts = AV_NOPTS_VALUE;
     int64_t m_curMixPts = AV_NOPTS_VALUE;

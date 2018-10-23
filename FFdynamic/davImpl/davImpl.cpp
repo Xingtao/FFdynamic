@@ -25,9 +25,9 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
 
     const DavProcFrom & from = ctx.m_inBuf->getAddress();
     if (m_inputTravelStatic.count(from) == 0)
-        m_inputTravelStatic.emplace(from, ctx.m_inBuf->m_travel.m_static);
-    //else /* update, in case static changed before dynamicallly initialized */
-    //    m_inputTravelStatic.at(from) = ctx.m_inBuf->m_travel.m_static;
+        m_inputTravelStatic.emplace(from, ctx.m_inBuf->m_travelStatic);
+    // else /* update, in case static changed before dynamicallly initialized */
+    // m_inputTravelStatic.at(from) = ctx.m_inBuf->m_travelStatic;
 
     /* already initialized, convert its timestamp to impl's timebase then*/
     if (m_bDynamicallyInitialized) {
@@ -38,8 +38,8 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
             for (auto & o : m_outputTravelStatic)
                 if (o.first == IMPL_SINGLE_OUTPUT_STREAM_INDEX)
                     m_timestampMgr.insert(std::make_pair(from,
-                       DavImplTimestamp(m_inputTravelStatic.at(from).m_timebase,
-                                        m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX).m_timebase)));
+                       DavImplTimestamp(m_inputTravelStatic.at(from)->m_timebase,
+                                        m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX)->m_timebase)));
         }
 
         const auto pkt = ctx.m_inBuf->getAVPacket();
@@ -101,7 +101,7 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
 }
 
 int DavImpl::onPostProcess(DavProcCtx & ctx) {
-    /* remove flushed input peer from inputTravelStatic and timestammgr */
+    /* remove flushed input peer from inputDavTravelStatic and timestammgr */
     if (ctx.m_inRefPkt)
         av_packet_free(&ctx.m_inRefPkt);
     if (ctx.m_inRefFrame)

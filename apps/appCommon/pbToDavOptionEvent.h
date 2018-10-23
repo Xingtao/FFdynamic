@@ -204,9 +204,9 @@ public:
             waveOptions.emplace_back(audioFilterOption);
         }
         /* use min(the muxer number, output url number) */
-        const size_t outNum = outputSetting.mux_outputs().size() > fullOutputUrls.size() ?
+        const int outNum = outputSetting.mux_outputs().size() > fullOutputUrls.size() ?
             fullOutputUrls.size() : outputSetting.mux_outputs().size();
-        size_t k = 0;
+        int k = 0;
         for (const auto & m : outputSetting.mux_outputs()) {
             if (k >= outNum)
                 break;

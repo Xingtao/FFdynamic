@@ -154,8 +154,8 @@ int main(int argc, char **argv) {
     // start
     DavStreamlet streamlet;
     /*videoFilter, audioFilter,  */
-    streamlet.setWaves(vector<shared_ptr<DavWave>>({demux, videoDecode,
-                    videoEncode, audioDecode, audioEncode, mux, mux2}));
+    streamlet.setWaves(vector<shared_ptr<DavWave>>({demux, videoDecode, videoEncode,
+                    audioDecode, audioEncode, mux, mux2}));
 
     streamlet.start();
     testRun(streamlet);

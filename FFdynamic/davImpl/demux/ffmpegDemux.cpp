@@ -22,7 +22,7 @@ int FFmpegDemux::dynamicallyInitialize () {
         // only deal with audio/video, ignore subtitle or data stream
         if (st->codecpar->codec_type != AVMEDIA_TYPE_VIDEO && st->codecpar->codec_type != AVMEDIA_TYPE_AUDIO)
             continue;
-        m_outputMediaMap.insert(std::make_pair(k, st->codecpar->codec_type));
+        m_outputMediaMap.emplace(k, st->codecpar->codec_type);
         auto outStatic = make_shared<DavTravelStatic>();
         outStatic->m_timebase = st->time_base;
         if (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -159,7 +159,7 @@ int FFmpegDemux::onProcess(DavProcCtx & ctx) {
         break;
     } while(true);
 
-    /* TODO: check side_data for dynamic change, then set to m_travel.m_dynamic; */
+    /* TODO: check side_data for dynamic change, then set to m_travelDynamic; */
     /* TODO: not accurate for some cases */
     const auto & st = m_fmtCtx->streams[pkt->stream_index];
     int64_t timeNow = av_gettime_relative();

@@ -26,8 +26,7 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
     const DavProcFrom & from = ctx.m_inBuf->getAddress();
     if (m_inputTravelStatic.count(from) == 0)
         m_inputTravelStatic.emplace(from, ctx.m_inBuf->m_travelStatic);
-    // else /* update, in case static changed before dynamicallly initialized */
-    // m_inputTravelStatic.at(from) = ctx.m_inBuf->m_travelStatic;
+    // /* else TODO: update, in case static changed before dynamicallly initialized */
 
     /* already initialized, convert its timestamp to impl's timebase then*/
     if (m_bDynamicallyInitialized) {
@@ -37,9 +36,9 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
             /* single output stream, add its timestamp mgr here */
             for (auto & o : m_outputTravelStatic)
                 if (o.first == IMPL_SINGLE_OUTPUT_STREAM_INDEX)
-                    m_timestampMgr.insert(std::make_pair(from,
+                    m_timestampMgr.emplace(from,
                        DavImplTimestamp(m_inputTravelStatic.at(from)->m_timebase,
-                                        m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX)->m_timebase)));
+                                        m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX)->m_timebase));
         }
 
         const auto pkt = ctx.m_inBuf->getAVPacket();

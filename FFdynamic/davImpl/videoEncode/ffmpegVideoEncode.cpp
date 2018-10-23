@@ -151,7 +151,7 @@ int FFmpegVideoEncode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
     }
 
     m_bDynamicallyInitialized = true;
-    LOG(INFO) << m_logtag << "dynamically create VideoEncode done.\nin static: " << in << ", \nout: " << out;
+    LOG(INFO) << m_logtag << "dynamically create VideoEncode done.\nin static: " << *in << ", \nout: " << *out;
     return 0;
 }
 

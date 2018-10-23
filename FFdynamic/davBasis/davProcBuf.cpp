@@ -18,10 +18,12 @@ bool operator<(const DavProcFrom & l, const DavProcFrom & r) {
     return false;
 }
 
-/* won't check group, this field may not be set. also, 'from' and 'streamIdx' are enough */
+/* won't check group id, this field may not be set. also, 'from' and 'streamIdx' are enough */
 bool operator==(const DavProcFrom & l, const DavProcFrom & r) {
     return (l.m_from == r.m_from &&
-            (l.m_fromStreamIndex == r.m_fromStreamIndex || r.m_fromStreamIndex == DavProcFrom::s_flushIndex));
+            (l.m_fromStreamIndex == r.m_fromStreamIndex ||
+             l.m_fromStreamIndex == DavProcFrom::s_flushIndex ||
+             r.m_fromStreamIndex == DavProcFrom::s_flushIndex));
 }
 
 std::ostream & operator<<(std::ostream & os, const DavProcFrom & f) {

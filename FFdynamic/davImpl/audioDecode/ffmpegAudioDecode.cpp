@@ -63,7 +63,7 @@ int FFmpegAudioDecode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
     m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
 
     m_bDynamicallyInitialized = true;
-    LOG(INFO) << m_logtag << "dynamically create AudioDecode done. in static: " << in << "\nout: " << out;
+    LOG(INFO) << m_logtag << "dynamically create AudioDecode done. in static: " << *in << "\nout: " << *out;
     return 0;
 }
 
@@ -92,7 +92,7 @@ int FFmpegAudioDecode::onProcess(DavProcCtx & ctx) {
     auto pkt = ctx.m_inRefPkt;
     if (!pkt) {
         ctx.m_bInputFlush = true;
-        LOG(INFO) << "audio decoding receive flush packet" << *ctx.m_inBuf;
+        LOG(INFO) << "audio decoding receive flush packet " << *ctx.m_inBuf;
     }
 
     ret = avcodec_send_packet(m_decCtx, pkt);

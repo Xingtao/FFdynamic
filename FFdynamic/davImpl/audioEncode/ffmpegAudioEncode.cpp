@@ -144,8 +144,9 @@ int FFmpegAudioEncode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
     }
 
     m_bDynamicallyInitialized = true;
-    INFOIT(DAV_INFO_IMPL_INSTANCE_CREATE_DONE,
-           m_logtag + "create AudioEncode done, desired frame size " + std::to_string(m_encCtx->frame_size));
+    m_bDynamicallyInitialized = true;
+    LOG(INFO) << m_logtag << "dynamically create AudioEncode done. encode frame size " << m_encCtx->frame_size
+              << ", in static: " << *in << "\nout: " << *out;
     return 0;
 }
 

@@ -166,7 +166,7 @@ int DavProc::runDavProcThread() {
 
     /* broadcast EOF to downstream peers */
     DavProcFrom flushFrom(this, m_groupId, DavProcFrom::s_flushIndex);
-    shared_ptr<DavProcBuf> flushBuf(new DavProcBuf());
+    auto flushBuf = make_shared<DavProcBuf>();
     flushBuf->setAddress(flushFrom);
     m_dataTransmitor->broadcast(flushBuf);
 
@@ -194,7 +194,8 @@ int DavProc::start() noexcept {
     m_state = EDavState::eStart;
     m_bAlive = true;
     m_bOnFire = true;
-    // TODO: may use future - async
+
+    /* TODO: may use future - async */
     m_processThread.reset(new std::thread(&DavProc::runDavProcThread, this));
     if (!m_processThread) {
         m_bAlive = false;

@@ -144,7 +144,6 @@ int FFmpegAudioEncode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
     }
 
     m_bDynamicallyInitialized = true;
-    m_bDynamicallyInitialized = true;
     LOG(INFO) << m_logtag << "dynamically create AudioEncode done. encode frame size " << m_encCtx->frame_size
               << ", in static: " << *in << "\nout: " << *out;
     return 0;
@@ -234,11 +233,10 @@ int FFmpegAudioEncode::receiveEncodeFrames(DavProcCtx & ctx) {
             continue;
         } else if (ret == AVERROR_EOF) {
             INFOIT(ret, m_logtag + "audio encode fully flushed. end process.");
-            break;
         } else if (ret < 0 && ret != AVERROR(EAGAIN)) {
             ERRORIT(ret, "audio decode failed when receive frame");
-            break;
         }
+        break;
     } while (true);
 
     LOG_EVERY_N(INFO, 1000) << m_logtag << "audio in " << m_inFrames << ", out " << m_outFrames

@@ -12,6 +12,12 @@ bool operator<(const DavProcFrom & l, const DavProcFrom & r) {
     if (lfrom < rfrom) return true;
     if (lfrom > rfrom) return false;
     // Otherwise from the same DavProc
+
+    /* take flush buf as equal to any exising streamIdx */
+    if (l.m_fromStreamIndex == DavProcFrom::s_flushIndex ||
+        r.m_fromStreamIndex == DavProcFrom::s_flushIndex)
+        return false;
+
     if (l.m_fromStreamIndex < r.m_fromStreamIndex) return true;
     if (l.m_fromStreamIndex > r.m_fromStreamIndex) return false;
     // both equal

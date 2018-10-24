@@ -134,7 +134,18 @@ int VideoMix::onConstruct() {
     m_implEvent.registerEvent(f);
     m_implEvent.registerEvent(g);
 
-    /* mark as initialized and process dynamic input peer in onProcess */
+    m_cellMixer.initMixer({m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX),
+                m_layout, m_adornment, m_bReGeneratePts, m_bStartAfterAllJoin,
+                trimStr(m_logtag) + "-CellMixer "});
+    /* TODO: bug here. could remove to onConstruct.
+       if dynamic change backgroud request is coming before init done. then it is lost */
+    if (!m_backgroudPath.empty()) {
+        DavDynaEventVideoMixSetNewBackgroud event {m_backgroudPath};
+        ret = m_cellMixer.onUpdateBackgroudEvent(event);
+        if (ret < 0) /* not a fatal error */
+            ERRORIT(ret, "do init update backgroud fail");
+    }
+   /* mark as initialized and process dynamic input peer in onProcess */
     m_bDynamicallyInitialized = true;
     LOG(INFO) << m_logtag << "VideoMix will deal with dynamic join in";
     return 0;
@@ -151,18 +162,8 @@ int VideoMix::onProcess(DavProcCtx & ctx) {
     int ret = 0;
     const DavProcFrom & from = ctx.m_inBuf->getAddress();
     if (m_cellMixer.isNewcomer(from)) {
-        if (!m_cellMixer.isInited()) {
-            m_cellMixer.initMixer({m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX),
-                        m_layout, m_adornment, m_bReGeneratePts, m_bStartAfterAllJoin,
-                        (int)ctx.m_froms.size(), trimStr(m_logtag) + "-CellMixer "});
-            /* TODO: bug here, if dynamic change backgroud request is coming before init done. then it is lost */
-            if (!m_backgroudPath.empty()) {
-                DavDynaEventVideoMixSetNewBackgroud event {m_backgroudPath};
-                ret = m_cellMixer.onUpdateBackgroudEvent(event);
-                if (ret < 0) /* not a fatal error */
-                    ERRORIT(ret, "do init update backgroud fail");
-            }
-        }
+        if (m_bStartAfterAllJoin)
+            m_cellMixer.setFixedInputNum((int)ctx.m_froms.size());
         ret = m_cellMixer.onJoin(from, m_inputTravelStatic.at(from));
         if (ret < 0) {
             ERRORIT(ret, "fail to join one input video cell " + toStringViaOss(from));

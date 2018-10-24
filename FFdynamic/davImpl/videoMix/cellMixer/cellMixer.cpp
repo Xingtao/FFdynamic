@@ -88,7 +88,11 @@ int CellMixer::updateOneMixCellSettings(unique_ptr<OneMixCell> & oneMixCell, con
 
 int CellMixer::onJoin(const DavProcFrom & from, shared_ptr<DavTravelStatic> & in) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    const int totalCellNum = (int)m_cells.size() + 1;
+    int curCellNum = (int)m_cells.size();
+    int totalCellNum = curCellNum + 1;
+    if (m_bStartAfterAllJoin)
+        totalCellNum = m_fixedInputNum;
+
     if (m_bAutoLayout) {
         EDavVideoMixLayout newLayout = CellLayout::getAutoLayoutViaCellNum(totalCellNum);
         if (newLayout != m_layout) {
@@ -102,7 +106,7 @@ int CellMixer::onJoin(const DavProcFrom & from, shared_ptr<DavTravelStatic> & in
     }
     /* TODO: else, calculate according to the setup */
 
-    m_cells.insert(std::make_pair(from, unique_ptr<OneMixCell>(new OneMixCell())));
+    m_cells.emplace(from, unique_ptr<OneMixCell>(new OneMixCell()));
     auto & oneMixCell = m_cells.at(from);
     unique_ptr<CellScaleSyncer> syncer(new CellScaleSyncer(trimStr(m_logtag) +
                                                            "-CellScaleSyncer-" + from.m_descFrom));
@@ -110,14 +114,13 @@ int CellMixer::onJoin(const DavProcFrom & from, shared_ptr<DavTravelStatic> & in
     oneMixCell->m_syncer = std::move(syncer);
     oneMixCell->m_in = in;
 
-    const int atPos = totalCellNum - 1;
-    oneMixCell->m_archor.m_atPos = atPos;
+    oneMixCell->m_archor.m_atPos = curCellNum;
 
     /* update cell settings */
     if (m_bUpdateCellSettings)
         updateCellSettings([](int & pos) {return 0;}); /* do nothing to existing cell pos */
     else
-        updateOneMixCellSettings(oneMixCell, atPos, in, m_outStatic);
+        updateOneMixCellSettings(oneMixCell, curCellNum, in, m_outStatic);
     LOG(INFO) << m_logtag << "Add one new stream done, total now " << m_cells.size();
     return 0;
 }
@@ -128,10 +131,7 @@ int CellMixer::onLeft(const DavProcFrom & from) {
         LOG(WARNING) << m_logtag << "No cell at all, cannot process onLeft: " << from;
         return 0;
     }
-    int totalCellNum = (int)m_cells.size() - 1;
-    if (m_bStartAfterAllJoin)
-        totalCellNum = m_fixedInputNum;
-
+    const int totalCellNum = (int)m_cells.size() - 1;
     if (m_bAutoLayout) {
         EDavVideoMixLayout newLayout = CellLayout::getAutoLayoutViaCellNum(totalCellNum);
         if (newLayout != m_layout) {
@@ -224,7 +224,6 @@ int CellMixer::initMixer(const CellMixerParams & cmp) {
     m_adornment = cmp.m_adornment;
     m_bReGeneratePts = cmp.m_bReGeneratePts;
     m_bStartAfterAllJoin = cmp.m_bStartAfterAllJoin;
-    m_fixedInputNum = cmp.m_fixedInputNum;
     m_logtag = cmp.m_logtag;
 
     /* this PtsInc has round error, may use av_rescale_q directly in future */

@@ -49,7 +49,7 @@ int testRun(T & t) {
             av_freep(&buf);
         }
 
-        usleep(static_cast<int>(EUSleepTime::e100ms));
+        usleep(static_cast<int>(ETimeUs::e100ms));
     } while(!g_bExit);
 
     return 0;

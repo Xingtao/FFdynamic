@@ -59,10 +59,12 @@ public:
 
     static int toVideoMixOption(const VideoMixSetting & vms, DavWaveOption & o) {
         o.setCategory(DavOptionClassCategory(), DavWaveClassVideoMix());
+        o.setBool(DavOptionVideoMixRegeneratePts(), vms.b_regenerate_pts());
+        o.setBool(DavOptionVideoMixQuitIfNoInputs(), vms.b_quit_if_no_input());
+        o.setBool(DavOptionVideoMixStartAfterAllJoin(), vms.b_start_after_all_join());
         o.set(DavOptionImplType(), "auto");
         o.setVideoSize(vms.width(), vms.height());
         o.setAVRational("framerate", {vms.fps_num(), vms.fps_den()});
-        o.setBool("b_regenerate_pts", vms.b_regenerate_pts(), 0);
         o.setInt("margin", vms.margin());
         o.setInt("border_width", vms.border_width());
         o.setInt("border_color", vms.border_color());

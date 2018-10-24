@@ -26,7 +26,8 @@ public:
 
 public: /* called with lock */
     int initMixer(shared_ptr<DavTravelStatic> & outStatic, EDavVideoMixLayout initLayout,
-                  const CellAdornment & adornment, const bool bReGeneratePts, const string & logtag);
+                  const CellAdornment & adornment, const bool bReGeneratePts,
+                  const bool bStartAfterAllJoin, const string & logtag);
     int sendFrame(const DavProcFrom & from, AVFrame *frame);
     int receiveFrames(vector<AVFrame *> & outFrames, vector<shared_ptr<DavPeerEvent>> & pubEvents);
     int onJoin(const DavProcFrom & from, shared_ptr<DavTravelStatic> & in);
@@ -67,6 +68,7 @@ private:
     /* mix video sync related */
     shared_ptr<DavTravelStatic> m_outStatic;
     bool m_bReGeneratePts = true; /* by default generate pts from 0. if use stream timestamp, set this as false */
+    bool m_bStartAfterAllJoin = false; /* be default, start mixing just has input */
     int64_t m_startMixPts = AV_NOPTS_VALUE;
     int64_t m_curMixPts = AV_NOPTS_VALUE;
     int64_t m_oneFramePtsInc = AV_NOPTS_VALUE;

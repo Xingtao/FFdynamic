@@ -20,7 +20,7 @@ namespace ff_dynamic {
      3. cache process:
         1) output existing caches
         2) each stream maintain its own pts relative to mixPts to do the sync;
- */
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 constexpr AVRational VideoMix::s_sar;
@@ -78,13 +78,30 @@ int VideoMix::constructVideoMixWithOptions() {
     // av_dict_set(opts, "pixel_format", AV_PIX_FMT_NONE, 0)
 
     /* check whether do pts re-generate */
-    ret = m_options.getBool("b_regenerate_pts", m_bReGeneratePts);
+    ret = m_options.getBool(DavOptionVideoMixRegeneratePts(), m_bReGeneratePts);
     if (ret == DAV_ERROR_DICT_NO_SUCH_KEY) {
         LOG(INFO) << m_logtag << "no bReGeneratePts set, use default " << m_bReGeneratePts;
     } else if (ret < 0) {
-        ERRORIT(ret, "video bReGeneratePts set not right");
+        ERRORIT(ret, "video bReGeneratePts setting invalid");
         return ret;
     }
+    /* check whether start mixing after all current participants joined, useful for static fixed number of inputs */
+    ret = m_options.getBool(DavOptionVideoMixStartAfterAllJoin(), m_bStartAfterAllJoin);
+    if (ret == DAV_ERROR_DICT_NO_SUCH_KEY) {
+        LOG(INFO) << m_logtag << "no m_bStartAfterAllJoin set, use default " << m_bStartAfterAllJoin;
+    } else if (ret < 0) {
+        ERRORIT(ret, "video m_bStartAfterAllJoin setting invalid");
+        return ret;
+    }
+    /* check whether start mixing after all current participants joined, useful for static fixed number of inputs */
+    ret = m_options.getBool(DavOptionVideoMixQuitIfNoInputs(), m_bQuitIfNoInput);
+    if (ret == DAV_ERROR_DICT_NO_SUCH_KEY) {
+        LOG(INFO) << m_logtag << "no m_bQuitIfNoInput set, use default " << m_bQuitIfNoInput;
+    } else if (ret < 0) {
+        ERRORIT(ret, "video m_bQuitIfNoInput setting invalid");
+        return ret;
+    }
+
     /* check video cell adornmment settings */
     m_options.get(DavOptionVideoMixLayout()) >> m_layout;
     m_options.getInt("margin", m_adornment.m_marginSize);
@@ -117,12 +134,11 @@ int VideoMix::onConstruct() {
     m_implEvent.registerEvent(f);
     m_implEvent.registerEvent(g);
 
-    /* output two kinds of Travel Dynamic: set I frame request when there is newly join; resolution change ?
-     */
-
+    /* output two kinds of Travel Dynamic:
+       set I frame request when there is newly join; resolution change ? */
     /* mix cell will do the actual cell scale, compose and incoming stream sync */
-    m_cellMixer.initMixer(out, m_layout, m_adornment, m_bReGeneratePts, trimStr(m_logtag) + "-CellMixer ");
-
+    m_cellMixer.initMixer(out, m_layout, m_adornment, m_bReGeneratePts, m_bStartAfterAllJoin,
+                          trimStr(m_logtag) + "-CellMixer ");
     if (!m_backgroudPath.empty()) {
         DavDynaEventVideoMixSetNewBackgroud event {m_backgroudPath};
         ret = m_cellMixer.onUpdateBackgroudEvent(event);
@@ -136,9 +152,6 @@ int VideoMix::onConstruct() {
 }
 
 int VideoMix::onDestruct() {
-    //LOG(WARNING) << m_logtag << "VideoMix closed, output mix frames " << m_outputMixFrames << ", discard input "
-    //             << m_discardInput << ", discard output " << m_discardOutput << ", startMixPts"
-    //             << m_startMixPts << ", curMixPts " << m_curMixPts;
     return 0;
 }
 
@@ -189,12 +202,11 @@ int VideoMix::onProcess(DavProcCtx & ctx) {
             LOG(INFO) << m_logtag << "video mix first output count; current input from " << from;
         }
     }
-
     /* finally, check quit */
     if (ctx.m_bInputFlush) {
         if (ctx.m_froms.size() > 1) /* still has valid inputs */
             return 0;
-        if (!m_bAutoQuit) { /* the only input left */
+        if (!m_bQuitIfNoInput) { /* the only input left */
             INFOIT(ret, "video mix has no inputs, auto quit is false, stay still");
             ret = 0;
         } else {

@@ -128,7 +128,6 @@ int CellMixer::onLeft(const DavProcFrom & from) {
         LOG(WARNING) << m_logtag << "No cell at all, cannot process onLeft: " << from;
         return 0;
     }
-
     const int totalCellNum = (int)m_cells.size() - 1;
     if (m_bAutoLayout) {
         EDavVideoMixLayout newLayout = CellLayout::getAutoLayoutViaCellNum(totalCellNum);
@@ -217,11 +216,13 @@ int CellMixer::onUpdateBackgroudEvent(const DavDynaEventVideoMixSetNewBackgroud 
 ////////////////////////
 // [init]
 int CellMixer::initMixer(shared_ptr<DavTravelStatic> & outStatic, EDavVideoMixLayout initLayout,
-                         const CellAdornment & adornment, const bool bReGeneratePts, const string & logtag) {
+                         const CellAdornment & adornment, const bool bReGeneratePts,
+                         const bool bStartAfterAllJoin, const string & logtag) {
     m_outStatic = outStatic;
     m_layout = initLayout;
     m_adornment = adornment;
     m_bReGeneratePts = bReGeneratePts;
+    m_bStartAfterAllJoin = bStartAfterAllJoin;
     m_logtag = logtag;
     /* this PtsInc has round error, may use av_rescale_q directly in future */
     m_oneFramePtsInc = av_rescale_q(1, av_inv_q(m_outStatic->m_framerate), m_outStatic->m_timebase);

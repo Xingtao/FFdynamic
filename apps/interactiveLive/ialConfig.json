@@ -18,6 +18,8 @@
   "mix_setting" : {
     "video_mix" : {
       "b_regenerate_pts": true,
+      "b_start_after_all_join": false,
+      "b_quit_if_no_input": true,
       "width": 1280,
       "height": 720,
       "fps_num" : 30,

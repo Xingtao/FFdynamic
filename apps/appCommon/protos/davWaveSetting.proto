@@ -37,16 +37,18 @@ message VideoMixSetting {
      /* whether regenerate pts from 0 or use coming streams' pts. if coming streams use real
         time timestamp, leave it false. otherwise, for instance, to mix several video clips, set true */
     bool b_regenerate_pts = 1;
-    int32 width = 2;
-    int32 height = 3;
-    int32 fps_num = 4;
-    int32 fps_den = 5;
-    int32 margin = 6;
-    int32 border_width = 7;
-    int32 border_color = 8;
-    int32 fillet_radius = 9; /* whether make cell with fillet, radius = 0 will do nothing */
-    string backgroud_image_path = 10;
-    VideoMixLayoutUpdate layout_info = 11;
+    bool b_start_after_all_join = 2;
+    bool b_quit_if_no_input = 3;
+    int32 width = 10;
+    int32 height = 11;
+    int32 fps_num = 12;
+    int32 fps_den = 13;
+    int32 margin = 14;
+    int32 border_width = 15;
+    int32 border_color = 16;
+    int32 fillet_radius = 17; /* whether make cell with fillet, radius = 0 will do nothing */
+    string backgroud_image_path = 18;
+    VideoMixLayoutUpdate layout_info = 19;
 }
 
 message AudioMixSetting {

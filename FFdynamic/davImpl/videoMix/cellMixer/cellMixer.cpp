@@ -128,7 +128,10 @@ int CellMixer::onLeft(const DavProcFrom & from) {
         LOG(WARNING) << m_logtag << "No cell at all, cannot process onLeft: " << from;
         return 0;
     }
-    const int totalCellNum = (int)m_cells.size() - 1;
+    int totalCellNum = (int)m_cells.size() - 1;
+    if (m_bStartAfterAllJoin)
+        totalCellNum = m_fixedInputNum;
+
     if (m_bAutoLayout) {
         EDavVideoMixLayout newLayout = CellLayout::getAutoLayoutViaCellNum(totalCellNum);
         if (newLayout != m_layout) {
@@ -256,7 +259,6 @@ int CellMixer::updateCellSettings(std::function<int (int & cellArchorPos)> posOp
 
 //////////////////////////////
 // [Mix Cell Process]
-
 int CellMixer::sendFrame(const DavProcFrom & from, AVFrame *inFrame) {
     std::lock_guard<std::mutex> lock(m_mutex);
     int ret = 0;
@@ -288,9 +290,11 @@ int CellMixer::receiveFrames(vector<AVFrame *> & outFrames, vector<shared_ptr<Da
 
 //////////////
 // [Mix Cells]
-
 int CellMixer::doMixCells() {
     int ret = 0;
+    if (m_bStartAfterAllJoin && (int)m_cells.size() != m_fixedInputNum)
+        return 0;
+
     do {
         vector<bool> bMixContinue;
         for (auto & c : m_cells) {

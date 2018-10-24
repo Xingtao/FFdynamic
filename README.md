@@ -50,10 +50,10 @@ Both changes are quite smooth, without any frozen or stuck.
   For instance, if we are developing a dehaze algorithm and would like to know how good the dehazed algorithm visually (in compare to original one). FFdynamic provides facilities that allow one to easily realize following composition:
 
 ```
-Demux |-> Audio Decode -> |-> Audio Encode -----------------------------------------> |
-      |                                                                               | -> Muxer
-      |                   |-> Dehaze Filter -> |                                      |
-      |-> Video Decode -> |                    | Mix original and dehzed ->| Encode ->|
+Demux |-> Audio Decode -> |-> Audio Encode ------------------------------------------> |
+      |                                                                                | -> Muxer
+      |                   |-> Dehaze Filter -> |                                       |
+      |-> Video Decode -> |                    | Mix original and dehazed ->| Encode ->|
                           | -----------------> |
 ```
   As shown, after demux the input stream, we do video decode which will output to two components: 'Dehaze Filter' component and 'mix video' component; after dehaze, its image also output to 'mix video' component, in there we mix original and dehazed image into one. The whole example is [here](#write-a-plugin-component). 
@@ -228,7 +228,7 @@ As shown, if we have 5 outputs (which is normal in live broadcast field, output 
 
 Here we introduce how to write a plugin. We develop a dehaze algorithm and make it as a FFdynamic's component. Then we could compose it with other components freely. the following image shows the diagram we mentioned in the 'Overview' part, mix original and dehazed image together to check the result visually.
 
-![dehazed mix image](asset/dehze.gif)
+![dehazed mix image](asset/dehaze.gif)
 
 Refer to [here](examplePlugin/README.md) for plugin source files.
 

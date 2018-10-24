@@ -63,6 +63,7 @@ int main(int argc, char **argv) {
     // audio mix has default settings: fltp, 44100, 2 channels
     // 8. video mix
     DavWaveOption videoMixOption((DavWaveClassVideoMix()));
+    videoMixOption.setBool(DavOptionVideoMixStartAfterAllJoin(), true);
     videoMixOption.setAVRational("framerate", {30, 1});
     videoMixOption.setVideoSize(1280, 720);
 

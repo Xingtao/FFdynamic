@@ -37,7 +37,8 @@ private:
     CellAdornment m_adornment; /* each cell use the same adornment at start, could be changed */
     string m_backgroudPath;
     bool m_bReGeneratePts = true;
-    bool m_bAutoQuit = true; /* whether quit when no connected input peers */
+    bool m_bStartAfterAllJoin = false; /* whether wait for all peers joined, useful for fixed inputs */
+    bool m_bQuitIfNoInput = true; /* whether quit when no connected input peers */
 
     ///////////////////////////////////////////////////////////////////
     /* parameters set via DavOptions */

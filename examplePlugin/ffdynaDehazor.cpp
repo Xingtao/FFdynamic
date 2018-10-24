@@ -8,8 +8,8 @@ namespace ff_dynamic {
 
 int PluginDehazor::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     CHECK(m_inputTravelStatic.size() == ctx.m_froms.size() && ctx.m_froms.size() == 1);
-    DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(ctx.m_froms[0]);
-    if (!in.m_codecpar && (in.m_pixfmt == AV_PIX_FMT_NONE)) {
+    const auto & in = m_inputTravelStatic.at(ctx.m_froms[0]);
+    if (!in->m_codecpar && (in->m_pixfmt == AV_PIX_FMT_NONE)) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
                 m_logtag + "dehaze cannot get valid codecpar or videopar");
         return DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR;
@@ -25,16 +25,16 @@ int PluginDehazor::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     /* set output infos */
     m_timestampMgr.clear();
     m_outputTravelStatic.clear();
-    DavImplTravel::TravelStatic out(in); /* use the same timebase with the input */
+    auto out = make_shared<DavTravelStatic>(*in); /* use the same parameters with input */
     LOG(INFO) << m_logtag << "travel static input/output for dehaze is the same: " << in;
-    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in.m_timebase, in.m_timebase)));
+    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in->m_timebase, in->m_timebase)));
     /* output only one stream: dehazed video stream */
     m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out));
 
     /* ok, no other works needed */
     /* must set this one after init done */
     m_bDynamicallyInitialized = true;
-    LOG(INFO) << m_logtag << "dynamically create dehazor done.\nin static: " << in << ", \nout: " << out;
+    LOG(INFO) << m_logtag << "dynamically create dehazor done.\nin static: " << *in << ", \nout: " << *out;
     return 0;
 }
 
@@ -133,7 +133,7 @@ int PluginDehazor::onProcess(DavProcCtx & ctx) {
 
     /* prepare output */
     outFrame->pts = inFrame->pts;
-    outBuf->m_travel.m_static = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+    outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
     ctx.m_outBufs.push_back(outBuf);
     return 0;
 }

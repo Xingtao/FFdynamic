@@ -39,7 +39,8 @@ struct DavTravelStatic {
     int m_channels = 0;
     uint64_t m_channelLayout = 0;
 
-    /* merge part: use videopar/audiopar when options not exist, normally used by encoders */
+    /////////////////////////////////////////////////////////////////////////////////////////
+    /* merge/setup part: use videopar/audiopar when options not exist, normally used by encoders */
     int mergeVideoDavTravelStaticToDict(DavWaveOption & options);
     int mergeAudioDavTravelStaticToDict(DavWaveOption & options);
     /* */

@@ -215,15 +215,15 @@ int CellMixer::onUpdateBackgroudEvent(const DavDynaEventVideoMixSetNewBackgroud 
 
 ////////////////////////
 // [init]
-int CellMixer::initMixer(shared_ptr<DavTravelStatic> & outStatic, EDavVideoMixLayout initLayout,
-                         const CellAdornment & adornment, const bool bReGeneratePts,
-                         const bool bStartAfterAllJoin, const string & logtag) {
-    m_outStatic = outStatic;
-    m_layout = initLayout;
-    m_adornment = adornment;
-    m_bReGeneratePts = bReGeneratePts;
-    m_bStartAfterAllJoin = bStartAfterAllJoin;
-    m_logtag = logtag;
+int CellMixer::initMixer(const CellMixerParams & cmp) {
+    m_outStatic = cmp.m_outStatic;
+    m_layout = cmp.m_initLayout;
+    m_adornment = cmp.m_adornment;
+    m_bReGeneratePts = cmp.m_bReGeneratePts;
+    m_bStartAfterAllJoin = cmp.m_bStartAfterAllJoin;
+    m_fixedInputNum = cmp.m_fixedInputNum;
+    m_logtag = cmp.m_logtag;
+
     /* this PtsInc has round error, may use av_rescale_q directly in future */
     m_oneFramePtsInc = av_rescale_q(1, av_inv_q(m_outStatic->m_framerate), m_outStatic->m_timebase);
     /* this frame will cache the backgroud until it re-freshed or layout change */

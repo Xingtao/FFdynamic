@@ -92,7 +92,9 @@ struct DavOptionVideoMixRegeneratePts : public DavOption {
         DavOption(type_index(typeid(*this)), type_index(typeid(bool)), "VideoMixRegeneratePts") {}
 };
 
-/* whether start mixing after all current participants joined, useful for static fixed number of inputs */
+/* whether start mixing after all current participants joined, useful for static fixed number of inputs.
+   set it to false if there are dynamically join/left.
+ */
 struct DavOptionVideoMixStartAfterAllJoin : public DavOption {
     DavOptionVideoMixStartAfterAllJoin() :
         DavOption(type_index(typeid(*this)), type_index(typeid(bool)), "StartAfterAllJoin") {}

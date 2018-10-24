@@ -13,6 +13,16 @@ namespace ff_dynamic {
 
 ///////////////////////////////
 /* Video Cell Sync & Compose */
+struct CellMixerParams {
+    shared_ptr<DavTravelStatic> m_outStatic;
+    EDavVideoMixLayout m_initLayout;
+    CellAdornment m_adornment;
+    bool m_bReGeneratePts = true;
+    bool m_bStartAfterAllJoin = false;
+    int m_fixedInputNum = 0;
+    string m_logtag;
+};
+
 class CellMixer {
 public:
     CellMixer() = default;
@@ -25,9 +35,8 @@ public:
     };
 
 public: /* called with lock */
-    int initMixer(shared_ptr<DavTravelStatic> & outStatic, EDavVideoMixLayout initLayout,
-                  const CellAdornment & adornment, const bool bReGeneratePts,
-                  const bool bStartAfterAllJoin, const string & logtag);
+    int initMixer(const CellMixerParams & cmp);
+    bool isInited() {return m_bInited;}
     int sendFrame(const DavProcFrom & from, AVFrame *frame);
     int receiveFrames(vector<AVFrame *> & outFrames, vector<shared_ptr<DavPeerEvent>> & pubEvents);
     int onJoin(const DavProcFrom & from, shared_ptr<DavTravelStatic> & in);
@@ -65,10 +74,13 @@ private:
 private:
     string m_logtag;
     std::mutex m_mutex;
+    std::atomic<bool> m_bInited = ATOMIC_VAR_INIT(false);
+
     /* mix video sync related */
     shared_ptr<DavTravelStatic> m_outStatic;
     bool m_bReGeneratePts = true; /* by default generate pts from 0. if use stream timestamp, set this as false */
     bool m_bStartAfterAllJoin = false; /* be default, start mixing just has input */
+    int m_fixedInputNum = 0;
     int64_t m_startMixPts = AV_NOPTS_VALUE;
     int64_t m_curMixPts = AV_NOPTS_VALUE;
     int64_t m_oneFramePtsInc = AV_NOPTS_VALUE;

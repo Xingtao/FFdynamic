@@ -113,6 +113,7 @@ int FFmpegAudioDecode::onProcess(DavProcCtx & ctx) {
         if (ret >= 0) {
             // TODO: if there is dynamic travel info, should only set to one outBuf
             ctx.m_outBufs.push_back(outBuf);
+            m_outputFrames++;
             if (frame->best_effort_timestamp != AV_NOPTS_VALUE)
                 frame->pts = frame->best_effort_timestamp;
             continue;
@@ -126,6 +127,7 @@ int FFmpegAudioDecode::onProcess(DavProcCtx & ctx) {
         break;
     } while (true);
 
+    LOG_IF(INFO, m_outputFrames % 1000 == 1) << m_logtag << "audio decode output frame " << m_outputFrames;
     return 0;
 }
 

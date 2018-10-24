@@ -104,12 +104,15 @@ int DavProc::postProcess(DavProcCtx & ctx) {
     m_expectInput = ctx.m_expect; /* next process expected input */
 
     /* post process for event */
-    for (const auto & e : ctx.m_pubEvents)
+    for (const auto & e : ctx.m_pubEvents) {
+        /* impl only know event's streamIndex, so we fill other fields here */
+        e->getAddress().setGroupFrom(this, m_groupId);
         m_pubsubTransmitor->broadcast(e);
+    }
 
     /* post process for output */
     for (auto & buf : ctx.m_outBufs) {
-        buf->setGroupFrom(m_groupId, this);
+        buf->getAddress().setGroupFrom(this, m_groupId);
         for (int k=0; k < ctx.m_outputTimes; k++) {
             m_dataTransmitor->delivery(buf);
         }

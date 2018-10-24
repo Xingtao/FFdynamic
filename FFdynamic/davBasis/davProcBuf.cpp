@@ -46,16 +46,19 @@ std::ostream & operator<<(std::ostream & os, const DavProcBuf & buf) {
 DavProcFrom::DavProcFrom(DavProc *from, const int fromIndex) noexcept
     : m_from(from), m_fromStreamIndex(fromIndex), m_descFrom(from->getClassTag()) {
 }
-DavProcFrom::DavProcFrom(DavProc *from, size_t groupId, const int fromIndex) noexcept
-    : m_from(from), m_groupId(groupId), m_fromStreamIndex(fromIndex), m_descFrom(from->getClassTag()) {
+
+DavProcFrom::DavProcFrom(DavProc *from, size_t groupId, const int fromIndex) noexcept {
+    setFromStreamIndex(fromIndex);
+    setGroupFrom(from, groupId);
 }
 
-void DavProcBuf::setGroupFrom(size_t groupId, DavProc *thisProc) noexcept {
-    m_buffrom.m_groupId = groupId;
-    m_buffrom.m_from = thisProc;
-    m_buffrom.m_descFrom = thisProc->getClassTag();
+void DavProcFrom::setGroupFrom(DavProc *thisProc, size_t groupId) noexcept {
+    m_groupId = groupId;
+    m_from = thisProc;
+    m_descFrom = thisProc->getClassTag();
 }
 
+/////////////////////////////////////////
 // manul reference with DavProcBufLimiter
 void DavProcBuf::unlimit() {
     std::lock_guard<std::mutex> lock(m_mutex);

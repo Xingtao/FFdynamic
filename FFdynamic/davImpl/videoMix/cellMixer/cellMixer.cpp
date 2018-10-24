@@ -17,7 +17,7 @@ int CellMixer::updateOneMixCellSettings(unique_ptr<OneMixCell> & oneMixCell, con
 
     oneMixCell->m_archor.init(out->m_width, out->m_height, coors, pos);
     LOG(INFO) << m_logtag << "update one cell settings: pos " << pos << ", coors "
-              <<  vectorToStringViaOss(coors) <<", in " << in << ", out " << out;
+              <<  vectorToStringViaOss(coors) <<", in " << *in << ", out " << *out;
 
     ScaleFilterParams sfp;
     // in

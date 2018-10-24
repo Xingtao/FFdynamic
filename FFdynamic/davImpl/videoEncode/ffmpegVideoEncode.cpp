@@ -223,7 +223,6 @@ int FFmpegVideoEncode::onProcess(DavProcCtx & ctx) {
     }
 
     int ret = 0;
-    // when upper do flush will output an empty frame
     auto inFrame = ctx.m_inRefFrame;
     if (!inFrame) {
         LOG(INFO) << m_logtag << "video encode reciving flush frame";

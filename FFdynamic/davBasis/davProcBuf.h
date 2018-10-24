@@ -23,6 +23,9 @@ struct DavProcFrom {
     DavProcFrom() = default;
     DavProcFrom(DavProc*from, const int fromIndex = -1) noexcept;
     DavProcFrom(DavProc*from, size_t groupId, const int fromIndex = -1) noexcept;
+    inline void setFromStreamIndex(const int idx = -1) noexcept {m_fromStreamIndex = idx;}
+    void setGroupFrom(DavProc *thisProc, size_t groupId) noexcept;
+
     virtual ~DavProcFrom() = default;
     DavProc* m_from = nullptr;
     size_t m_groupId = 0;
@@ -41,11 +44,9 @@ struct DavProcBuf {
     inline bool isEmptyData() const noexcept {return !m_pkt && !m_frame;}
     /* this is awkward, it should have been captured by class dependency.
        may asbstract DavProcBuf in future to avoid this 'getAddress' */
-    inline const DavProcFrom & getAddress() const noexcept {return m_buffrom;}
+    inline DavProcFrom & getAddress() noexcept {return m_buffrom;}
     inline void setAddress(const DavProcFrom & buffrom) noexcept {m_buffrom = buffrom;}
-    inline void setFromStreamIndex(const int idx = -1) noexcept {m_buffrom.m_fromStreamIndex = idx;}
     inline void setBufLimitor(shared_ptr<DavProcBufLimiter> limiter) {m_limiter = limiter;}
-    void setGroupFrom(size_t groupId, DavProc *thisProc) noexcept;
     friend std::ostream & operator<<(std::ostream & os, const DavProcBuf & buf);
 
     /* Data */

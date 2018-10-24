@@ -28,7 +28,7 @@ int AudioMix::processVideoMixSync(const DavEventVideoMixSync & event) {
         for (auto & syncer : m_syncers) {/* some groups' SyncEvent may be discarded, it is ok */
             if (vsi.m_from.m_groupId == syncer.second->getGroupId()) {
                 syncer.second->processVideoPeerSyncEvent(m_videoMixCurPts,
-                          av_rescale_q(vsi.m_curPts, AV_TIME_BASE_Q, AVRational{1, m_dstSamplerate}));
+                             av_rescale_q(vsi.m_curPts, AV_TIME_BASE_Q, AVRational{1, m_dstSamplerate}));
             }
         }
     }
@@ -58,7 +58,7 @@ int AudioMix::addOneSyncerStream(DavProcCtx & ctx) {
     auto in = m_inputTravelStatic.at(from);
 
     /* output */
-    m_timestampMgr.insert(std::make_pair(from, DavImplTimestamp(in->m_timebase, {1, m_dstSamplerate})));
+    m_timestampMgr.emplace(from, DavImplTimestamp(in->m_timebase, {1, m_dstSamplerate}));
 
     unique_ptr<AudioSyncer> syncer(new AudioSyncer());
     CHECK(syncer != nullptr);
@@ -97,10 +97,10 @@ int AudioMix::onConstruct() {
 
     /* */
     auto out = make_shared<DavTravelStatic>();
-    m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
     out->setupAudioStatic(m_dstFmt, {1, m_dstSamplerate}, m_dstSamplerate,
-                         av_get_channel_layout_nb_channels(m_dstLayout), m_dstLayout);
-    m_outputMediaMap.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_AUDIO));
+                          av_get_channel_layout_nb_channels(m_dstLayout), m_dstLayout);
+    m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
+    m_outputMediaMap.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_AUDIO);
 
     /* mark as initialized and process dynamic input peer in onProcess */
     m_bDynamicallyInitialized = true;

@@ -146,7 +146,6 @@ int VideoMix::onProcess(DavProcCtx & ctx) {
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
     if (!ctx.m_inBuf)
         return 0;
-
     int ret = 0;
     const DavProcFrom & from = ctx.m_inBuf->getAddress();
     if (m_cellMixer.isNewcomer(from)) {
@@ -177,6 +176,9 @@ int VideoMix::onProcess(DavProcCtx & ctx) {
 
     vector<AVFrame *> outFrames;
     m_cellMixer.receiveFrames(outFrames, ctx.m_pubEvents);
+    for (auto & e : ctx.m_pubEvents) {
+        e->getAddress().setFromStreamIndex(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+    }
     for (auto & f : outFrames) {
         auto outBuf = make_shared<DavProcBuf>();
         outBuf->mkAVFrame(f);

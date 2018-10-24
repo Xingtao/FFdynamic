@@ -155,7 +155,7 @@ int FFmpegDemux::onProcess(DavProcCtx & ctx) {
         }
         // ok then, set up travel static info
         outBuf->m_travelStatic = m_outputTravelStatic.at(pkt->stream_index);
-        outBuf->setFromStreamIndex(pkt->stream_index);
+        outBuf->getAddress().setFromStreamIndex(pkt->stream_index);
         break;
     } while(true);
 

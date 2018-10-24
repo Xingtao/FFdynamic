@@ -5,33 +5,31 @@
 
 namespace ff_dynamic {
 
+//////////////////////////////////////////////////////////////////////////////////////////
 // TODO: should disctinct flush and real left
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // [cell paramters calculdate]
 int CellMixer::updateOneMixCellSettings(unique_ptr<OneMixCell> & oneMixCell, const int pos,
-                                        const DavImplTravel::TravelStatic & in,
-                                        const DavImplTravel::TravelStatic & out) {
+                                        shared_ptr<DavTravelStatic> & in, shared_ptr<DavTravelStatic> & out) {
     vector<int> coors = CellLayout::getCoordinateOfLayoutAtPos(m_layout, pos);
     if (coors.size() == 0) /* this cell won't be shown on screen */
         return 0;
 
-    oneMixCell->m_archor.init(out.m_width, out.m_height, coors, pos);
+    oneMixCell->m_archor.init(out->m_width, out->m_height, coors, pos);
     LOG(INFO) << m_logtag << "update one cell settings: pos " << pos << ", coors "
-              <<  vectorToStringViaOss(coors) <<", in " << in << ", out " << out;
+              <<  vectorToStringViaOss(coors) <<", in " << *in << ", out " << *out;
 
     ScaleFilterParams sfp;
     // in
-    sfp.m_inFormat = in.m_pixfmt;
-    sfp.m_inWidth = in.m_width;
-    sfp.m_inHeight = in.m_height;
-    sfp.m_inTimebase = out.m_timebase; /* NOTE: in frame's timestamp already convert to out's timebase */
-    sfp.m_inFramerate = in.m_framerate;
-    sfp.m_inSar = in.m_sar;
+    sfp.m_inFormat = in->m_pixfmt;
+    sfp.m_inWidth = in->m_width;
+    sfp.m_inHeight = in->m_height;
+    sfp.m_inTimebase = out->m_timebase; /* NOTE: in frame's timestamp already convert to out's timebase */
+    sfp.m_inFramerate = in->m_framerate;
+    sfp.m_inSar = in->m_sar;
     // out
-    sfp.m_outTimebase = out.m_timebase;
-    sfp.m_outFramerate = out.m_framerate;
+    sfp.m_outTimebase = out->m_timebase;
+    sfp.m_outFramerate = out->m_framerate;
     sfp.m_hwFramesCtx = nullptr; /* TODO! */
     sfp.m_bFpsScale = true; /* whether do fps conversion */
 
@@ -59,7 +57,7 @@ int CellMixer::updateOneMixCellSettings(unique_ptr<OneMixCell> & oneMixCell, con
     const int cellWidth = oneMixCell->m_archor.m_w;
     const int cellHeight = oneMixCell->m_archor.m_h;
     const int margin = m_adornment.m_marginSize;
-    const AVRational scaledDar = av_div_q(av_mul_q(in.m_sar, AVRational{in.m_width, in.m_height}) , out.m_sar);
+    const AVRational scaledDar = av_div_q(av_mul_q(in->m_sar, AVRational{in->m_width, in->m_height}) , out->m_sar);
     CHECK(scaledDar.num != 0 && scaledDar.den != 0);
 
     int scaledHeight = cellHeight - 2 * margin;
@@ -77,7 +75,7 @@ int CellMixer::updateOneMixCellSettings(unique_ptr<OneMixCell> & oneMixCell, con
     sfp.m_outWidth = scaledWidth;
     sfp.m_outHeight = scaledHeight;
     /* setup cell paster */
-    oneMixCell->m_cellPaster.update(oneMixCell->m_archor, m_adornment, padX, padY, in.m_pixfmt, out.m_pixfmt);
+    oneMixCell->m_cellPaster.update(oneMixCell->m_archor, m_adornment, padX, padY, in->m_pixfmt, out->m_pixfmt);
     oneMixCell->m_syncer->updateSyncerScaleParam(sfp);
     LOG(INFO) << m_logtag << "OneCell's params update done: scaledDar " << scaledDar << ", scaled WxH "
               << scaledWidth << "x" << scaledHeight << ", padX " << padX << ", padY " << padY << ", "
@@ -88,9 +86,8 @@ int CellMixer::updateOneMixCellSettings(unique_ptr<OneMixCell> & oneMixCell, con
 //////////////////////////////////////////////////////////////////////////////////////////
 // [Event Process]
 
-int CellMixer::onJoin(const DavProcFrom & from, const DavImplTravel::TravelStatic & in) {
+int CellMixer::onJoin(const DavProcFrom & from, shared_ptr<DavTravelStatic> & in) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    const auto & out = m_outStatic;
     const int totalCellNum = (int)m_cells.size() + 1;
     if (m_bAutoLayout) {
         EDavVideoMixLayout newLayout = CellLayout::getAutoLayoutViaCellNum(totalCellNum);
@@ -120,7 +117,7 @@ int CellMixer::onJoin(const DavProcFrom & from, const DavImplTravel::TravelStati
     if (m_bUpdateCellSettings)
         updateCellSettings([](int & pos) {return 0;}); /* do nothing to existing cell pos */
     else
-        updateOneMixCellSettings(oneMixCell, atPos, in, out);
+        updateOneMixCellSettings(oneMixCell, atPos, in, m_outStatic);
     LOG(INFO) << m_logtag << "Add one new stream done, total now " << m_cells.size();
     return 0;
 }
@@ -219,7 +216,7 @@ int CellMixer::onUpdateBackgroudEvent(const DavDynaEventVideoMixSetNewBackgroud 
 
 ////////////////////////
 // [init]
-int CellMixer::initMixer(const DavImplTravel::TravelStatic & outStatic, EDavVideoMixLayout initLayout,
+int CellMixer::initMixer(shared_ptr<DavTravelStatic> & outStatic, EDavVideoMixLayout initLayout,
                          const CellAdornment & adornment, const bool bReGeneratePts, const string & logtag) {
     m_outStatic = outStatic;
     m_layout = initLayout;
@@ -227,7 +224,7 @@ int CellMixer::initMixer(const DavImplTravel::TravelStatic & outStatic, EDavVide
     m_bReGeneratePts = bReGeneratePts;
     m_logtag = logtag;
     /* this PtsInc has round error, may use av_rescale_q directly in future */
-    m_oneFramePtsInc = av_rescale_q(1, av_inv_q(m_outStatic.m_framerate), m_outStatic.m_timebase);
+    m_oneFramePtsInc = av_rescale_q(1, av_inv_q(m_outStatic->m_framerate), m_outStatic->m_timebase);
     /* this frame will cache the backgroud until it re-freshed or layout change */
     m_canvasFrame = allocMixedOutputFrame();
     if (m_backgroudFrame)
@@ -319,7 +316,7 @@ int CellMixer::doMixCells() {
         }
         // m_curMixPts = m_startMixPts + (int64_t)m_outputMixFrameCount * m_oneFramePtsInc;
         m_curMixPts = m_startMixPts + av_rescale_q(m_outputMixFrameCount,
-                                                   av_inv_q(m_outStatic.m_framerate), m_outStatic.m_timebase);
+                                                   av_inv_q(m_outStatic->m_framerate), m_outStatic->m_timebase);
         m_outputMixFrameCount++;
     } while (true);
 
@@ -387,9 +384,9 @@ int CellMixer::getMixProcOrderByLayer(vector<pair<int, DavProcFrom>> & mixOrder)
 AVFrame *CellMixer::allocMixedOutputFrame() {
     AVFrame *outFrame = av_frame_alloc();
     CHECK(outFrame != nullptr);
-    outFrame->width = m_outStatic.m_width;
-    outFrame->height = m_outStatic.m_height;
-    outFrame->format = m_outStatic.m_pixfmt;
+    outFrame->width = m_outStatic->m_width;
+    outFrame->height = m_outStatic->m_height;
+    outFrame->format = m_outStatic->m_pixfmt;
     /* TODO: cuda frame allocate */
     if(av_frame_get_buffer(outFrame, 0) < 0)
         av_frame_free(&outFrame);

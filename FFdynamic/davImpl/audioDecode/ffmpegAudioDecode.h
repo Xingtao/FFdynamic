@@ -24,6 +24,7 @@ private:
 
 private:
     AVCodecContext *m_decCtx = nullptr;
+    uint64_t m_outputFrames = 0;
     uint64_t m_discardFrames = 0;
 };
 

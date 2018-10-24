@@ -39,6 +39,15 @@ public:
         auto & eventProcess = *(reinterpret_cast<function<int (decltype(e))> *>(it->second->m_fp));
         return eventProcess(event);
     }
+    /* called in each implementation for interested events */
+    int processTravelDynamic(const DavTravelDynamic & event) {
+        const auto & e = event.getSelf();
+        auto it = m_implEventMap.find(std::type_index(typeid(event)));
+        if (it == m_implEventMap.end())
+            return DAV_ERROR_EVENT_PROCESS_NOT_SUPPORT;
+        auto & eventProcess = *(reinterpret_cast<function<int (decltype(e))> *>(it->second->m_fp));
+        return eventProcess(event);
+    }
 
     template <typename T>
     int registerEvent(function<int (const T &)> & f) {

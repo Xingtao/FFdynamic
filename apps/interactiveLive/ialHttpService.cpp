@@ -704,7 +704,7 @@ vector<string> IalHttpService::mkFullOutputUrl(const string & outputBaseUrl,
                      const string & roomId, const string & outputId,
                      const DavStreamletSetting::OutputStreamletSetting & outputStreamletSetting) {
     vector<string> outputUrls;
-    for (size_t k=0; k < outputStreamletSetting.mux_outputs().size(); k++) {
+    for (int k=0; k < outputStreamletSetting.mux_outputs().size(); k++) {
         // TODO: may add an extension m.mux_fmt();
         const string oneOutUrl = outputBaseUrl + "/" + roomId + "_" + outputId + "_" + std::to_string(k);
         LOG(INFO) << m_logtag << "--> one out " << oneOutUrl;

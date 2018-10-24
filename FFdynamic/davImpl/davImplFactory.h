@@ -119,7 +119,6 @@ private:
                           const string & implType, DavImplCreateFunc & func) {
         string registerKey = mkClassImplKey(classCategory.name(), implType);
         s_classImplMap.insert(std::make_pair(registerKey, func));
-        LOG(INFO) << "[DavImplRegister] " << "Register " << registerKey;
         return registerKey;
     }
     vector<string> m_implRegisterNames;

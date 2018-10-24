@@ -2,7 +2,7 @@
 
 namespace ff_dynamic {
 
-ostream & operator<<(ostream & os, const DavImplTravel::TravelStatic & s) {
+ostream & operator<<(ostream & os, const DavTravelStatic & s) {
     os << "Media Type: " << av_get_media_type_string(s.m_mediaType);
     if (s.m_mediaType == AVMEDIA_TYPE_VIDEO) {
         os  << ", pixel format " << (int)s.m_pixfmt << ", timebase " << s.m_timebase << ", width " << s.m_width
@@ -23,7 +23,7 @@ ostream & operator<<(ostream & os, const DavImplTravel::TravelStatic & s) {
 // [merge travel static to DavWaveOption options]
 
 /* merge part: use videopar/audiopar when options not exist, normally used by encoders */
-int DavImplTravel::TravelStatic::mergeVideoTravelStaticToDict(DavWaveOption & options) {
+int DavTravelStatic::mergeVideoDavTravelStaticToDict(DavWaveOption & options) {
     // TODO: twice of get_buffer_fmt, so it may not right for the first time
     options.set("pixel_format", std::to_string(m_pixfmt), AV_DICT_DONT_OVERWRITE);
     options.setVideoSize(m_width, m_height, AV_DICT_DONT_OVERWRITE);
@@ -33,7 +33,7 @@ int DavImplTravel::TravelStatic::mergeVideoTravelStaticToDict(DavWaveOption & op
     return 0;
 }
 
-int DavImplTravel::TravelStatic::mergeAudioTravelStaticToDict(DavWaveOption & options) {
+int DavTravelStatic::mergeAudioDavTravelStaticToDict(DavWaveOption & options) {
     options.setAVRational("time_base", m_timebase, AV_DICT_DONT_OVERWRITE);
     options.set("sample_fmt", std::to_string(m_samplefmt), AV_DICT_DONT_OVERWRITE);
     options.set("ar", std::to_string(m_samplerate), AV_DICT_DONT_OVERWRITE);
@@ -45,7 +45,7 @@ int DavImplTravel::TravelStatic::mergeAudioTravelStaticToDict(DavWaveOption & op
 ////////////////////////////////////////////
 // [travel static video settings]
 
-int DavImplTravel::TravelStatic::
+int DavTravelStatic::
 setupVideoStatic(AVCodecContext *codecCtx, const AVRational & timebase,
                  const AVRational & framerate, AVBufferRef *hwFramesCtx) noexcept {
     CHECK(codecCtx != nullptr);
@@ -55,7 +55,7 @@ setupVideoStatic(AVCodecContext *codecCtx, const AVRational & timebase,
     return setupVideoStatic(m_codecpar.get(), timebase, framerate, hwFramesCtx);
 }
 
-int DavImplTravel::TravelStatic::
+int DavTravelStatic::
 setupVideoStatic(AVCodecParameters *codecpar, const AVRational & timebase,
                  const AVRational & framerate, AVBufferRef *hwFramesCtx) noexcept {
     m_mediaType = AVMEDIA_TYPE_VIDEO;
@@ -71,7 +71,7 @@ setupVideoStatic(AVCodecParameters *codecpar, const AVRational & timebase,
                             timebase, framerate, codecpar->sample_aspect_ratio, hwFramesCtx);
 }
 
-int DavImplTravel::TravelStatic::
+int DavTravelStatic::
 setupVideoStatic(enum AVPixelFormat pixfmt, int width, int height,
                      const AVRational & timebase, const AVRational & framerate,
                      const AVRational & sampleAspectRatio, AVBufferRef *hwFramesCtx) noexcept {
@@ -89,7 +89,7 @@ setupVideoStatic(enum AVPixelFormat pixfmt, int width, int height,
 ////////////////////////////////////////////
 //  [audio travel static settings]
 
-int DavImplTravel::TravelStatic::
+int DavTravelStatic::
 setupAudioStatic(AVCodecContext *codecCtx, const AVRational & timebase) noexcept {
     CHECK(codecCtx != nullptr);
     m_codecpar.reset(avcodec_parameters_alloc(),
@@ -98,7 +98,7 @@ setupAudioStatic(AVCodecContext *codecCtx, const AVRational & timebase) noexcept
     return setupAudioStatic(m_codecpar.get(), timebase);
 }
 
-int DavImplTravel::TravelStatic::
+int DavTravelStatic::
 setupAudioStatic(AVCodecParameters *codecpar, const AVRational & timebase) noexcept {
     m_mediaType = AVMEDIA_TYPE_AUDIO;
     if (!m_codecpar) {
@@ -111,7 +111,7 @@ setupAudioStatic(AVCodecParameters *codecpar, const AVRational & timebase) noexc
                             codecpar->channels, codecpar->channel_layout);
 }
 
-int DavImplTravel::TravelStatic::
+int DavTravelStatic::
 setupAudioStatic(enum AVSampleFormat samplefmt, const AVRational & timebase,
                      int samplerate, int channels, uint64_t channelLayout) noexcept {
     m_mediaType = AVMEDIA_TYPE_AUDIO;

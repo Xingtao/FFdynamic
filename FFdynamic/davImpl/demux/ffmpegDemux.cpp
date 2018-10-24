@@ -22,19 +22,19 @@ int FFmpegDemux::dynamicallyInitialize () {
         // only deal with audio/video, ignore subtitle or data stream
         if (st->codecpar->codec_type != AVMEDIA_TYPE_VIDEO && st->codecpar->codec_type != AVMEDIA_TYPE_AUDIO)
             continue;
-        m_outputMediaMap.insert(std::make_pair(k, st->codecpar->codec_type));
-        DavImplTravel::TravelStatic outStatic;
-        outStatic.m_timebase = st->time_base;
+        m_outputMediaMap.emplace(k, st->codecpar->codec_type);
+        auto outStatic = make_shared<DavTravelStatic>();
+        outStatic->m_timebase = st->time_base;
         if (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
             /* r_fps is the base frame rate, it is just a guess */
             AVRational outFramerate = st->avg_frame_rate.num != 0 ? st->avg_frame_rate : st->r_frame_rate;
-            outStatic.setupVideoStatic(st->codecpar, st->time_base, outFramerate);
+            outStatic->setupVideoStatic(st->codecpar, st->time_base, outFramerate);
         } else {
-            outStatic.setupAudioStatic(st->codecpar, st->time_base);
+            outStatic->setupAudioStatic(st->codecpar, st->time_base);
         }
         // skip other fields and use codecpar
         LOG(INFO) << m_logtag << "Demux add one stream output: " << outStatic;
-        m_outputTravelStatic.insert(std::make_pair(k, outStatic));
+        m_outputTravelStatic.emplace(k, outStatic);
     }
     m_bDynamicallyInitialized = true;
     return 0;
@@ -154,12 +154,12 @@ int FFmpegDemux::onProcess(DavProcCtx & ctx) {
                       << " start at relative time " << m_streamStartTime[pkt->stream_index];
         }
         // ok then, set up travel static info
-        outBuf->m_travel.m_static = m_outputTravelStatic.at(pkt->stream_index);
-        outBuf->setFromStreamIndex(pkt->stream_index);
+        outBuf->m_travelStatic = m_outputTravelStatic.at(pkt->stream_index);
+        outBuf->getAddress().setFromStreamIndex(pkt->stream_index);
         break;
     } while(true);
 
-    /* TODO: check side_data for dynamic change, then set to m_travel.m_dynamic; */
+    /* TODO: check side_data for dynamic change, then set to m_travelDynamic; */
     /* TODO: not accurate for some cases */
     const auto & st = m_fmtCtx->streams[pkt->stream_index];
     int64_t timeNow = av_gettime_relative();

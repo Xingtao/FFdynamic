@@ -41,15 +41,15 @@ int FFmpegVideoDecode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
         onDestruct();
 
     CHECK(m_inputTravelStatic.size() == ctx.m_froms.size() && ctx.m_froms.size() == 1);
-    DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(ctx.m_froms[0]);
-    if (!in.m_codecpar && in.m_pixfmt == AV_PIX_FMT_NONE) {
+    auto in = m_inputTravelStatic.at(ctx.m_froms[0]);
+    if (!in->m_codecpar && in->m_pixfmt == AV_PIX_FMT_NONE) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
                 m_logtag + "video decode cannot get valid codecpar");
         return DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR;
     }
 
     // 2. let's open the decoder
-    int ret = dynamicallyInitialize(in.m_codecpar.get());
+    int ret = dynamicallyInitialize(in->m_codecpar.get());
     if (ret < 0)
         return ret;
 
@@ -57,14 +57,14 @@ int FFmpegVideoDecode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
     m_timestampMgr.clear();
     m_outputTravelStatic.clear();
     AVBufferRef *hwFramesCtx = nullptr; // TODO
-    AVRational framerate = m_decCtx->framerate.num != 0 ? m_decCtx->framerate : in.m_framerate;
+    AVRational framerate = m_decCtx->framerate.num != 0 ? m_decCtx->framerate : in->m_framerate;
 
-    DavImplTravel::TravelStatic out;
-    out.setupVideoStatic(m_decCtx, in.m_timebase, framerate, hwFramesCtx);
+    auto out = make_shared<DavTravelStatic>();
+    out->setupVideoStatic(m_decCtx, in->m_timebase, framerate, hwFramesCtx);
     /* specific validate */
-    if (out.m_sar.num == 0)
-        out.m_sar = {1, 1};
-    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in.m_timebase, out.m_timebase)));
+    if (out->m_sar.num == 0)
+        out->m_sar = {1, 1};
+    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in->m_timebase, out->m_timebase)));
     m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out));
 
     m_bDynamicallyInitialized = true;
@@ -111,7 +111,7 @@ int FFmpegVideoDecode::onProcess(DavProcCtx & ctx) {
     do
     {
         auto outBuf = make_shared<DavProcBuf>();
-        outBuf->m_travel.m_static = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+        outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
         AVFrame *frame = outBuf->mkAVFrame();
         CHECK(frame != nullptr);
         ret = avcodec_receive_frame(m_decCtx, frame);

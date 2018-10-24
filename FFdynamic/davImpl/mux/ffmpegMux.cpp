@@ -10,7 +10,7 @@ namespace ff_dynamic {
 //    return 0;
 //}
 
-AVStream* FFmpegMux::addOneStream(const DavImplTravel::TravelStatic & travelStatic) {
+AVStream* FFmpegMux::addOneStream(const DavTravelStatic & travelStatic) {
     int ret = 0;
     AVStream *st = avformat_new_stream(m_fmtCtx, nullptr);
     CHECK(st != nullptr);
@@ -42,7 +42,7 @@ int FFmpegMux::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
 
     /* add streams */
     for (auto & s :  m_inputTravelStatic) {
-        AVStream *st = addOneStream(s.second);
+        AVStream *st = addOneStream(*s.second);
         m_muxStreamsMap.insert(std::make_pair(s.first, st));
     }
 
@@ -66,7 +66,7 @@ int FFmpegMux::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     /* set timestamp info after write header, no outputTravelStatic needed */
     for (auto & s : m_inputTravelStatic) {
         auto st = m_muxStreamsMap.at(s.first);
-        m_timestampMgr.insert(std::make_pair(s.first, DavImplTimestamp(s.second.m_timebase, st->time_base)));
+        m_timestampMgr.insert(std::make_pair(s.first, DavImplTimestamp(s.second->m_timebase, st->time_base)));
         LOG(INFO) << m_logtag << "stream " << st->index << " final timebase " << st->time_base;
     }
 

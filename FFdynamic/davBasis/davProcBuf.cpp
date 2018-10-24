@@ -12,16 +12,24 @@ bool operator<(const DavProcFrom & l, const DavProcFrom & r) {
     if (lfrom < rfrom) return true;
     if (lfrom > rfrom) return false;
     // Otherwise from the same DavProc
+
+    /* take flush buf as equal to any exising streamIdx */
+    if (l.m_fromStreamIndex == DavProcFrom::s_flushIndex ||
+        r.m_fromStreamIndex == DavProcFrom::s_flushIndex)
+        return false;
+
     if (l.m_fromStreamIndex < r.m_fromStreamIndex) return true;
     if (l.m_fromStreamIndex > r.m_fromStreamIndex) return false;
     // both equal
     return false;
 }
 
-/* won't check group, this field may not be set. also, 'from' and 'streamIdx' are enough */
+/* won't check group id, this field may not be set. also, 'from' and 'streamIdx' are enough */
 bool operator==(const DavProcFrom & l, const DavProcFrom & r) {
     return (l.m_from == r.m_from &&
-            (l.m_fromStreamIndex == r.m_fromStreamIndex || r.m_fromStreamIndex == DavProcFrom::s_flushIndex));
+            (l.m_fromStreamIndex == r.m_fromStreamIndex ||
+             l.m_fromStreamIndex == DavProcFrom::s_flushIndex ||
+             r.m_fromStreamIndex == DavProcFrom::s_flushIndex));
 }
 
 std::ostream & operator<<(std::ostream & os, const DavProcFrom & f) {
@@ -38,16 +46,19 @@ std::ostream & operator<<(std::ostream & os, const DavProcBuf & buf) {
 DavProcFrom::DavProcFrom(DavProc *from, const int fromIndex) noexcept
     : m_from(from), m_fromStreamIndex(fromIndex), m_descFrom(from->getClassTag()) {
 }
-DavProcFrom::DavProcFrom(DavProc *from, size_t groupId, const int fromIndex) noexcept
-    : m_from(from), m_groupId(groupId), m_fromStreamIndex(fromIndex), m_descFrom(from->getClassTag()) {
+
+DavProcFrom::DavProcFrom(DavProc *from, size_t groupId, const int fromIndex) noexcept {
+    setFromStreamIndex(fromIndex);
+    setGroupFrom(from, groupId);
 }
 
-void DavProcBuf::setGroupFrom(size_t groupId, DavProc *thisProc) noexcept {
-    m_buffrom.m_groupId = groupId;
-    m_buffrom.m_from = thisProc;
-    m_buffrom.m_descFrom = thisProc->getClassTag();
+void DavProcFrom::setGroupFrom(DavProc *thisProc, size_t groupId) noexcept {
+    m_groupId = groupId;
+    m_from = thisProc;
+    m_descFrom = thisProc->getClassTag();
 }
 
+/////////////////////////////////////////
 // manul reference with DavProcBufLimiter
 void DavProcBuf::unlimit() {
     std::lock_guard<std::mutex> lock(m_mutex);

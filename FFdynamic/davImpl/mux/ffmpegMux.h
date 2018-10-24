@@ -25,7 +25,7 @@ private:
 
 private:
     int dynamicallyInitialize(DavProcCtx & ctx);
-    AVStream* addOneStream(const DavImplTravel::TravelStatic & travelStatic);
+    AVStream* addOneStream(const DavTravelStatic & travelStatic);
     int muxMetaDataSettings();
 
 private:

@@ -5,7 +5,7 @@ namespace ff_dynamic {
 ////////////////////////////////////
 //  [initialization]
 // please refers to "init_output_stream_encode", real staffs
-int FFmpegVideoEncode::dynamicallyInitialize(const DavImplTravel::TravelStatic & in) {
+int FFmpegVideoEncode::dynamicallyInitialize(const DavTravelStatic & in) {
     int ret = 0;
     LOG(INFO) << m_logtag << "open real ffmpeg VideoEncode: " << m_options.dump();
     const string encName = m_options.get(DavOptionCodecName());
@@ -67,7 +67,7 @@ int FFmpegVideoEncode::dynamicallyInitialize(const DavImplTravel::TravelStatic &
 }
 
 int FFmpegVideoEncode::
-setupScaleFilter(const DavImplTravel::TravelStatic & in, const DavImplTravel::TravelStatic & out) {
+setupScaleFilter(const DavTravelStatic & in, const DavTravelStatic & out) {
     int ret = 0;
     if (m_scaleFilter) {
         delete m_scaleFilter;
@@ -115,8 +115,8 @@ int FFmpegVideoEncode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
         onDestruct();
 
     CHECK(m_inputTravelStatic.size() == ctx.m_froms.size() && ctx.m_froms.size() == 1);
-    DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(ctx.m_froms[0]);
-    if (!in.m_codecpar && (in.m_pixfmt == AV_PIX_FMT_NONE)) {
+    auto in = m_inputTravelStatic.at(ctx.m_froms[0]);
+    if (!in->m_codecpar && (in->m_pixfmt == AV_PIX_FMT_NONE)) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
                 m_logtag + "video encode cannot get valid codecpar or videopar");
         return DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR;
@@ -124,10 +124,10 @@ int FFmpegVideoEncode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
 
     /* this is crucial: if some fields no set via options (such as width, height, framerate, etc..),
        use values from inTravelstatic */
-    in.mergeVideoTravelStaticToDict(m_options);
+    in->mergeVideoDavTravelStaticToDict(m_options);
 
     // 2. let's open the encoder
-    ret = dynamicallyInitialize(in);
+    ret = dynamicallyInitialize(*in);
     if (ret < 0)
         return ret;
 
@@ -136,14 +136,14 @@ int FFmpegVideoEncode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
     m_outputTravelStatic.clear();
 
     // TODO: hwFramesctx
-    DavImplTravel::TravelStatic out;
-    out.setupVideoStatic(m_encCtx, m_encCtx->time_base, m_encCtx->framerate, nullptr);
-    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in.m_timebase, out.m_timebase)));
-    m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out));
+    auto out = make_shared<DavTravelStatic>();
+    out->setupVideoStatic(m_encCtx, m_encCtx->time_base, m_encCtx->framerate, nullptr);
+    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in->m_timebase, out->m_timebase)));
+    m_outputTravelStatic.emplace(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out));
 
     // 4. set scaleFilter (do this setup after encoder open)
-    if (in.m_width != out.m_width || in.m_height != out.m_height) {
-        ret = setupScaleFilter(in, out);
+    if (in->m_width != out->m_width || in->m_height != out->m_height) {
+        ret = setupScaleFilter(*in, *out);
         if (ret < 0)
             return ret;
     } else {
@@ -151,7 +151,7 @@ int FFmpegVideoEncode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
     }
 
     m_bDynamicallyInitialized = true;
-    LOG(INFO) << m_logtag << "dynamically create VideoEncode done.\nin static: " << in << ", \nout: " << out;
+    LOG(INFO) << m_logtag << "dynamically create VideoEncode done.\nin static: " << *in << ", \nout: " << *out;
     return 0;
 }
 
@@ -190,7 +190,7 @@ int FFmpegVideoEncode::receiveEncodeFrames(DavProcCtx & ctx) {
     int ret = 0;
     do {
         auto outBuf = make_shared<DavProcBuf>();
-        outBuf->m_travel.m_static = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+        outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
         AVPacket *pkt = outBuf->mkAVPacket();
         CHECK(pkt != nullptr);
         av_init_packet(pkt);
@@ -223,7 +223,6 @@ int FFmpegVideoEncode::onProcess(DavProcCtx & ctx) {
     }
 
     int ret = 0;
-    // when upper do flush will output an empty frame
     auto inFrame = ctx.m_inRefFrame;
     if (!inFrame) {
         LOG(INFO) << m_logtag << "video encode reciving flush frame";

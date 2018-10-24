@@ -38,8 +38,7 @@ private:
 
 private:
     AudioResample *m_resampler = nullptr;
-    int openAudioResample(const DavImplTravel::TravelStatic & inTravelStatic,
-                          const DavImplTravel::TravelStatic & outTravelStatic);
+    int openAudioResample(const DavTravelStatic & in, const DavTravelStatic & out);
     int sampleFormatSet(AVCodec *codec);
     int receiveEncodeFrames(DavProcCtx & ctx);
 };

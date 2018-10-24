@@ -10,11 +10,11 @@ namespace ff_dynamic {
 static const std::map<int, const char *> davMessagerCode2StrMap = {
     {0,                                "Success"},
     // if cannot knwo init implementation errors, fill those ones
-    {DAV_ERROR_IMPL_ON_CONSTRUCT,      "Imp - failed on impl construct"},
-    {DAV_ERROR_IMPL_DYNAMIC_INIT,      "Imp - failed on dynamic initialization"},
-    {DAV_ERROR_IMPL_ON_DESTRUCT,       "Imp - failed on impl destruct"},
-    {DAV_ERROR_IMPL_PROCESS,             "Impl - do process fail"},
-    {DAV_ERROR_IMPL_POST_PROCESS,        "Impl - do post-process fail"},
+    {DAV_ERROR_IMPL_ON_CONSTRUCT,   "Imp - failed on impl construct"},
+    {DAV_ERROR_IMPL_DYNAMIC_INIT,   "Imp - failed on dynamic initialization"},
+    {DAV_ERROR_IMPL_ON_DESTRUCT,    "Imp - failed on impl destruct"},
+    {DAV_ERROR_IMPL_PROCESS,        "Impl - do process fail"},
+    {DAV_ERROR_IMPL_POST_PROCESS,   "Impl - do post-process fail"},
 
     // base proc errors
     {DAV_ERROR_BASE_EMPTY_IMPL,         "Dav base has empty implementation"},
@@ -52,9 +52,9 @@ static const std::map<int, const char *> davMessagerCode2StrMap = {
     {DAV_ERROR_IMPL_CODEC_NOT_FOUND,           "Impl - codec not found"},
     {DAV_ERROR_IMPL_DATA_NOPTS,                "Impl - data without valid timestamp"},
     {DAV_ERROR_IMPL_UNEXPECT_EMPTY_INBUF,      "Impl - unexpected empty input buf"},
-    {DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR, "Impl-TravelStatic - invalid codecpar"},
-    {DAV_ERROR_TRAVEL_STATIC_INVALID_VIDEOPAR, "Impl-TravelStatic - invalid videopar"},
-    {DAV_ERROR_TRAVEL_STATIC_INVALID_AUDIOPAR, "Impl-TravelStatic - invalid audiopar"},
+    {DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR, "Impl - TravelStatic - invalid codecpar"},
+    {DAV_ERROR_TRAVEL_STATIC_INVALID_VIDEOPAR, "Impl - TravelStatic - invalid videopar"},
+    {DAV_ERROR_TRAVEL_STATIC_INVALID_AUDIOPAR, "Impl - TravelStatic - invalid audiopar"},
     {DAV_ERROR_IMPL_CLEAR_CACHE_BUFFER,        "Impl - clear input cache buffer"},
     {DAV_ERROR_IMPL_DTS_NOT_MONOTONIC,         "Impl - pkt dts not monotonic"},
     {DAV_ERROR_IMPL_PKT_NO_DTS,                "Impl - pkt has no valid dts"},

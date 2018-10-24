@@ -85,9 +85,6 @@ public: /* APIs */
         for (; it != m_recipients.end(); it++)
             if (it->second.get() == r.get())
                 break;
-        LOG(INFO) << m_logtag << "with size " << m_recipients.size() << " --> erase " << r->getLogtag()
-                  << " with ref count " << r.use_count() << "; found ? "
-                  << ((it != m_recipients.end()) ? "yes" : "no");
         if (it != m_recipients.end())
             m_recipients.erase(it);
         return 0;
@@ -139,7 +136,8 @@ public: /* Transmitor load and unload its load */
     int welcome(const shared_ptr<Load> & in) {
         std::lock_guard<std::mutex> guard(m_mutex);
         m_loads.push_back(in);
-        m_receiveCounts.at(in->getAddress()) += 1;
+        const auto & from = in->getAddress();
+        m_receiveCounts.at(from) += 1;
         m_expectCV.notify_one();
         return 0;
     }
@@ -156,10 +154,8 @@ public: /* Transmitor load and unload its load */
     }
     int broadcast(const shared_ptr<Load> & out) {
         std::lock_guard<std::mutex> guard(m_mutex);
-        for (auto & m : m_recipients) {
-            out->setAddress(m.first);
+        for (auto & m : m_recipients)
             m.second->welcome(out);
-        }
         return 0;
     }
     int farwell(const shared_ptr<Load> & in) {

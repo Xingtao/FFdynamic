@@ -26,19 +26,12 @@ using namespace ff_dynamic;
 
 int main(int argc, char **argv) {
     testInit(argv[0]);
-
-    string inUrl1 = "../test.ts";
-    string inUrl2 = "../sd.flv"; //"../sd2.mp4";
-    if (argc >= 2) {
-        int theTestType = std::stoi(argv[1]);
-        if (theTestType == 1) {
-            inUrl1 = "rtmp://live.hkstv.hk.lxdns.com/live/hks"; // 480x288 sar,16:15
-            inUrl2 = "rtmp://202.69.69.180:443/webcast/bshdlive-pc"; // 1027x576 sar,1:1
-        } else if (theTestType == 2) {
-            // inUrl2 = "rtmp://live.hkstv.hk.lxdns.com/live/hks"; // 480x288 sar,16:15
-            inUrl2 = "rtmp://202.69.69.180:443/webcast/bshdlive-pc"; // 1027x576 sar,1:1
-        }
+    if (argc != 3) {
+        LOG(ERROR) << "Usage: mixTest url1 url2";
+        return -1;
     }
+    string inUrl1(argv[1]);
+    string inUrl2(argv[2]);
     LOG(INFO) << "starting test: " << inUrl1 << " & " << inUrl2;
 
     // 1. create demux and get stream info
@@ -91,7 +84,8 @@ int main(int argc, char **argv) {
                                                DavDefaultInputStreamletTag("input2"), input2Option);
     CHECK(streamletInput2 != nullptr);
     mixOption.setInt(DavOptionBufLimitNum(), 25);
-    auto streamletMix = mixBuilder.build({videoMixOption, audioMixOption}, DavMixStreamletTag("mix"), mixOption);
+    auto streamletMix = mixBuilder.build({videoMixOption, audioMixOption},
+                                         DavMixStreamletTag("mix"), mixOption);
     CHECK(streamletMix != nullptr);
     auto streamletOutput = outputBuilder.build({videoEncodeOption, audioEncodeOption, muxOption1, muxOption2},
                                                DavDefaultOutputStreamletTag("output1"));

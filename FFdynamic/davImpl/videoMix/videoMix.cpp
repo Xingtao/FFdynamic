@@ -104,10 +104,10 @@ int VideoMix::onConstruct() {
         return ret;
 
     /* output */
-    m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, DavImplTravel::TravelStatic()));
-    auto & out = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
-    out.setupVideoStatic(m_pixfmt, m_width, m_height, s_timebase, m_framerate, s_sar, nullptr);
-    m_outputMediaMap.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO));
+    auto out = make_shared<DavTravelStatic>();
+    out->setupVideoStatic(m_pixfmt, m_width, m_height, s_timebase, m_framerate, s_sar, nullptr);
+    m_outputMediaMap.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO);
+    m_outputTravelStatic.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out);
 
     /* register event: setLayout */
     std::function<int (const DavDynaEventVideoMixLayoutUpdate &)> f =
@@ -146,7 +146,6 @@ int VideoMix::onProcess(DavProcCtx & ctx) {
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
     if (!ctx.m_inBuf)
         return 0;
-
     int ret = 0;
     const DavProcFrom & from = ctx.m_inBuf->getAddress();
     if (m_cellMixer.isNewcomer(from)) {
@@ -177,10 +176,13 @@ int VideoMix::onProcess(DavProcCtx & ctx) {
 
     vector<AVFrame *> outFrames;
     m_cellMixer.receiveFrames(outFrames, ctx.m_pubEvents);
+    for (auto & e : ctx.m_pubEvents) {
+        e->getAddress().setFromStreamIndex(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+    }
     for (auto & f : outFrames) {
         auto outBuf = make_shared<DavProcBuf>();
         outBuf->mkAVFrame(f);
-        outBuf->m_travel.m_static = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+        outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
         ctx.m_outBufs.push_back(outBuf);
         m_outputCount++;
         if (m_outputCount == 1) {

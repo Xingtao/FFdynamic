@@ -78,7 +78,7 @@ int DavProc::preProcess(shared_ptr<DavProcBuf> & inBuf) {
             }
         }
         /* get input data */
-        bGet = m_dataTransmitor->expect(inBuf, m_expectInput, (int)EUSleepTime::e5ms);
+        bGet = m_dataTransmitor->expect(inBuf, m_expectInput, (int)ETimeUs::e5ms);
     } while(!bGet);
     return 0;
 }
@@ -104,21 +104,22 @@ int DavProc::postProcess(DavProcCtx & ctx) {
     m_expectInput = ctx.m_expect; /* next process expected input */
 
     /* post process for event */
-    for (const auto & e : ctx.m_pubEvents)
+    for (const auto & e : ctx.m_pubEvents) {
+        /* impl only know event's streamIndex, so we fill other fields here */
+        e->getAddress().setGroupFrom(this, m_groupId);
         m_pubsubTransmitor->broadcast(e);
+    }
 
     /* post process for output */
     for (auto & buf : ctx.m_outBufs) {
-        buf->setGroupFrom(m_groupId, this);
+        buf->getAddress().setGroupFrom(this, m_groupId);
         for (int k=0; k < ctx.m_outputTimes; k++) {
             m_dataTransmitor->delivery(buf);
         }
     }
     /* limit output buf number if needed.
        TODO: if stop at this point, may block here; should use timeout wait */
-    //do {
     m_outbufLimiter->limit(ctx.m_outBufs); /* with 100ms timeout */
-    //} while(m_bAlive);
     return 0;
 }
 
@@ -139,11 +140,11 @@ int DavProc::runDavProcThread() {
             std::unique_lock<mutex> lock(m_runLock);
             m_runCondVar.wait(lock, [this](){return (this->m_bOnFire ? true : false);});
             getProcessStartTime();
-            //if (inBuf && !m_dataTransmitor->isSenderStillValid(inBuf->getAddress())) {
-            //    m_dataTransmitor->farwell(inBuf);
-            //    continue; /* external event process may delete input peer */
-            //}
-            //else
+            /*
+            if (inBuf && !m_dataTransmitor->isSenderStillValid(inBuf->getAddress())) {
+                m_dataTransmitor->farwell(inBuf);
+                continue; // external event process may delete input peer
+            } */
             ctx.m_inBuf = inBuf;
             ret = process(ctx);
             getProcessEndTime();
@@ -168,7 +169,7 @@ int DavProc::runDavProcThread() {
 
     /* broadcast EOF to downstream peers */
     DavProcFrom flushFrom(this, m_groupId, DavProcFrom::s_flushIndex);
-    shared_ptr<DavProcBuf> flushBuf(new DavProcBuf());
+    auto flushBuf = make_shared<DavProcBuf>();
     flushBuf->setAddress(flushFrom);
     m_dataTransmitor->broadcast(flushBuf);
 
@@ -196,7 +197,8 @@ int DavProc::start() noexcept {
     m_state = EDavState::eStart;
     m_bAlive = true;
     m_bOnFire = true;
-    // TODO: may use future - async
+
+    /* TODO: may use future - async */
     m_processThread.reset(new std::thread(&DavProc::runDavProcThread, this));
     if (!m_processThread) {
         m_bAlive = false;

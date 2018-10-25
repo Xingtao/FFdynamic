@@ -23,12 +23,12 @@ install:
         git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
         git submodule update --init --recursive
         ./autogen.sh
-        ./configure CXXFLAGS=-Wno-unused-variable && make && make check && make install
-        ldconfig
+        ./configure CXXFLAGS=-Wno-unused-variable && make && make check && sudo make install
+        sudo ldconfig
     else
-        rvm install ruby-2.3.3
-        rvm --default use 2.3.3
-        brew install cmake glog gflags protobuf
+        rvm install ruby-2.3.3;
+        rvm --default use 2.3.3;
+        brew install cmake glog gflags protobuf;
     fi
 
 script:

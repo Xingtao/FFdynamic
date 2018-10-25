@@ -1,31 +1,34 @@
 matrix:
   include:
-    - compiler: gcc
+    - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-      env: COMPILER=g++-5
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
-          packages:
-            - clang-3.7
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+
+    - os: osx
+      osx_image: xcode8
       env: COMPILER=clang++-3.7
 
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev
+cache:
+  directories:
+    - ~/protobuf3
 
-  - DIR=$(mktemp -d) && cd ${DIR}
-  - git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
-  - git submodule update --init --recursive
-  - ./autogen.sh && ./configure && make && make check && sudo make install && sudo ldconfig
+before_install:
+  - if [ $TRAVIS_OS_NAME = linux ]; then
+        sudo apt-get update -qq
+        sudo apt-get install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev
+        mkdir -p ~/protobuf3 && cd ~/protobuf3
+        git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
+        git submodule update --init --recursive
+        ./autogen.sh && ./configure && make && make check && sudo make install && sudo ldconfig
+    else
+        brew install cmake glog gflags protobuf boost
+    fi
 
 script:
-  - cd app/interactiveLive && ./build.sh
+  - cd apps/interactiveLive && ./build.sh

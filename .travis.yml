@@ -19,10 +19,12 @@ install:
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
         sudo apt-get update -qq
         sudo apt-get install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev
-        (mkdir -p ~/protobuf3 && cd ~/protobuf3)
-        (git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf)
+        DIR=$(mktemp -d) && cd ${DIR}
+        git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
         git submodule update --init --recursive
-        ./autogen.sh && ./configure && make && make check && sudo make install && sudo ldconfig
+        ./autogen.sh
+        ./configure CXXFLAGS=-Wno-unused-variable && make && make check && make install
+        ldconfig
     else
         rvm install ruby-2.3.3
         rvm --default use 2.3.3
@@ -30,4 +32,5 @@ install:
     fi
 
 script:
-  - (cd apps/interactiveLive && ./build.sh)
+  - cd apps/interactiveLive
+  - ./build.sh

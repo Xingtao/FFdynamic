@@ -30,7 +30,7 @@ before_install:
     else
         rvm install ruby-2.3.3
         rvm --default use 2.3.3
-        brew install cmake glog gflags protobuf boost
+        brew install cmake glog gflags protobuf
     fi
 
 script:

@@ -14,13 +14,13 @@ matrix:
       osx_image: xcode8
       env: COMPILER=clang++-3.7
 
-before_install:
+install:
   - |
     if [ $TRAVIS_OS_NAME = linux ]; then
         sudo apt-get update -qq
         sudo apt-get install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev
-        mkdir -p ~/protobuf3 && cd ~/protobuf3
-        git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
+        (mkdir -p ~/protobuf3 && cd ~/protobuf3)
+        (git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf)
         git submodule update --init --recursive
         ./autogen.sh && ./configure && make && make check && sudo make install && sudo ldconfig
     else
@@ -30,5 +30,4 @@ before_install:
     fi
 
 script:
-  - |
-    cd apps/interactiveLive && ./build.sh
+  - (cd apps/interactiveLive && ./build.sh)

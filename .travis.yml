@@ -14,10 +14,6 @@ matrix:
       osx_image: xcode8
       env: COMPILER=clang++-3.7
 
-cache:
-  directories:
-    - ~/protobuf3
-
 before_install:
   - |
     if [ $TRAVIS_OS_NAME = linux ]; then
@@ -34,4 +30,5 @@ before_install:
     fi
 
 script:
-  - cd apps/interactiveLive && ./build.sh
+  - |
+    cd apps/interactiveLive && ./build.sh

@@ -17,7 +17,7 @@ This project shipped with two parts: **FFdynamic** library, and **_Interactive L
 ## `An application *Interactive Live*`
 
 Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and shows how to use this library to develop complicated program.    
-Ial does video and audio mixing, then streams it out. It could be run in phones or cloud servers.
+Ial does video and audio mixing, then streams it out. It could be run in phones or cloud servers.  
 Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream.
 
 #### **Interactive live scenario**
@@ -25,15 +25,15 @@ Here is an image got from an mobile app show its using scenario. Two streams are
 
 **Interactive Live** give more flexiable control over the mixing process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
 
-#### **Layout auto change or set to certain pattern during mixing broadcast by request**
+#### *Layout auto change or set to certain pattern during mixing broadcast by request*
+This picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
 ![Layout auto change or set as request](asset/layoutChange.gif)
 
-The above picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
 
-#### **Backgroud dynamically change during mixing broadcast by request**
+#### *Backgroud dynamically change during mixing broadcast by request*
+This picture shows backgroud picture changed by a request (the text 'FFdynamic' in backgroud changes font and size)
+
 ![Backgroud dynamically change via request](asset/backgroudChange.gif)
-
-The above picture shows backgroud picture changed by a request (the text 'FFdynami' in backgroud changes font and size) 
 
 Both changes are quite smooth, without any frozen or stuck.
 

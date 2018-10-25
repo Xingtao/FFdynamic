@@ -23,7 +23,6 @@ find_package(FFdynamic REQUIRED)
 add_executable(yoloROI yoloROI/yoloROI.cpp moduleCLI/cliYoloROI.cpp cliCommon.cpp)
 add_executable(focusFaceEncode faceDetect/faceDetect.cpp moduleCLI/focusFaceEncode.cpp cliCommon.cpp)
 
-
 set(bins focusFaceEncode yoloROI)
 
 target_include_directories(yoloROI

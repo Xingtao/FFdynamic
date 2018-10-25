@@ -13,21 +13,19 @@ struct DavWaveClassFaceDetect : public DavWaveClassCategory {
         DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "FaceDetect") {}
 };
 
-/* define dehaze options to illustrate how to use option passing */
-struct DavOptionFaceDetectFogFactor : public DavOption {
-    DavOptionFaceDetectFogFactor() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(double)), "FaceDetectFogFactor") {}
-};
+/* already exist one
+struct DavTravelROI : DavTravelDynamic {
+    virtual const DavTravelROI & getSelf() const {return *this;}
+    struct ROI {
+        int x = 0;
+        int y = 0;
+        int w = 0;
+        int h = 0;
+        string roiTag;
+    };
+    vector<ROI> rois;
+}; */
 
-/* define an event to illustrate how to use dynamic event */
-struct FogFactorChangeEvent {
-    double m_newFogFactor = 0.1;
-};
-
-/* dehaze component may have diffrent implementation;
-   so we would also register impl later, refer to register part at bottom of ffdynaDehazor.cpp's file */
-
-/* here is one implementation called, FaceDetect */
 class FaceDetect : public DavImpl {
 public:
     FaceDetect(const DavWaveOption & options) : DavImpl(options) {
@@ -44,9 +42,6 @@ private: /* Interface we should implement */
     virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
     /* if no travel dynamic needed, leave it empty */
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
-
-private:
-    int processFogFactorUpdate(const FogFactorChangeEvent & e);
 
 private:
     unique_ptr<Dehazor> m_dehazor;

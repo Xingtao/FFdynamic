@@ -6,7 +6,7 @@ namespace ff_dynamic {
 ////////////////////////////////////
 //  [initialization]
 
-int YoloROI::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
+int FaceDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     CHECK(m_inputTravelStatic.size() == ctx.m_froms.size() && ctx.m_froms.size() == 1);
     DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(ctx.m_froms[0]);
     if (!in.m_codecpar && (in.m_pixfmt == AV_PIX_FMT_NONE)) {
@@ -40,7 +40,7 @@ int YoloROI::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
 
 ////////////////////////////////////
 //  [event process]
-int YoloROI::processFogFactorUpdate(const FogFactorChangeEvent & e) {
+int FaceDetect::processFogFactorUpdate(const FogFactorChangeEvent & e) {
     /* event process is in the same thread with data process thread, so no lock need here */
     if (m_dehazor)
         m_dehazor->setFogFactor(e.m_newFogFactor);
@@ -48,10 +48,10 @@ int YoloROI::processFogFactorUpdate(const FogFactorChangeEvent & e) {
 }
 ////////////////////////////////////
 //  [construct - destruct - process]
-int YoloROI::onConstruct() {
+int FaceDetect::onConstruct() {
     /* construct phrase could do nothing, and put all iniitialization work in onDynamicallyInitializeViaTravelStatic,
        for some implementations rely on input peer's parameters to do the iniitialization */
-    LOG(INFO) << m_logtag << "will open YoloROI after first frame " << m_options.dump();
+    LOG(INFO) << m_logtag << "will open FaceDetect after first frame " << m_options.dump();
 
     /* register events: also could put this one in dynamicallyInit part.
        Let's say we require dynamically change some dehaze's parameters, 'FogFactor':
@@ -66,7 +66,7 @@ int YoloROI::onConstruct() {
     return 0;
 }
 
-int YoloROI::onDestruct() {
+int FaceDetect::onDestruct() {
     if (m_dehazor) {
         m_dehazor.reset();
     }
@@ -75,7 +75,7 @@ int YoloROI::onDestruct() {
 }
 
 /* here is the data process */
-int YoloROI::onProcess(DavProcCtx & ctx) {
+int FaceDetect::onProcess(DavProcCtx & ctx) {
     /* for most of the cases, the process just wants one input data to process;
        few compplicate implementations may require data from certain peer, then can setup this one */
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
@@ -139,23 +139,10 @@ int YoloROI::onProcess(DavProcCtx & ctx) {
 }
 
 ///////////////////////////////////////
-// [Register - auto, dehaze]: this will create YoloROI instance for dehaze
-DavImplRegister g_dehazeReg(DavWaveClassDehaze(), vector<string>({"auto", "dehaze"}),
+// [Register - auto, faceDetect]: this will create FaceDetect instance
+DavImplRegister g_dehazeReg(DavWaveClassDehaze(), vector<string>({"auto", "faceDetect"}),
                             [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                unique_ptr<YoloROI> p(new YoloROI(options));
+                                unique_ptr<FaceDetect> p(new FaceDetect(options));
                                 return p;
                             });
-
-/* Register Explaination */
-/* If we have another dehaze implementation, let's say DehazorImpl2, we could register it as:
-DavImplRegister g_regDehazeP2(DavWaveClassVideoDehaze(), vector<string>({"dehazeImpl2"}),
-                             [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                 unique_ptr<DehazorImpl2> p(new DehazorImpl2(options));
-                                 return p;
-                             });
-   And, we could select them by set options:
-       options..setDavWaveCategory((DavWaveClassDehaze()));
-       options.set(EDavWaveOption::eImplType, "dehazeImpl2");
-  */
-
 } // namespace ff_dynamic

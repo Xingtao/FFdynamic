@@ -2,20 +2,20 @@
 
 #include "ffmpegHeaders.h"
 #include "davImpl.h"
-#include "scaleFilter.h"
+#include "x264.h"
 
 namespace ff_dynamic {
 
-class FFmpegVideoEncode : public DavImpl {
+class X264Encode : public DavImpl {
 public:
-    FFmpegVideoEncode(const DavWaveOption & options) : DavImpl(options) {
+    X264Encode(const DavWaveOption & options) : DavImpl(options) {
         implDefaultInstantiate();
     }
-    virtual ~FFmpegVideoEncode() {onDestruct();}
+    virtual ~X264Encode() {onDestruct();}
 
 private: /* data process */
-    FFmpegVideoEncode(const FFmpegVideoEncode &) = delete;
-    FFmpegVideoEncode & operator= (const FFmpegVideoEncode &) = delete;
+    X264Encode(const X264Encode &) = delete;
+    X264Encode & operator= (const X264Encode &) = delete;
     virtual int onConstruct();
     virtual int onDestruct();
     virtual int onProcess(DavProcCtx & ctx);
@@ -26,7 +26,6 @@ private: /* data process */
     int receiveEncodeFrames(DavProcCtx & ctx);
 
 private: /* event process */
-    // int keyFrameRequest(const DavEvent & event);
 
 private:
     AVCodecContext *m_encCtx = nullptr;

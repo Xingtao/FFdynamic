@@ -28,6 +28,8 @@ before_install:
         git submodule update --init --recursive
         ./autogen.sh && ./configure && make && make check && sudo make install && sudo ldconfig
     else
+        rvm install ruby-2.3.3
+        rvm --default use 2.3.3
         brew install cmake glog gflags protobuf boost
     fi
 

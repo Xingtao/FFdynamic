@@ -39,7 +39,13 @@ install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
         sudo apt update
-        sudo apt install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev ffmpeg
+        sudo apt install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev
+        # ffmpeg
+        DIR_FFMPEG=$(mktemp -d) && cd ${DIR_FFMPEG}
+        curl -sLO https://ffmpeg.org/releases/ffmpeg-4.0.2.tar.bz2
+        tar -jx --strip-components=1 -f ffmpeg-4.0.2.tar.bz2
+        ./configure --enable-nonfree --enable-gpl --disable-debug --disable-doc --enable-version3 --enable-shared --enable-postproc && make && sudo make install
+        # protobuf
         DIR=$(mktemp -d) && cd ${DIR}
         git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
         git submodule update --init --recursive

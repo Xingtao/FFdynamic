@@ -39,6 +39,8 @@ extern bool operator==(const DavProcFrom & l, const DavProcFrom & r);
 extern std::ostream & operator<<(std::ostream & os, const DavProcFrom & f);
 
 struct DavProcBuf {
+    DavProcBuf() = default;
+    virtual ~DavProcBuf();
     inline bool isEmptyData() const noexcept {return !m_pkt && !m_frame;}
     /* this is awkward, it should have been captured by class dependency.
        may asbstract DavProcBuf in future to avoid this 'getAddress' */

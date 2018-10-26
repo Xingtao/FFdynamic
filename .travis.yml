@@ -1,3 +1,8 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+
 matrix:
   include:
     - os: linux
@@ -10,6 +15,42 @@ matrix:
       env:
          - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
 
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+    # osx: gcc is alias for clang
+    - os: osx
+      osx_image: xcode8
+      env:
+        - MATRIX_EVAL="brew install gcc5 && CC=gcc-5 && CXX=g++-5"
+
+    - os: osx
+      osx_image: xcode8
+      env:
+        - MATRIX_EVAL="brew install gcc6 && CC=gcc-6 && CXX=g++-6"
+
+    - os: osx
+      osx_image: xcode8
+      env:
+        - MATRIX_EVAL="brew install gcc && CC=gcc-7 && CXX=g++-7"
+
 before_install:
     - eval "${MATRIX_EVAL}"
 
@@ -17,7 +58,7 @@ install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
         sudo apt-get update -qq
-        sudo apt-get install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev
+        sudo apt-get install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev ffmpeg
         DIR=$(mktemp -d) && cd ${DIR}
         git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
         git submodule update --init --recursive
@@ -25,9 +66,9 @@ install:
         ./configure CXXFLAGS=-Wno-unused-variable && make && make check && sudo make install
         sudo ldconfig
     else
-        rvm install ruby-2.3.3;
-        rvm --default use 2.3.3;
-        brew install cmake glog gflags protobuf;
+        rvm install ruby-2.3.3
+        rvm --default use 2.3.3
+        brew install cmake glog gflags protobuf ffmpeg
     fi
 
 before_script:

@@ -68,7 +68,9 @@ install:
     else
         rvm install ruby-2.3.3
         rvm --default use 2.3.3
-        brew install cmake glog gflags protobuf ffmpeg
+        brew update
+        brew install cmake glog gflags protobuf
+        brew install ffmpeg --with-gpl --with-version3 --with-nonfree --with-libfaac --with-libfdk-aac --with-libfreetype --with-libmp3lame --with-openssl --with-libspeex --with-libx264 --with-libx265
     fi
 
 before_script:

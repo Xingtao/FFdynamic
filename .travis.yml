@@ -30,6 +30,8 @@ install:
         brew install cmake glog gflags protobuf;
     fi
 
-before_script: apps/interactiveLive
+before_script: cd apps/interactiveLive
 
-script: ./build.sh
+script:
+  - echo $PWD && echo $TRAVIS_BUILD_DIR
+  - ./build.sh

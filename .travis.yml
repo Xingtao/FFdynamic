@@ -39,7 +39,7 @@ install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
         sudo apt update
-        sudo apt install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev
+        sudo apt install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev yasm nasm
         # ffmpeg
         DIR_FFMPEG=$(mktemp -d) && cd ${DIR_FFMPEG}
         curl -sLO https://ffmpeg.org/releases/ffmpeg-4.0.2.tar.bz2

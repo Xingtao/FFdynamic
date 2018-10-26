@@ -30,6 +30,6 @@ install:
         brew install cmake glog gflags protobuf;
     fi
 
-script:
-  - cd apps/interactiveLive
-  - ./build.sh
+before_script: apps/interactiveLive
+
+script: ./build.sh

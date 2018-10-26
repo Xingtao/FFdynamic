@@ -1,0 +1,69 @@
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+
+install:
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+        sudo apt update
+        sudo apt install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-all-dev yasm nasm
+        # ffmpeg
+        DIR_FFMPEG=$(mktemp -d) && cd ${DIR_FFMPEG}
+        curl -sLO https://ffmpeg.org/releases/ffmpeg-4.0.2.tar.bz2
+        tar -jx --strip-components=1 -f ffmpeg-4.0.2.tar.bz2
+        ./configure --enable-nonfree --enable-gpl --disable-debug --disable-doc --enable-version3 --enable-shared --enable-postproc && make && sudo make install
+        # protobuf
+        DIR=$(mktemp -d) && cd ${DIR}
+        git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
+        git submodule update --init --recursive
+        ./autogen.sh
+        ./configure CXXFLAGS=-Wno-unused-variable && make && make check && sudo make install
+        sudo ldconfig
+    else
+        rvm install ruby-2.3.3
+        rvm --default use 2.3.3
+        brew update
+        brew install cmake glog gflags protobuf
+        brew install ffmpeg --with-gpl --with-version3 --with-nonfree --with-libfaac --with-libfdk-aac --with-libfreetype --with-libmp3lame --with-openssl --with-libspeex --with-libx264 --with-libx265
+    fi
+
+before_script:
+  - echo $PWD && echo $TRAVIS_BUILD_DIR
+  - cd $TRAVIS_BUILD_DIR/apps/interactiveLive
+
+script:
+  - echo $PWD && echo $TRAVIS_BUILD_DIR
+  - ./build.sh

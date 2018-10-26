@@ -94,15 +94,15 @@ This is an example that we register an run time event, change 'FogFactor', send 
 Here is the test for our newly ceated 'dehaze' plugin, we make the test with the following pattern: mix dehazed and original video frame in one screen, then encode it as one file. This allows use see the original and dehazed video at the same time.
 
 ```
-Demux |-> Audio Decode -> |-> Audio Encode -----------------------------------------> |
-      |                                                                               | -> Muxer
-      |                   |-> Dehaze Filter -> |                                      |
-      |-> Video Decode -> |                    | Mix original and dehzed ->| Encode ->|
+Demux |-> Audio Decode -> |-> Audio Encode ------------------------------------------> |
+      |                                                                                | -> Muxer
+      |                   |-> Dehaze Filter -> |                                       |
+      |-> Video Decode -> |                    | Mix original and dehazed ->| Encode ->|
                           | -----------------> |
 ```
 
 The result is this (the dehaze effect is not good, but it is not the point).
-![dehazed mix image](../asset/dehze.gif)
+![dehazed mix image](../asset/dehaze.gif)
 
 
 You can refer to the source file [here](ffdynaDehazor.cpp). (NOTE: the dehazed algorightm itself (dehazor.cpp) is from github, but miss the link).

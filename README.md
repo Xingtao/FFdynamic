@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.org/Xingtao/FFdynamic.svg?branch=master)](https://travis-ci.org/Xingtao/FFdynamic)
+
 ### FFdynamic - Extending FFmpeg's power with video/audio process composition and run time control 
 
 This project shipped with two parts: **FFdynamic** library, and **_Interactive Live_** application build on **FFdynamic**
@@ -17,7 +19,7 @@ This project shipped with two parts: **FFdynamic** library, and **_Interactive L
 ## `An application *Interactive Live*`
 
 Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and shows how to use this library to develop complicated program.    
-Ial does video and audio mixing, then streams it out. It could be run in phones or cloud servers.
+Ial does video and audio mixing, then streams it out. It could be run in phones or cloud servers.  
 Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream.
 
 #### **Interactive live scenario**
@@ -25,15 +27,15 @@ Here is an image got from an mobile app show its using scenario. Two streams are
 
 **Interactive Live** give more flexiable control over the mixing process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
 
-#### **Layout auto change or set to certain pattern during mixing broadcast by request**
+#### *Layout auto change or set to certain pattern during mixing broadcast by request*
+This picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
 ![Layout auto change or set as request](asset/layoutChange.gif)
 
-The above picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
 
-#### **Backgroud dynamically change during mixing broadcast by request**
+#### *Backgroud dynamically change during mixing broadcast by request*
+This picture shows backgroud picture changed by a request (the text 'FFdynamic' in backgroud changes font and size)
+
 ![Backgroud dynamically change via request](asset/backgroudChange.gif)
-
-The above picture shows backgroud picture changed by a request (the text 'FFdynami' in backgroud changes font and size) 
 
 Both changes are quite smooth, without any frozen or stuck.
 
@@ -50,10 +52,10 @@ Both changes are quite smooth, without any frozen or stuck.
   For instance, if we are developing a dehaze algorithm and would like to know how good the dehazed algorithm visually (in compare to original one). FFdynamic provides facilities that allow one to easily realize following composition:
 
 ```
-Demux |-> Audio Decode -> |-> Audio Encode -----------------------------------------> |
-      |                                                                               | -> Muxer
-      |                   |-> Dehaze Filter -> |                                      |
-      |-> Video Decode -> |                    | Mix original and dehzed ->| Encode ->|
+Demux |-> Audio Decode -> |-> Audio Encode ------------------------------------------> |
+      |                                                                                | -> Muxer
+      |                   |-> Dehaze Filter -> |                                       |
+      |-> Video Decode -> |                    | Mix original and dehazed ->| Encode ->|
                           | -----------------> |
 ```
   As shown, after demux the input stream, we do video decode which will output to two components: 'Dehaze Filter' component and 'mix video' component; after dehaze, its image also output to 'mix video' component, in there we mix original and dehazed image into one. The whole example is [here](#write-a-plugin-component). 
@@ -228,7 +230,7 @@ As shown, if we have 5 outputs (which is normal in live broadcast field, output 
 
 Here we introduce how to write a plugin. We develop a dehaze algorithm and make it as a FFdynamic's component. Then we could compose it with other components freely. the following image shows the diagram we mentioned in the 'Overview' part, mix original and dehazed image together to check the result visually.
 
-![dehazed mix image](asset/dehze.gif)
+![dehazed mix image](asset/dehaze.gif)
 
 Refer to [here](examplePlugin/README.md) for plugin source files.
 

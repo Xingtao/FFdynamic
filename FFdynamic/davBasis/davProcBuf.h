@@ -39,7 +39,7 @@ extern bool operator==(const DavProcFrom & l, const DavProcFrom & r);
 extern std::ostream & operator<<(std::ostream & os, const DavProcFrom & f);
 
 struct DavProcBuf {
-    DavProcBuf() noexcept = default;
+    DavProcBuf() = default;
     virtual ~DavProcBuf();
     inline bool isEmptyData() const noexcept {return !m_pkt && !m_frame;}
     /* this is awkward, it should have been captured by class dependency.
@@ -104,6 +104,7 @@ private:
     shared_ptr<DavProcBufLimiter> m_limiter;
     friend std::ostream & operator<<(std::ostream &, const DavProcBuf &);
 };
+
 extern std::ostream & operator<<(std::ostream &, const DavProcBuf &);
 
 /* DavProcBufLimiter: when do output, check whether process limit needed. */

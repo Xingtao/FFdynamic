@@ -1,32 +1,26 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR
 
-project(interactive-live VERSION 1.0 LANGUAGES CXX)
-# require a c++14
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Dynamic Add/Delete Object Detectors with live streaming
+project(ObjDetectors VERSION 1.0 LANGUAGES CXX)
 
-get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-
+## Dependency Check
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-## find Boost::system
-find_package(FFdynamic OPTIONAL)
-if (TARGET ffdynamic::ffdynamic)
-  message("ffdynamic found -->")
-else(TARGET ffdynamic::ffdynamic)
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../FFdynamic ${CMAKE_CURRENT_BINARY_DIR}/FFdynamic)
-  if (TARGET ffdynamic::ffdynamic)
-    message("build ffdynamic inside ial service <--")
-  endif()
-endif()
-
+# opencv 3.4.0 or newer
+find_package(opencv 3.4.0 REQUIRED)
 ## find Boost::system
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(Glog REQUIRED)
+
+find_package(FFdynamic OPTIONAL)
+if (NOT TARGET ffdynamic::ffdynamic)
+  message("build ffdynamic inside dynaObjDetector service --> ")
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../FFdynamic ${CMAKE_CURRENT_BINARY_DIR}/FFdynamic)
+endif()
 
 ## find protobuf.
-## if 'FindProtobuf' is an old version, define the target protobuf::libprotobuf as imported
+# if 'FindProtobuf' is an old version, define the target protobuf::libprotobuf as imported
 find_package(Protobuf REQUIRED)
 if (NOT TARGET protobuf::libprotobuf)
   message("protobuf::libprotobuf not export as a target, make it manully. location: "
@@ -60,7 +54,6 @@ else(TARGET pbtree::pbtree)
   endif()
 endif()
 
-
 ## proto library
 if (NOT TARGET ffdynaProto::ffdynaProto)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../appCommon/protos ${CMAKE_CURRENT_BINARY_DIR}/protos)
@@ -71,9 +64,9 @@ else (NOT TARGET ffdynaProto::ffdynaProto)
   message("[find ffdynaProto::ffdynaProto target]")
 endif()
 
-#################################################################
-# ial service
-add_executable(ialService ialService.cpp ialHttpService.cpp ialMain.cpp)
+########################################################
+# Dynamic Add/Delete Object Detectors with live streaming
+add_executable(dynaObjDetector appService.cpp dynaDetectorHttpService.cpp dynaDetectorMain.cpp)
 target_include_directories(ialService
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../appCommon
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}

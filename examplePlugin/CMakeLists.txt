@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(dehaze VERSION 1.0 LANGUAGES CXX)
 
-# find opencv required by dehaze
-find_package(opencv REQUIRED)
+# opencv 3.4.0 or newer
+find_package(opencv 3.4.0 REQUIRED)
 
 ## find FFdynamic; set FFdynamic's cmake path (change it to your build)
 list(INSERT CMAKE_MODULE_PATH 0 /usr/local/FFdynamic/cmake)

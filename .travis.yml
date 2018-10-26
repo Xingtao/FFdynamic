@@ -1,7 +1,4 @@
 language: cpp
-compiler:
-  - clang
-  - gcc
 
 matrix:
   include:
@@ -41,8 +38,8 @@ before_install:
 install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-        sudo apt-get update -qq
-        sudo apt-get install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev ffmpeg
+        sudo apt update
+        sudo apt install -y libopencv-dev libgflags-dev libgoogle-glog-dev libboost-dev ffmpeg
         DIR=$(mktemp -d) && cd ${DIR}
         git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
         git submodule update --init --recursive

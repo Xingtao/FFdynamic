@@ -12,7 +12,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 ## find Boost::system
-find_package(FFdynamic OPTIONAL)
+find_package(FFdynamic)
 if (TARGET ffdynamic::ffdynamic)
   message("ffdynamic found -->")
 else(TARGET ffdynamic::ffdynamic)
@@ -73,15 +73,19 @@ endif()
 
 #################################################################
 # ial service
-add_executable(ialService ialService.cpp ialHttpService.cpp ialMain.cpp)
+add_executable(ialService ialMain.cpp ialService.cpp ../appCommon/appService.cpp)
+
 target_include_directories(ialService
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../appCommon
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
   )
+
 target_compile_features(ialService PUBLIC cxx_auto_type cxx_lambdas)
+
 target_compile_options(ialService
   PUBLIC $<$<CXX_COMPILER_ID:GNU>: -Wall -Wpedantic>
   PUBLIC $<$<CXX_COMPILER_ID:Clang>: -Wall -Wpedantic>)
+
 target_link_libraries(ialService
   PUBLIC ffdynamic::ffdynamic httputil::httputil pbtree::pbtree ffdynaProto::ffdynaProto protobuf::libprotobuf
   PUBLIC boost_system Threads::Threads)

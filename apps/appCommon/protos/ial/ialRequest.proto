@@ -112,9 +112,3 @@ message UpdateMixSetting {
     string output_setting_id = 1;
     DavStreamletSetting.MixStreamletSetting mix_setting = 2;
 }
-
-message CommonResponse {
-    int32 code = 1; /* error code, 0 means success, for others please refer to 'error code' part */
-    string msg = 2; /* detailed error message */
-    bool b_sync_resp = 3; /* sync or async response */
-}

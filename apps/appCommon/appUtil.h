@@ -14,13 +14,13 @@
 #include "davProcBuf.h"
 #include "ffmpegHeaders.h"
 
-namespace ial_service {
+namespace app_common {
 using ::std::string;
 using ::std::vector;
 using ::std::shared_ptr;
 namespace pb = google::protobuf;
 
-class IalUtil {
+class AppUtil {
 public:
     static int readFileContent(const string & filePath, string & content) {
         std::ifstream file(filePath);
@@ -45,4 +45,4 @@ public:
     }
 };
 
-} // namespace ial_service
+} // namespace app_common

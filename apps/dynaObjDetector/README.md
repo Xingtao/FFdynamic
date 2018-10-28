@@ -1,7 +1,7 @@
 ##  A play case - Change Object Detectors at run time with live streams
 ---------
 
-This project provides a play groud one can change object detector types at run time while reading live streams (also local files). Those detectors are opencv supported one, yolo, ssd, face detector, etc.. or your own ones, which needs write a plugin wrapper. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they find objects intereted.
+This project provides a play groud one can change object detector types at run time while reading live streams (also local files). Those detectors are opencv supported one, yolo, ssd, face detector, etc.. or your own ones, which needs write a plugin wrapper. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate objects intereted.
 
 ### Chnage detectors at run time
 
@@ -49,5 +49,30 @@ VideoStreamDemux |-> AudioDecode -> |-> AudioEncode ----------------------------
 
 Depends on OpenCV (3.4.0 or above), glog, protobuf3.
 
-For mac: 
+#### *For mac*
+Install FFmpeg as usal, then
+``` shell
+brew install cmake glog gflags protobuf boost 
+```
 
+#### *For Ubuntu*
+Install FFmpeg as usal, then  
+```
+apt install -y cmake libgflags-dev libgoogle-glog-dev libboost-all-dev
+```
+
+#### *For CentOS*
+Install FFmpeg as usal, then  
+``` shell
+yum install -y glog-devel gflags-devel cmake boost-devel
+```
+
+protobuf3 is not well supports by some linux distributions' package manager, here is a compile script (sudo required):
+```
+DIR=$(mktemp -d) && cd ${DIR} && \
+git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf && \
+git submodule update --init --recursive && \
+./autogen.sh && ./configure CXXFLAGS=-Wno-unused-variable && \
+make && make check && \
+sudo make install && sudo ldconfig
+```

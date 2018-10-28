@@ -7,7 +7,7 @@
 
 #include "globalSignalHandle.h"
 #include "httpClient.h"
-#include "ialHttpService.h"
+#include "ialService.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef COMPILE_TIME
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
     LOG(INFO) << s_logtag << "IalService with config file: " << configPath;
 
     /* start ial service */
-    IalHttpService & ialService = IalHttpService::getOnlyInstance();
+    IalService & ialService = IalService::getOnlyInstance();
     if (ialService.init(configPath) < 0) {
         LOG(ERROR) << s_logtag << "Failed create IalService: " << ialService.getErr();
         return -1;

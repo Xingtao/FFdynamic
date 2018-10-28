@@ -262,7 +262,7 @@ sudo make install && sudo ldconfig
 
 #### For Ubuntu
 Install FFmpeg as usal, then  
-apt install -y cmake libgflags-dev libgoogle-glog-dev libboost-dev
+apt install -y cmake libgflags-dev libgoogle-glog-dev libboost-all-dev
 
 #### For CentOS
 Install FFmpeg as usal, then  

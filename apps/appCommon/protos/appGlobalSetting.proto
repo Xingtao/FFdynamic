@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-message AppGlobalSetting {
+package AppGlobalSetting;
+
+message GlobalSetting {
     string http_server_addr = 1;
     int32 http_server_port = 2;
     int32 input_max_buf_num = 15; /* <= 0 means no limit */
@@ -11,4 +13,11 @@ message AppGlobalSetting {
     string ffmpeg_log_level = 22;
     /* output 'json' or 'pb' event log (for logstach); only json supported right now */
     string event_report_format = 23;
+}
+
+/* common http response */
+message CommonResponse {
+    int32 code = 1; /* error code, 0 means success, for others please refer to 'error code' part */
+    string msg = 2; /* detailed error message */
+    bool b_sync_resp = 3; /* sync or async response */
 }

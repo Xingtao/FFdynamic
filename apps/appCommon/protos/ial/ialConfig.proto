@@ -10,7 +10,7 @@ message IalGlobalSetting {
 }
 
 message IalTaskConfig {
-    AppGlobalSetting app_global_setting = 1;
+    AppGlobalSetting.GlobalSetting app_global_setting = 1;
     IalGlobalSetting ial_global_setting = 2;
     DavStreamletSetting.InputStreamletSetting input_setting = 10;
     DavStreamletSetting.MixStreamletSetting mix_setting = 11;

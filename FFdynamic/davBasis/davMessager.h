@@ -110,12 +110,12 @@ struct DavMessager : public std::exception {
     DavMessager(const int msgCode, const string & msgDetail = "") noexcept {
         setInfo(msgCode, msgDetail);
     }
-    inline virtual void setInfo(const int msgCode, const string & msgDetail = "") noexcept {
-        m_msgCode = msgCode;
-        m_msgDetail = davMsg2str(msgCode) + ", " + msgDetail;
+    inline virtual string msg2str(const int reportNum) {
+        return davMsg2str(reportNum);
     }
-    inline virtual const char* what() const throw() {
-        return m_msgDetail.c_str();
+    inline void setInfo(const int msgCode, const string & msgDetail = "") noexcept {
+        m_msgCode = msgCode;
+        m_msgDetail = msg2str(msgCode) + ", " + msgDetail;
     }
     inline bool hasErr() const noexcept {return m_msgCode < 0;}
     friend std::ostream & operator<<(std::ostream & os, const DavMessager & msg);

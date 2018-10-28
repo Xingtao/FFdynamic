@@ -110,6 +110,9 @@ protected:
             }
         }
         m_appGlobalSetting.CopyFrom(configPbObj.app_global_setting());
+        string appGlobalSetting;
+        PbTree::pbToJsonString(m_appGlobalSetting, appGlobalSetting);
+        LOG(INFO) << "AppGlobalSetting " << appGlobalSetting;
         m_httpIp = m_appGlobalSetting.http_server_addr();
         m_httpPort = (int16_t)m_appGlobalSetting.http_server_port();
         /* log setting */

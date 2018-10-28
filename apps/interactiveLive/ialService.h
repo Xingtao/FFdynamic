@@ -60,14 +60,14 @@ public:
         for (auto & o : m_ialConfig.output_settings())
             m_outputSettings.emplace(o.first, o.second);
          /* log parsed app config */
-        string globalSetting;
-        PbTree::pbToJsonString(m_appGlobalSetting, globalSetting);
+        string ialGlobalSetting;
+        PbTree::pbToJsonString(m_ialGlobalSetting, ialGlobalSetting);
         string inputSetting;
         PbTree::pbToJsonString(m_inputSetting, inputSetting);
         string mixSetting;
         PbTree::pbToJsonString(m_mixSetting, mixSetting);
         LOG(INFO) << m_logtag << "AppConfig - \n";
-        LOG(INFO) << globalSetting << "\n";
+        LOG(INFO) << ialGlobalSetting << "\n";
         LOG(INFO) << inputSetting << "\n";
         LOG(INFO) << mixSetting << "\n";
         for (const auto & o : m_outputSettings) {

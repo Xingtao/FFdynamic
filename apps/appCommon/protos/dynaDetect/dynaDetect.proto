@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "davStreamletSetting.proto";
+import "appGlobalSetting.proto";
+
+package DynaDetectConfig;
+
+message DynaDetectGlobalSetting {
+    int32 max_detectors = 5; /* max detectors run in parallel */
+}
+
+// message Dynamic
+
+message IalTaskConfig {
+    AppGlobalSetting.GlobalSetting app_global_setting = 1;
+    IalGlobalSetting dyna_detect_global_setting = 2;
+    DavStreamletSetting.InputStreamletSetting input_setting = 10;
+    DavStreamletSetting.OutputStreamletSetting output_setting = 11;
+
+}

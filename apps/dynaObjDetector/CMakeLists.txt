@@ -37,7 +37,7 @@ else (NOT TARGET protobuf::libprotobuf)
   message("target protobuf::libprotobuf found")
 endif()
 
-## use libraries from tools: httpUtil a& pbtree
+## use libraries from tools: httpUtil & pbtree
 if (TARGET httputil::httputil)
   message("[httputil found as imported target]")
 else(TARGET httputil::httputil)
@@ -68,15 +68,15 @@ endif()
 
 ########################################################
 # Dynamic Add/Delete Object Detectors with live streaming
-add_executable(dynaObjDetector appService.cpp dynaDetectorHttpService.cpp dynaDetectorMain.cpp)
+add_executable(dynaDetector appService.cpp dynaDetectorService.cpp dynaDetectorMain.cpp)
 target_include_directories(ialService
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../appCommon
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
   )
-target_compile_features(ialService PUBLIC cxx_auto_type cxx_lambdas)
-target_compile_options(ialService
+target_compile_features(dynaDetector PUBLIC cxx_auto_type cxx_lambdas)
+target_compile_options(dynaDetector
   PUBLIC $<$<CXX_COMPILER_ID:GNU>: -Wall -Wpedantic>
   PUBLIC $<$<CXX_COMPILER_ID:Clang>: -Wall -Wpedantic>)
-target_link_libraries(ialService
+target_link_libraries(dynaDetector
   PUBLIC ffdynamic::ffdynamic httputil::httputil pbtree::pbtree ffdynaProto::ffdynaProto protobuf::libprotobuf
   PUBLIC boost_system Threads::Threads)

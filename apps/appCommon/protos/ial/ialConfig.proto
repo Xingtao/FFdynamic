@@ -1,29 +1,19 @@
 syntax = "proto3";
 
 import "davStreamletSetting.proto";
+import "appGlobalSetting.proto";
 
 package IalConfig;
 
 message IalGlobalSetting {
-    string http_server_addr = 1;
-    int32 http_server_port = 2;
-
     int32 max_participants = 10; /* should less than 25 */
-    int32 input_max_buf_num = 15; /* <= 0 means no limit */
-    int32 mix_max_buf_num = 16;
-    int32 output_max_buf_num = 17;
-
-    string glog_save_level = 20;
-    string glog_save_path = 21;
-    string ffmpeg_log_level = 22;
-    /* output 'json' or 'pb' event log (for logstach); only json supported right now */
-    string event_report_format = 23;
 }
 
 message IalTaskConfig {
-    DavStreamletSetting.InputStreamletSetting input_setting = 1;
-    DavStreamletSetting.MixStreamletSetting mix_setting = 2;
+    AppGlobalSetting app_global_setting = 1;
+    IalGlobalSetting ial_global_setting = 2;
+    DavStreamletSetting.InputStreamletSetting input_setting = 10;
+    DavStreamletSetting.MixStreamletSetting mix_setting = 11;
     /* an unique tag associated with one set of output settting */
-    map<string, DavStreamletSetting.OutputStreamletSetting> output_settings = 3;
-    IalGlobalSetting global_setting = 4;
+    map<string, DavStreamletSetting.OutputStreamletSetting> output_settings = 12;
 }

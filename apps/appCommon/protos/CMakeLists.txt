@@ -27,6 +27,7 @@ set(ial_proto_dir ${CMAKE_CURRENT_SOURCE_DIR}/ial)
 set(ffdyna_origin_proto
   ${CMAKE_CURRENT_SOURCE_DIR}/davWaveSetting.proto
   ${CMAKE_CURRENT_SOURCE_DIR}/davStreamletSetting.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/appGlobalSetting.proto
   ${ial_proto_dir}/ialConfig.proto
   ${ial_proto_dir}/ialRequest.proto
   )

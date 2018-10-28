@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+message AppGlobalSetting {
+    string http_server_addr = 1;
+    int32 http_server_port = 2;
+    int32 input_max_buf_num = 15; /* <= 0 means no limit */
+    int32 mix_max_buf_num = 16;
+    int32 output_max_buf_num = 17;
+    string glog_save_level = 20;
+    string glog_save_path = 21;
+    string ffmpeg_log_level = 22;
+    /* output 'json' or 'pb' event log (for logstach); only json supported right now */
+    string event_report_format = 23;
+}

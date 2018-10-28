@@ -11,7 +11,7 @@ message DynaDetectGlobalSetting {
 
 // message Dynamic
 
-message IalTaskConfig {
+message DynaDetectTaskConfig {
     AppGlobalSetting.GlobalSetting app_global_setting = 1;
     IalGlobalSetting dyna_detect_global_setting = 2;
     DavStreamletSetting.InputStreamletSetting input_setting = 10;

@@ -28,7 +28,6 @@ using namespace ::google::protobuf;
 #define IAL_ERROR_MIX_LAYOUT_CHANGE        FFERRTAG('F', 'M', 'L', 'C')
 #define IAL_ERROR_MUTE_UNMUTE              FFERRTAG('F', 'M', 'U', 'U')
 #define IAL_ERROR_MIX_SET_BACKGROUD        FFERRTAG('S', 'M', 'B', 'G')
-#define IAL_ERROR_BUILD_STREAMLET          FFERRTAG('E', 'B', 'S', 'L')
 
 extern string ialServiceErr2Str(const int errNum);
 

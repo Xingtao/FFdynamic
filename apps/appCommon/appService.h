@@ -16,6 +16,9 @@
 #include "httpServer.h"
 #include "appUtil.h"
 #include "appGlobalSetting.pb.h"
+#include "davStreamlet.h"
+#include "davStreamletBuilder.h"
+#include "pbToDavOptionEvent.h"
 
 namespace app_common {
 using ::std::string;
@@ -34,6 +37,7 @@ using AppMsgCollector = DavMsgCollector;
 #define APP_ERROR_PARSE_REQUEST     FFERRTAG('F', 'P', 'R', 'Q')
 #define APP_ERROR_PROCESS_REQUEST   FFERRTAG('E', 'P', 'R', 'Q')
 #define APP_ERROR_HTTP_SETTING      FFERRTAG('E', 'H', 'T', 'S')
+#define APP_ERROR_BUILD_STREAMLET   FFERRTAG('E', 'B', 'S', 'L')
 
 extern string appServiceErr2Str(const int errNum);
 struct AppMessager : public DavMessager {
@@ -152,8 +156,10 @@ protected: /* provides few default streamlet builders */
     virtual int buildInputStreamlet(const string & inputUrl,
                                     const DavStreamletSetting::InputStreamletSetting & inputSetting);
     virtual int asyncBuildInputStreamlet(const string & inputUrl,
-                                         const DavStreamletSetting::InputStreamletSetting & inputSetting);
-    virtual int buildMixStreamlet(const string & mixStreamletId);
+                                         const DavStreamletSetting::InputStreamletSetting & inputSetting,
+                                         std::function<int(shared_ptr<DavStreamlet>)> onBuildSuccess);
+    virtual int buildMixStreamlet(const string & mixStreamletId,
+                                  const DavStreamletSetting::MixStreamletSetting & mixSetting);
     virtual int buildOutputStreamlet(const string & outputId,
                                      const DavStreamletSetting::OutputStreamletSetting & outStreamletSetting,
                                      const vector<string> & fullOutputUrls);

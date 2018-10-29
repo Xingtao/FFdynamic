@@ -1,6 +1,5 @@
 #include "davStreamlet.h"
 #include "davStreamletBuilder.h"
-
 #include "pbToDavOptionEvent.h"
 #include "ialRequest.pb.h"
 #include "ialService.h"
@@ -12,7 +11,6 @@ static const std::map<int, const char *> ialServiceErrorCode2StrMap = {
     {IAL_ERROR_EXCEED_MAX_JOINS,         "Inputs exceed max participants"},
     {IAL_ERROR_OUTPUT_ID_NOT_FOUND,      "Fail find output setting id"},
     {IAL_ERROR_OUTPUT_URL_NOT_FOUND,     "Fail get output full url"},
-    {IAL_ERROR_BUILD_STREAMLET,          "Fail build streamlet"},
     {IAL_ERROR_CREATE_ROOM,              "Create room fail"},
     {IAL_ERROR_PARTICIPANT_JOIN,         "Participant join fail"},
     {IAL_ERROR_PARTICIPANT_LEFT,         "Participant left fail"},
@@ -85,7 +83,7 @@ int IalService::onCreateRoom(shared_ptr<Response> & response, const IalRequest::
     }
 
     /* 2. build streamlet: sync build mix & output streamlet, aync build input streamlet */
-    ret = buildMixStreamlet(m_mixStreamletName);
+    ret = buildMixStreamlet(m_mixStreamletName, m_mixSetting);
     if (ret < 0) {
         m_river.clear();
         ERRORIT(IAL_ERROR_CREATE_ROOM,
@@ -104,8 +102,17 @@ int IalService::onCreateRoom(shared_ptr<Response> & response, const IalRequest::
     LOG(INFO) << m_logtag << "connect mix streamlet done. start async create input streamlet";
 
     /* 4. async build input streamlet with callback that connect to mix streamlet */
+    auto onBuildSuccess = [this] (shared_ptr<DavStreamlet> inputStreamlet) {
+        if (!inputStreamlet)
+            return AVERROR(EINVAL);
+        auto mixStreamlet = m_river.get(DavMixStreamletTag(m_mixStreamletName));
+        if (!mixStreamlet)
+            return AVERROR(EINVAL);
+        inputStreamlet >> mixStreamlet;
+        return inputStreamlet->start(); /*start just after connect */
+    };
     for (const auto & inputUrl : createRoom.input_urls())
-        asyncBuildInputStreamlet(inputUrl, m_inputSetting);
+        asyncBuildInputStreamlet(inputUrl, m_inputSetting, onBuildSuccess);
 
     /* 5. river start */
     m_river.start();
@@ -116,27 +123,6 @@ int IalService::onCreateRoom(shared_ptr<Response> & response, const IalRequest::
     response->write(m_successCRJsonStrAsync);
     LOG(INFO) << m_logtag << "craete new room with roomId: " << m_roomId << ", output base "
               << m_roomOutputBaseUrl;
-    return 0;
-}
-
-int IalService::asyncBuildInputStreamlet(const string & inputUrl,
-                                             const DavStreamletSetting::InputStreamletSetting & inputSetting) {
-    auto inSetting = make_shared<DavStreamletSetting::InputStreamletSetting>();
-    inSetting->CopyFrom(inputSetting); /* in case pass down inputSetting out of scope */
-    std::thread([this, inSetting, inputUrl]() {
-            auto fut = std::async(std::launch::async, [this, inSetting, inputUrl]() {
-                    return this->buildInputStreamlet(inputUrl, *inSetting);
-                });
-            fut.wait();
-            if (fut.get() >= 0) {
-                auto inputStreamlet = m_river.get(DavDefaultInputStreamletTag(inputUrl));
-                auto mixStreamlet = m_river.get(DavMixStreamletTag(m_mixStreamletName));
-                CHECK(inputStreamlet != nullptr && mixStreamlet != nullptr);
-                inputStreamlet >> mixStreamlet;
-                inputStreamlet->start(); /*start just after connect */
-            }
-            return;
-        }).detach();
     return 0;
 }
 
@@ -168,7 +154,16 @@ int IalService::onAddNewInputStream(shared_ptr<Response> & response,
     }
 
     const auto & inSetting = joinNew.has_specific_setting() ? joinNew.specific_setting() : m_inputSetting;
-    asyncBuildInputStreamlet(joinNew.input_url(), inSetting);
+    auto onBuildSuccess = [this] (shared_ptr<DavStreamlet> inputStreamlet) {
+        if (!inputStreamlet)
+            return AVERROR(EINVAL);
+        auto mixStreamlet = m_river.get(DavMixStreamletTag(m_mixStreamletName));
+        if (!mixStreamlet)
+            return AVERROR(EINVAL);
+        inputStreamlet >> mixStreamlet;
+        return inputStreamlet->start(); /*start just after connect */
+    };
+    asyncBuildInputStreamlet(joinNew.input_url(), inSetting, onBuildSuccess);
     response->write(m_successCRJsonStrAsync);
     return 0;
 }

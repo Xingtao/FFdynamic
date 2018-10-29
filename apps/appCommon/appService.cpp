@@ -14,7 +14,8 @@ static const std::map<int, const char *> appServiceErrorCode2StrMap = {
     {APP_ERROR_LOAD_CONFIG_FILE,         "Fail load configuration file"},
     {APP_ERROR_JSONSTR_TO_PBOBJ,         "Fail parse json string to pb object"},
     {APP_ERROR_PROCESS_REQUEST,          "Fail process incoming request"},
-    {APP_ERROR_HTTP_SETTING,             "Invalied https settings"}
+    {APP_ERROR_HTTP_SETTING,             "Invalied https settings"},
+    {APP_ERROR_BUILD_STREAMLET,          "Fail build streamlet"}
 };
 
 string appServiceErr2Str(const int errCode) {
@@ -183,66 +184,85 @@ int AppService::appMsgProtobufReport(const shared_ptr<AVDictionary> & msg) {
 //
 
 /////////////////////////////////////////
-// [Streamlet/Wave options build helpers]
+// [Default Streamlets build]
+int AppService::asyncBuildInputStreamlet(const string & inputUrl,
+                                         const DavStreamletSetting::InputStreamletSetting & inputSetting,
+                                         std::function<int(shared_ptr<DavStreamlet>)> onBuildSuccess) {
+    auto inSetting = make_shared<DavStreamletSetting::InputStreamletSetting>();
+    inSetting->CopyFrom(inputSetting); /* in case pass down inputSetting out of scope */
+    std::thread([this, onBuildSuccess, inSetting, inputUrl]() {
+            auto fut = std::async(std::launch::async, [this, inSetting, inputUrl]() {
+                    return this->buildInputStreamlet(inputUrl, *inSetting);
+                });
+            fut.wait();
+            if (fut.get() >= 0) {
+                auto inputStreamlet = m_river.get(DavDefaultInputStreamletTag(inputUrl));
+                onBuildSuccess(inputStreamlet);
+            }
+            return;
+        }).detach();
+    return 0;
+}
 
-int IalHttpService::buildInputStreamlet(const string & inputUrl,
-                                        const DavStreamletSetting::InputStreamletSetting & inputSetting) {
+int AppService::buildInputStreamlet(const string & inputUrl,
+                                    const DavStreamletSetting::InputStreamletSetting & inputSetting) {
     DavStreamletOption so;
-    so.set(DavOptionBufLimitNum(), std::to_string(m_ialGlobalSetting.input_max_buf_num()));
+    so.set(DavOptionBufLimitNum(), std::to_string(m_appGlobalSetting.input_max_buf_num()));
     vector<DavWaveOption> waveOptions;
     PbStreamletSettingToDavOption::mkInputStreamletWaveOptions(inputUrl, inputSetting, waveOptions);
     DavDefaultInputStreamletBuilder builder;
     auto streamletInput = builder.build(waveOptions, DavDefaultInputStreamletTag(inputUrl), so);
     if (!streamletInput) {
         /* work around, for we may in another thread */
-        IalMessager msg(IAL_ERROR_BUILD_STREAMLET, ("fail create input streamlet with id " + inputUrl + ", " +
+        AppMessager msg(APP_ERROR_BUILD_STREAMLET, ("fail create input streamlet with id " + inputUrl + ", " +
                                                     toStringViaOss(builder.m_buildInfo)));
-        s_ialMsgCollector.addMsg(msg);
+        s_appMsgCollector.addMsg(msg);
         LOG(ERROR) << m_logtag << msg;
 
-        // ERRORIT(IAL_ERROR_BUILD_STREAMLET, "input streamlet build fail with id: " + inputUrl);
-        return IAL_ERROR_BUILD_STREAMLET;
+        // ERRORIT(APP_ERROR_BUILD_STREAMLET, "input streamlet build fail with id: " + inputUrl);
+        return APP_ERROR_BUILD_STREAMLET;
     }
     m_river.add(streamletInput);
     LOG(INFO) << m_logtag << m_river.dumpRiver();
     return 0;
 }
 
-int IalHttpService::buildMixStreamlet(const string & mixStreamletName) {
+    int AppService::buildMixStreamlet(const string & mixStreamletName,
+                                      const DavStreamletSetting::MixStreamletSetting & mixSetting) {
     DavStreamletOption so;
-    so.set(DavOptionBufLimitNum(), std::to_string(m_ialGlobalSetting.mix_max_buf_num()));
+    so.set(DavOptionBufLimitNum(), std::to_string(m_appGlobalSetting.mix_max_buf_num()));
     vector<DavWaveOption> waveOptions;
     int ret = PbStreamletSettingToDavOption::
-        mkMixStreamletWaveOptions(mixStreamletName, m_mixSetting, waveOptions);
+        mkMixStreamletWaveOptions(mixStreamletName, mixSetting, waveOptions);
     if (ret < 0) {
-        ERRORIT(IAL_ERROR_BUILD_STREAMLET, "mix setting invalid");
-        return IAL_ERROR_BUILD_STREAMLET;
+        ERRORIT(APP_ERROR_BUILD_STREAMLET, "mix setting invalid");
+        return APP_ERROR_BUILD_STREAMLET;
     }
     DavMixStreamletBuilder builder;
     auto streamletMix = builder.build(waveOptions, DavMixStreamletTag(mixStreamletName), so);
     if (!streamletMix) {
-        ERRORIT(IAL_ERROR_BUILD_STREAMLET, ("mix streamlet build fail with id: " + mixStreamletName + ", " +
+        ERRORIT(APP_ERROR_BUILD_STREAMLET, ("mix streamlet build fail with id: " + mixStreamletName + ", " +
                                             toStringViaOss(builder.m_buildInfo)));
-        return IAL_ERROR_BUILD_STREAMLET;
+        return APP_ERROR_BUILD_STREAMLET;
     }
     m_river.add(streamletMix);
     return 0;
 }
 
-int IalHttpService::buildOutputStreamlet(const string & outputId,
-                                         const DavStreamletSetting::OutputStreamletSetting & outStreamletSetting,
-                                         const vector<string> & fullOutputUrls) {
+int AppService::buildOutputStreamlet(const string & outputId,
+                                     const DavStreamletSetting::OutputStreamletSetting & outStreamletSetting,
+                                     const vector<string> & fullOutputUrls) {
     DavStreamletOption so;
-    so.set(DavOptionBufLimitNum(), std::to_string(m_ialGlobalSetting.output_max_buf_num()));
+    so.set(DavOptionBufLimitNum(), std::to_string(m_appGlobalSetting.output_max_buf_num()));
     vector<DavWaveOption> waveOptions;
     PbStreamletSettingToDavOption::mkOutputStreamletWaveOptions(fullOutputUrls,
                                                                 outStreamletSetting, waveOptions);
     DavDefaultOutputStreamletBuilder builder;
     auto streamletOutput = builder.build(waveOptions, DavDefaultOutputStreamletTag(outputId), so);
     if (!streamletOutput) {
-        ERRORIT(IAL_ERROR_BUILD_STREAMLET, ("build output streamlet fail; with id " +
+        ERRORIT(APP_ERROR_BUILD_STREAMLET, ("build output streamlet fail; with id " +
                                             outputId + ", " + toStringViaOss(builder.m_buildInfo)));
-        return IAL_ERROR_BUILD_STREAMLET;
+        return APP_ERROR_BUILD_STREAMLET;
     }
     m_river.add(streamletOutput);
     return 0;

@@ -129,16 +129,6 @@ private: /* Dynamic Request Process Handlers */
     /* ial stop */
     int onIalStop(shared_ptr<Response> &, shared_ptr<Request> &);
 
-private: /* build streamlets */
-    int buildInputStreamlet(const string & inputUrl,
-                            const DavStreamletSetting::InputStreamletSetting & inputSetting);
-    int asyncBuildInputStreamlet(const string & inputUrl,
-                                 const DavStreamletSetting::InputStreamletSetting & inputSetting);
-    int buildMixStreamlet(const string & mixStreamletId);
-    int buildOutputStreamlet(const string & outputId,
-                             const DavStreamletSetting::OutputStreamletSetting & outStreamletSetting,
-                             const vector<string> & fullOutputUrls);
-
 private: /* trivial ones */
     int sanityCheckCreateRoomMsg(const IalRequest::CreateRoom & createRoom);
     vector<string> mkFullOutputUrl(const string & outputBaseUrl, const string & roomId, const string & outputId,

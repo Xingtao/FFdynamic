@@ -148,6 +148,15 @@ protected: /* http interface */
     string m_successCRJsonStr;
     string m_successCRJsonStrAsync;
 
+protected: /* provides few default streamlet builders */
+    virtual int buildInputStreamlet(const string & inputUrl,
+                                    const DavStreamletSetting::InputStreamletSetting & inputSetting);
+    virtual int asyncBuildInputStreamlet(const string & inputUrl,
+                                         const DavStreamletSetting::InputStreamletSetting & inputSetting);
+    virtual int buildMixStreamlet(const string & mixStreamletId);
+    virtual int buildOutputStreamlet(const string & outputId,
+                                     const DavStreamletSetting::OutputStreamletSetting & outStreamletSetting,
+                                     const vector<string> & fullOutputUrls);
 protected:
     AppGlobalSetting::GlobalSetting m_appGlobalSetting;
     DavRiver m_river; /* a set of all implementations */

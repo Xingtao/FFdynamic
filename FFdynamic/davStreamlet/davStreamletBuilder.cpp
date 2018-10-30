@@ -88,7 +88,7 @@ build(const vector<DavWaveOption> & waveOptions,
     for (auto & vf : videoFilters) {
         if (videoConnectCount > vfCount) {
             DavWave::connect(videoDecoders[vfCount].get(), vf.get());
-            streamlet->addOneVideoOutEntry(vf);
+            streamlet->addOneOutVideoRawEntry(vf);
             vfCount++;
         }
     }
@@ -96,23 +96,23 @@ build(const vector<DavWaveOption> & waveOptions,
     for (auto & af : audioFilters) {
         if (audioConnectCount > afCount) {
             DavWave::connect(audioDecoders[afCount].get(), af.get());
-            streamlet->addOneAudioOutEntry(af);
+            streamlet->addOneOutAudioRawEntry(af);
             afCount++;
         }
     }
     /* other decoders that not connected to a vf */
     for (int k=vfCount; videoConnectCount > k; k++)
-        streamlet->addOneVideoOutEntry(videoDecoders[k]);
+        streamlet->addOneOutVideoRawEntry(videoDecoders[k]);
     for (int k=vfCount; audioConnectCount > k; k++)
-        streamlet->addOneAudioOutEntry(audioDecoders[k]);
+        streamlet->addOneOutAudioRawEntry(audioDecoders[k]);
     return streamlet;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-shared_ptr<DavStreamlet> DavMixStreamletBuilder::
-build(const vector<DavWaveOption> & waveOptions,
-      const DavStreamletTag & streamletTag,
-      const DavStreamletOption & streamletOptions) {
+shared_ptr<DavStreamlet>
+DavMixStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
+                              const DavStreamletTag & streamletTag,
+                              const DavStreamletOption & streamletOptions) {
     auto streamlet = createStreamlet(waveOptions, streamletTag, streamletOptions);
     if (!streamlet)
         return streamlet;
@@ -127,9 +127,9 @@ build(const vector<DavWaveOption> & waveOptions,
     shared_ptr<DavWave> audioMix;
     if (audioMixes.size() > 0)
         audioMix = audioMixes[0];
-    streamlet->addOneVideoInEntry(videoMix);
+    streamlet->addOneInVideoRawEntry(videoMix);
     if (audioMix)
-        streamlet->addOneAudioInEntry(audioMix);
+        streamlet->addOneInAudioRawEntry(audioMix);
 
     auto videoFilters = streamlet->getWavesByCategory(DavWaveClassVideoFilter());
     auto audioFilters = streamlet->getWavesByCategory(DavWaveClassAudioFilter());
@@ -138,17 +138,17 @@ build(const vector<DavWaveOption> & waveOptions,
 
     if (videoFilters.size()) {
         DavWave::connect(videoMix.get(), videoFilters[0].get());
-        streamlet->addOneVideoOutEntry(videoFilters[0]);
+        streamlet->addOneOutVideoRawEntry(videoFilters[0]);
      } else {
-        streamlet->addOneVideoOutEntry(videoMix);
+        streamlet->addOneOutVideoRawEntry(videoMix);
     }
 
     if (audioMix) {
         if (audioFilters.size()) {
             DavWave::connect(audioMix.get(), audioFilters[0].get());
-            streamlet->addOneAudioOutEntry(audioFilters[0]);
+            streamlet->addOneOutAudioRawEntry(audioFilters[0]);
         } else {
-            streamlet->addOneAudioOutEntry(audioMix);
+            streamlet->addOneOutAudioRawEntry(audioMix);
         }
         // peer event subscribe: audio mix subscribe video mix
         DavWave::subscribe(videoMix.get(), audioMix.get());
@@ -157,10 +157,10 @@ build(const vector<DavWaveOption> & waveOptions,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-shared_ptr<DavStreamlet> DavDefaultOutputStreamletBuilder::
-build(const vector<DavWaveOption> & waveOptions,
-      const DavStreamletTag & streamletTag,
-      const DavStreamletOption & streamletOptions) {
+shared_ptr<DavStreamlet>
+DavDefaultOutputStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
+                                        const DavStreamletTag & streamletTag,
+                                        const DavStreamletOption & streamletOptions) {
     auto streamlet = createStreamlet(waveOptions, streamletTag, streamletOptions);
     if (!streamlet)
         return streamlet;
@@ -181,16 +181,17 @@ build(const vector<DavWaveOption> & waveOptions,
     CHECK(muxers.size() > 0) << m_logtag << "output streamlet at least has one muxer";
 
     if (preVideoFilters.size()) {
-        streamlet->addOneVideoInEntry(preVideoFilters[0]);
+        streamlet->addOneInVideoRawEntry(preVideoFilters[0]);
         DavWave::connect(preVideoFilters[0].get(), videoEncode.get());
     } else {
-        streamlet->addOneVideoInEntry(videoEncode);
+        streamlet->addOneInVideoRawEntry(videoEncode);
     }
+
     if (audioEncodes.size() > 0 && preAudioFilters.size() > 0) {
-        streamlet->addOneAudioInEntry(preAudioFilters[0]);
+        streamlet->addOneInAudioRawEntry(preAudioFilters[0]);
         DavWave::connect(preAudioFilters[0].get(), audioEncodes[0].get());
-    } else if (audioEncodes.size() > 0){
-        streamlet->addOneAudioInEntry(audioEncodes[0]);
+    } else if (audioEncodes.size() > 0) {
+        streamlet->addOneInAudioRawEntry(audioEncodes[0]);
     }
     for (auto & m : muxers) {
         DavWave::connect(videoEncode.get(), m.get());
@@ -201,10 +202,10 @@ build(const vector<DavWaveOption> & waveOptions,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-shared_ptr<DavStreamlet> DavSingleWaveStreamletBuilder::
-build(const vector<DavWaveOption> & waveOptions,
-      const DavStreamletTag & streamletTag,
-      const DavStreamletOption & streamletOptions) {
+shared_ptr<DavStreamlet>
+DavSingleWaveStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
+                                     const DavStreamletTag & streamletTag,
+                                     const DavStreamletOption & streamletOptions) {
     auto streamlet = createStreamlet(waveOptions, streamletTag, streamletOptions);
     if (!streamlet)
         return streamlet;
@@ -219,17 +220,18 @@ build(const vector<DavWaveOption> & waveOptions,
 
     if (inDataType == DavDataTypeUndefined() || outDataType == DavDataTypeUndefined())
         return {};
+    // TODO: - - - -y
 
-    if (inDataType == DavDataVideoBitstream() || inDataType == DavDataVideoRaw()) {
-        streamlet->addOneVideoInEntry(wave);
-    } else {
-        streamlet->addOneAudioInEntry(wave);
+    if (inDataType == DavDataInVideoBitstream()) {
+        streamlet->addOneInVideoBitstreamEntry(wave);
+    } else if (inDataType == DavDataInVideoRaw()) {
+        streamlet->addOneInVideoRawEntry(wave);
     }
 
-    if (outDataType == DavDataVideoBitstream() || outDataType == DavDataVideoRaw()) {
-        streamlet->addOneVideoOutEntry(wave);
+    if (outDataType == DavDataOutVideoBitstream()) {
+        streamlet->addOneOutVideoBitstreamEntry(wave);
     } else {
-        streamlet->addOneAudioOutEntry(wave);
+        streamlet->addOneOutVideoRawEntry(wave);
     }
     return streamlet;
 }

@@ -168,6 +168,22 @@ struct DavWaveClassAudioMix : public DavWaveClassCategory {
 //// Dav Audio/Video Data Type: Use DavOption Derived class as enum
 using DavDataType = DavOption;
 
+/* category can be set as key */
+struct DavOptionDataTypeCategory : public DavOption {
+    DavOptionDataTypeCategory() :
+        DavOption(type_index(typeid(*this)), type_index(typeid(DavOption)), "DataTypeCategory") {}
+};
+
+struct DavOptionInputDataTypeCategory : public DavOption {
+    DavOptionInputDataTypeCategory() :
+        DavOption(type_index(typeid(*this)), type_index(typeid(DavOption)), "InputDataTypeCategory") {}
+};
+
+struct DavOptionOutputDataTypeCategory : public DavOption {
+    DavOptionOutputDataTypeCategory() :
+        DavOption(type_index(typeid(*this)), type_index(typeid(DavOption)), "OutputDataTypeCategory") {}
+};
+
 /* data type values */
 struct DavDataTypeUndefined : public DavDataType {
     DavDataTypeUndefined() :

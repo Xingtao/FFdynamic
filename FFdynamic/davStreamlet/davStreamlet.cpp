@@ -24,16 +24,28 @@ std::ostream & operator<<(std::ostream & os, const DavStreamletTag & streamletTa
 }
 
 static void streamletConnect(DavStreamlet & from, DavStreamlet & to) {
-    auto & audioFromOut = from.getAudioOutEntries();
-    auto & videoFromOut = from.getVideoOutEntries();
-    auto & audioToIn = to.getAudioInEntries();
-    auto & videoToIn = to.getVideoInEntries();
-    for (size_t k=0; k < audioToIn.size(); k++)
-        if (k < audioFromOut.size())
-            DavWave::connect(audioFromOut[k].get(), audioToIn[k].get());
-    for (size_t k=0; k < videoToIn.size(); k++)
-        if (k < videoFromOut.size())
-            DavWave::connect(videoFromOut[k].get(), videoToIn[k].get());
+    auto & audioBsFromOut = from.getOutAudioBitstreamEntries();
+    auto & videoBsFromOut = from.getOutVideoBitstreamEntries();
+    auto & audioBsToIn = to.getInAudioBitstreamEntries();
+    auto & videoBsToIn = to.getInVideoBitstreamEntries();
+
+    auto & audioRawFromOut = from.getOutAudioRawEntries();
+    auto & videoRawFromOut = from.getOutVideoRawEntries();
+    auto & audioRawToIn = to.getInAudioRawEntries();
+    auto & videoRawToIn = to.getInVideoRawEntries();
+
+    for (size_t k=0; k < audioBsToIn.size(); k++)
+        if (k < audioBsFromOut.size())
+            DavWave::connect(audioBsFromOut[k].get(), audioBsToIn[k].get());
+    for (size_t k=0; k < videoBsToIn.size(); k++)
+        if (k < videoBsFromOut.size())
+            DavWave::connect(videoBsFromOut[k].get(), videoBsToIn[k].get());
+    for (size_t k=0; k < audioRawToIn.size(); k++)
+        if (k < audioRawFromOut.size())
+            DavWave::connect(audioRawFromOut[k].get(), audioRawToIn[k].get());
+    for (size_t k=0; k < videoRawToIn.size(); k++)
+        if (k < videoRawFromOut.size())
+            DavWave::connect(videoRawFromOut[k].get(), videoRawToIn[k].get());
     return;
 }
 

@@ -101,14 +101,7 @@ public:
         m_streamletGroupId = streamletGroupId;
         m_streamletTag = streamletTag;
     }
-    virtual ~DavStreamlet() {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_davWaves.clear();
-        m_audioInEntries.clear();
-        m_audioOutEntries.clear();
-        m_videoInEntries.clear();
-        m_videoOutEntries.clear();
-    }
+    virtual ~DavStreamlet() = default;
 
 public:
     int start() {
@@ -151,10 +144,14 @@ public:
     int clear() {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_davWaves.clear();
-        m_audioInEntries.clear();
-        m_audioOutEntries.clear();
-        m_videoInEntries.clear();
-        m_videoOutEntries.clear();
+        m_inAudioBitstreamEntries.clear();
+        m_inAudioRawEntries.clear();
+        m_inVideoBitstreamEntries.clear();
+        m_inVideoRawEntries.clear();
+        m_outAudioBitstreamEntries.clear();
+        m_outAudioRawEntries.clear();
+        m_outVideoBitstreamEntries.clear();
+        m_outVideoRawEntries.clear();
         return 0;
     }
     int getErr() noexcept {
@@ -193,56 +190,106 @@ public:
     }
 
     /* connection's use */
-    inline vector<shared_ptr<DavWave>> & getAudioInEntries() noexcept {
+    inline vector<shared_ptr<DavWave>> & getInAudioBitstreamEntries() noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        return m_audioInEntries;
+        return m_inAudioBitstreamEntries;
     }
-    inline vector<shared_ptr<DavWave>> & getAudioOutEntries() noexcept {
+    inline vector<shared_ptr<DavWave>> & getOutAudioBitstreamEntries() noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        return m_audioOutEntries;
+        return m_outAudioBitstreamEntries;
     }
-    inline vector<shared_ptr<DavWave>> & getVideoInEntries() noexcept {
+    inline vector<shared_ptr<DavWave>> & getInVideoBitstreamEntries() noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        return m_videoInEntries;
+        return m_inVideoBitstreamEntries;
     }
-    inline vector<shared_ptr<DavWave>> & getVideoOutEntries() noexcept {
+    inline vector<shared_ptr<DavWave>> & getOutVideoBitstreamEntries() noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        return m_videoOutEntries;
+        return m_outVideoBitstreamEntries;
+    }
+
+    inline vector<shared_ptr<DavWave>> & getInAudioRawEntries() noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_inAudioRawEntries;
+    }
+    inline vector<shared_ptr<DavWave>> & getOutAudioRawEntries() noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_outAudioRawEntries;
+    }
+    inline vector<shared_ptr<DavWave>> & getInVideoRawEntries() noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_inVideoRawEntries;
+    }
+    inline vector<shared_ptr<DavWave>> & getOutVideoRawEntries() noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_outVideoRawEntries;
     }
 
     /* set all */
-    inline void setAudioInEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
+    inline void setInAudioBitstreamEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_audioInEntries = waves;
+        m_inAudioBitstreamEntries = waves;
     }
-    inline void setVideoInEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
+    inline void setInVideoBitstreamEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_videoInEntries = waves;
+        m_inVideoBitstreamEntries = waves;
     }
-    inline void setAudioOutEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
+    inline void setOutAudioBitstreamEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_audioOutEntries = waves;
+        m_outAudioBitstreamEntries = waves;
     }
-    inline void setVideoOutEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
+    inline void setOutVideoBitstreamEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_videoOutEntries = waves;
+        m_outVideoBitstreamEntries = waves;
     }
+    inline void setInAudioRawEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_inAudioRawEntries = waves;
+    }
+    inline void setInVideoRawEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_inVideoRawEntries = waves;
+    }
+    inline void setOutAudioRawEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_outAudioRawEntries = waves;
+    }
+    inline void setOutVideoRawEntries(const vector<shared_ptr<DavWave>> & waves) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_outVideoRawEntries = waves;
+    }
+
     /* add one */
-    inline void addOneAudioInEntry(const shared_ptr<DavWave> & wave) noexcept {
+    inline void addOneInAudioBitstreamEntry(const shared_ptr<DavWave> & wave) noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_audioInEntries.emplace_back(wave);
+        m_inAudioBitstreamEntries.emplace_back(wave);
     }
-    inline void addOneVideoInEntry(const shared_ptr<DavWave> & wave) noexcept {
+    inline void addOneInVideoBitstreamEntry(const shared_ptr<DavWave> & wave) noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_videoInEntries.emplace_back(wave);
+        m_inVideoBitstreamEntries.emplace_back(wave);
     }
-    inline void addOneAudioOutEntry(const shared_ptr<DavWave> & wave) noexcept {
+    inline void addOneOutAudioBitstreamEntry(const shared_ptr<DavWave> & wave) noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_audioOutEntries.emplace_back(wave);
+        m_outAudioBitstreamEntries.emplace_back(wave);
     }
-    inline void addOneVideoOutEntry(const shared_ptr<DavWave> & wave) noexcept {
+    inline void addOneOutVideoBitstreamEntry(const shared_ptr<DavWave> & wave) noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_videoOutEntries.emplace_back(wave);
+        m_outVideoBitstreamEntries.emplace_back(wave);
+    }
+    inline void addOneInAudioRawEntry(const shared_ptr<DavWave> & wave) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_inAudioRawEntries.emplace_back(wave);
+    }
+    inline void addOneInVideoRawEntry(const shared_ptr<DavWave> & wave) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_inVideoRawEntries.emplace_back(wave);
+    }
+    inline void addOneOutAudioRawEntry(const shared_ptr<DavWave> & wave) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_outAudioRawEntries.emplace_back(wave);
+    }
+    inline void addOneOutVideoRawEntry(const shared_ptr<DavWave> & wave) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_outVideoRawEntries.emplace_back(wave);
     }
 
 public:
@@ -273,11 +320,14 @@ private:
     DavStreamletTag m_streamletTag;
     size_t m_streamletGroupId; /* used for waves that in the same streamlet */
     vector<shared_ptr<DavWave>> m_davWaves;
-    /* TODO: distince video/audio raw or bitstream In/Out Entry */
-    vector<shared_ptr<DavWave>> m_audioInEntries;
-    vector<shared_ptr<DavWave>> m_audioOutEntries;
-    vector<shared_ptr<DavWave>> m_videoInEntries;
-    vector<shared_ptr<DavWave>> m_videoOutEntries;
+    vector<shared_ptr<DavWave>> m_inAudioBitstreamEntries;
+    vector<shared_ptr<DavWave>> m_inAudioRawEntries;
+    vector<shared_ptr<DavWave>> m_inVideoBitstreamEntries;
+    vector<shared_ptr<DavWave>> m_inVideoRawEntries;
+    vector<shared_ptr<DavWave>> m_outAudioBitstreamEntries;
+    vector<shared_ptr<DavWave>> m_outAudioRawEntries;
+    vector<shared_ptr<DavWave>> m_outVideoBitstreamEntries;
+    vector<shared_ptr<DavWave>> m_outVideoRawEntries;
 };
 
 extern DavStreamlet &  operator>>(DavStreamlet & dst, DavStreamlet & src);

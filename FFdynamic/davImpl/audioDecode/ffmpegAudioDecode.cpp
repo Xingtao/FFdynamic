@@ -133,6 +133,7 @@ int FFmpegAudioDecode::onProcess(DavProcCtx & ctx) {
 
 //// Register ////
 DavImplRegister g_audioDecodeReg(DavWaveClassAudioDecode(), vector<string>({"auto", "ffmpeg"}),
+                                 vector<DavDataType>({DavDataAudioInBitStream(), DavDataAudioOutRaw()}),
                                  [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
                                      unique_ptr<FFmpegAudioDecode> p(new FFmpegAudioDecode(options));
                                      return p;

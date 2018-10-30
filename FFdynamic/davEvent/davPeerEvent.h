@@ -29,4 +29,12 @@ struct DavEventVideoMixSync : public DavPeerEvent {
     int64_t m_videoMixCurPts = 0; /* in AV_TIME_BASE_Q */
 };
 
+//// Other basic structure could be used by derived events
+struct DavRect {
+    int x = 0;
+    int y = 0;
+    int w = 0;
+    int h = 0;
+};
+
 } // namespace ff_dynamic

@@ -28,6 +28,7 @@ class DavImplFactory {
 public:
     using DavImplCreateFunc = function<unique_ptr<DavImpl>(const DavWaveOption &)>;
     using DavClassImplMap = map<string, DavImplCreateFunc>;
+    using DavClassProcessDataTypesMap = map<DavWaveClassCategory, vector<DavDataType>>;
 
     static unique_ptr<DavImpl> create(const DavWaveOption & options, DavMsgError & createErr) {
         unique_ptr<DavImpl> davImpl;
@@ -89,6 +90,7 @@ public:
 
 protected:
     static DavClassImplMap s_classImplMap;
+    static DavClassProcessDataTypesMap s_classProcessDataTypeMap;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,9 +118,11 @@ public:
 private:
     static std::mutex s_mutex;
     static string addOneImplType(const DavOption & classCategory,
+                                 const vector<DavDataType> & processDataTypes,
                           const string & implType, DavImplCreateFunc & func) {
         string registerKey = mkClassImplKey(classCategory.name(), implType);
-        s_classImplMap.insert(std::make_pair(registerKey, func));
+        s_classImplMap.emplace(registerKey, func);
+        s_classProcessDataTypeMap.emplace(classCategory, processDataTypes);
         return registerKey;
     }
     vector<string> m_implRegisterNames;

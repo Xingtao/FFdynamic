@@ -164,27 +164,9 @@ struct DavWaveClassAudioMix : public DavWaveClassCategory {
         DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioMix") {}
 };
 
-
-
 ///////////////////////////////////////////////////////////////////
 //// Dav Audio/Video Data Type: Use DavOption Derived class as enum
 using DavDataType = DavOption;
-
-/* category can be set as key */
-struct DavOptionDataTypeCategory : public DavOption {
-    DavOptionDataTypeCategory() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(DavOption)), "DataTypeCategory") {}
-};
-
-struct DavOptionInputDataTypeCategory : public DavOption {
-    DavOptionInputDataTypeCategory() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(DavOption)), "InputDataTypeCategory") {}
-};
-
-struct DavOptionOutputDataTypeCategory : public DavOption {
-    DavOptionOutputDataTypeCategory() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(DavOption)), "OutputDataTypeCategory") {}
-};
 
 /* data type values */
 struct DavDataTypeUndefined : public DavDataType {
@@ -192,22 +174,38 @@ struct DavDataTypeUndefined : public DavDataType {
         DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "DataTypeUndefined") {}
 };
 
-struct DavDataVideoBitstream : public DavDataType {
+struct DavDataVideoInBitstream : public DavDataType {
     DavDataVideoBitstream() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoBitstream") {}
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoInBitstream") {}
 };
-struct DavDataAudioBitstream : public DavDataType {
+struct DavDataAudioInBitstream : public DavDataType {
     DavDataAudioBitstream() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioBitstream") {}
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioInBitstream") {}
 };
-struct DavDataVideoRaw : public DavDataType {
+struct DavDataVideoInRaw : public DavDataType {
     DavDataVideoRaw() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoRaw") {}
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoInRaw") {}
 };
-struct DavDataAudioRaw : public DavDataType {
+struct DavDataAudioInRaw : public DavDataType {
     DavDataAudioRaw() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioRaw") {}
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioInRaw") {}
 };
 
+struct DavDataVideoOutBitstream : public DavDataType {
+    DavDataVideoBitstream() :
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoOutBitstream") {}
+};
+struct DavDataAudioOutBitstream : public DavDataType {
+    DavDataAudioBitstream() :
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioOutBitstream") {}
+};
+struct DavDataVideoOutRaw : public DavDataType {
+    DavDataVideoRaw() :
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoOutRaw") {}
+};
+struct DavDataAudioOutRaw : public DavDataType {
+    DavDataAudioRaw() :
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioOutRaw") {}
+};
 
 } // namespace ff_dynamic

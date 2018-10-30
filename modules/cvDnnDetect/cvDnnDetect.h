@@ -6,38 +6,38 @@
 
 namespace ff_dynamic {
 
-/* create cvObjDetect component category */
-struct DavWaveClassCVObjDetect : public DavWaveClassCategory {
-    DavWaveClassCVObjDetect () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "CVObjDetect") {}
+/* create cvDnnDetect component category */
+struct DavWaveClassCVDnnDetect : public DavWaveClassCategory {
+    DavWaveClassCVDnnDetect () :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "CVDnnDetect") {}
 };
 
 /* options to control */
-struct DavOptionCVObjDetectNetModel : public DavOption {
-    DavOptionCVObjDetectFogFactor() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "CVObjDetectNetModel") {}
+struct DavOptionCVDnnDetectNetModel : public DavOption {
+    DavOptionCVDnnDetectFogFactor() :
+        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "CVDnnDetectNetModel") {}
 };
 
-struct CVObjDetectorAddEvent {
+struct CVDnnDetectorAddEvent {
     string m_netModelType; /* yolo3, ssd, tensorflow, pytorch, caffe */
     string m_modelPath;
     string m_
 };
 
-/* cvObjDetect component may have diffrent implementation;
+/* cvDnnDetect component may have diffrent implementation;
    so we would also register impl later, refer to register part at bottom of ffdynaDehazor.cpp's file */
 
-/* here is one implementation called, CVObjDetect */
-class CVObjDetect : public DavImpl {
+/* here is one implementation called, CVDnnDetect */
+class CVDnnDetect : public DavImpl {
 public:
-    CVObjDetect(const DavWaveOption & options) : DavImpl(options) {
+    CVDnnDetect(const DavWaveOption & options) : DavImpl(options) {
         implDefaultInstantiate();
     }
-    virtual ~CVObjDetect() {onDestruct();}
+    virtual ~CVDnnDetect() {onDestruct();}
 
 private: /* Interface we should implement */
-    CVObjDetect(const CVObjDetect &) = delete;
-    CVObjDetect & operator= (const CVObjDetect &) = delete;
+    CVDnnDetect(const CVDnnDetect &) = delete;
+    CVDnnDetect & operator= (const CVDnnDetect &) = delete;
     virtual int onConstruct();
     virtual int onDestruct();
     virtual int onProcess(DavProcCtx & ctx);

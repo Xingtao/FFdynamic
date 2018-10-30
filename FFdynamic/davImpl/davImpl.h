@@ -86,6 +86,7 @@ public: /* public apis */
 
     /* use AVDictionary for implementation's statistics (avoid introduce json dependency) */
     virtual int statistics(AVDictionary & stat) {return 0;};
+    virtual const DavRegisterProperties & getRegisterProperties() const noexcept = 0;
 
     /* trival helpers */
     inline const DavMsgError & getImplErr() const {return m_implErr;}

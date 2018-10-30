@@ -4,7 +4,6 @@ namespace ff_dynamic {
 
 DavMsgCollector & DavImpl::s_msgCollector = DavMsgCollector::getInstance();
 DavImplFactory::DavClassImplMap DavImplFactory::s_classImplMap;
-DavImplFactory::DavClassProcessDataTypesMap DavImplFactory::s_classProcessDataTypeMap;
 std::mutex DavImplRegister::s_mutex;
 
 //////////////////////////////////////////////////////////////////////////////////////////

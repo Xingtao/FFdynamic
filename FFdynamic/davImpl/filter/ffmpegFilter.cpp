@@ -3,6 +3,25 @@
 
 namespace ff_dynamic {
 
+//// Register ////
+static DavImplRegister s_audioFitlerReg(DavWaveClassAudioFilter(), vector<string>({"auto", "ffmpeg"}), {},
+                                        [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                            unique_ptr<FFmpegFilter> p(new FFmpegFilter(options));
+                                            return p;
+                                        });
+static DavImplRegister s_videoFilterReg(DavWaveClassVideoFilter(), vector<string>({"auto", "ffmpeg"}), {},
+                                        [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                                unique_ptr<FFmpegFilter> p(new FFmpegFilter(options));
+                                                return p;
+                                        });
+const DavRegisterProperties & FFmpegFilter::getRegisterProperties() const noexcept {
+    DavWaveClassCategory classCategory((DavWaveClassNotACategory()));
+    m_options.getCategory(DavOptionClassCategory(), classCategory);
+    if (classCategory == DavWaveClassVideoFilter())
+        return s_videoFilterReg.m_properties;
+    return s_audioFitlerReg.m_properties;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 int FFmpegFilter::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     if (m_filterGraph)
@@ -124,16 +143,4 @@ int FFmpegFilter::onProcess(DavProcCtx & ctx) {
 
     return 0;
 }
-
-//// Register ////
-DavImplRegister g_audioFitlerReg(DavWaveClassAudioFilter(), vector<string>({"auto", "ffmpeg"}),
-                                 [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                     unique_ptr<FFmpegFilter> p(new FFmpegFilter(options));
-                                     return p;
-                           });
-DavImplRegister g_videoFilterReg(DavWaveClassVideoFilter(), vector<string>({"auto", "ffmpeg"}),
-                                 [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                     unique_ptr<FFmpegFilter> p(new FFmpegFilter(options));
-                                     return p;
-                                 });
 } // namespace ff_dynamic

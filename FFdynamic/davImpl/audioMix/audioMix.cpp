@@ -1,7 +1,18 @@
 #include "audioMix.h"
 
 namespace ff_dynamic {
+//// [Register] ////
+static DavImplRegister s_audioMixReg(DavWaveClassAudioMix(), vector<string>({"auto", "AudioMix"}), {},
+                                     [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                         unique_ptr<AudioMix> p(new AudioMix(options));
+                                         return p;
+                                     });
 
+const DavRegisterProperties & AudioMix::getRegisterProperties() const noexcept {
+    return s_audioMixReg.m_properties;
+}
+
+////////////////////////////////////
 /* The base assumptions is:
      0. video send sync event, then audio can output with ts bigger than sync ts;
      1. video's sync pts monotonic increase
@@ -238,11 +249,4 @@ int AudioMix::setupMixFrame(AVFrame *mixFrame) {
     return 0;
 }
 
-////////////////////
-//// [Register] ////
-DavImplRegister g_audioMixReg(DavWaveClassAudioMix(), vector<string>({"auto", "AudioMix"}),
-                              [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                  unique_ptr<AudioMix> p(new AudioMix(options));
-                                  return p;
-                              });
 } // namespace

@@ -21,6 +21,7 @@ private:
     virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
     int dynamicallyInitialize(const AVCodecParameters *codecpar);
+    virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
 
 private:
     AVCodecContext *m_decCtx = nullptr;

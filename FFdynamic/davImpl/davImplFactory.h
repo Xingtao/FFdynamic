@@ -28,7 +28,6 @@ class DavImplFactory {
 public:
     using DavImplCreateFunc = function<unique_ptr<DavImpl>(const DavWaveOption &)>;
     using DavClassImplMap = map<string, DavImplCreateFunc>;
-    using DavClassProcessDataTypesMap = map<DavWaveClassCategory, vector<DavDataType>>;
 
     static unique_ptr<DavImpl> create(const DavWaveOption & options, DavMsgError & createErr) {
         unique_ptr<DavImpl> davImpl;
@@ -90,21 +89,34 @@ public:
 
 protected:
     static DavClassImplMap s_classImplMap;
-    static DavClassProcessDataTypesMap s_classProcessDataTypeMap;
+};
+
+/* TODO: static properties used when do connecting, not used right now  */
+struct DavRegisterProperties {
+    vector<AVCodecID> m_inVideoBitstreamTypes;
+    vector<AVCodecID> m_outVideoBitstreamTypes;
+    vector<AVCodecID> m_inAudioBitstreamTypes;
+    vector<AVCodecID> m_outAudioBitstreamTypes;
+    vector<AVPixelFormat> m_inVideoRawTypes;
+    vector<AVPixelFormat> m_outVideoRawTypes;
+    vector<AVSampleFormat> m_inAudioRawTypes;
+    vector<AVSampleFormat> m_outAudioRawTypes;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 // implementation register
 class DavImplRegister : DavImplFactory {
 public:
-    DavImplRegister(const DavOption & classCategory, const string & implType,
-                    DavImplCreateFunc func) {
+    DavImplRegister(const DavWaveClassCategory & classCategory, const string & implType,
+                    const DavRegisterProperties & properties, DavImplCreateFunc func) {
         std::lock_guard<std::mutex> lock(s_mutex);
+        m_properties = properties;
         m_implRegisterNames.emplace_back(addOneImplType(classCategory, implType, func));
     }
-    DavImplRegister(const DavOption & classCategory, const vector<string> & implTypes,
-                    DavImplCreateFunc func) {
+    DavImplRegister(const DavWaveClassCategory & classCategory, const vector<string> & implTypes,
+                    const DavRegisterProperties & properties, DavImplCreateFunc func) {
         std::lock_guard<std::mutex> lock(s_mutex);
+        m_properties = properties;
         for (const auto & implType : implTypes)
             m_implRegisterNames.emplace_back(addOneImplType(classCategory, implType, func));
     }
@@ -115,17 +127,18 @@ public:
         return name;
     }
 
+public:
+    vector<string> m_implRegisterNames;
+    DavRegisterProperties m_properties;
+
 private:
     static std::mutex s_mutex;
-    static string addOneImplType(const DavOption & classCategory,
-                                 const vector<DavDataType> & processDataTypes,
+    static string addOneImplType(const DavWaveClassCategory & classCategory,
                           const string & implType, DavImplCreateFunc & func) {
         string registerKey = mkClassImplKey(classCategory.name(), implType);
         s_classImplMap.emplace(registerKey, func);
-        s_classProcessDataTypeMap.emplace(classCategory, processDataTypes);
         return registerKey;
     }
-    vector<string> m_implRegisterNames;
 };
 
 } // namespace ff_dynamic

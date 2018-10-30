@@ -79,6 +79,9 @@ private:
 public: /* trivial helpers */
     inline void setGroupId(size_t groupId) noexcept {updateGroupId(groupId);}
     inline size_t getGroupId() noexcept {return m_groupId;}
+    inline const DavRegisterProperties & getDavRegisterProperties() const noexcept {
+        return getDavRegisterProperties();
+    }
     map<int, AVMediaType> getOutputMediaMap() {
         if (m_impl)
             return m_impl->getOutputMediaMap();

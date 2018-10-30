@@ -12,6 +12,18 @@ using ::std::shared_ptr;
  3. m_outputMediaMap's stream index (key) may not continuous since we skip subtitle or data streams
 */
 
+//// Register ////
+static DavImplRegister s_demuxReg(DavWaveClassDemux(), vector<string>({"auto", "ffmpeg"}),
+                                  {}, /* static properties */
+                                  [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                      unique_ptr<FFmpegDemux> p(new FFmpegDemux(options));
+                                      return p;
+                                  });
+
+const DavRegisterProperties & FFmpegDemux::getRegisterProperties() const noexcept {
+    return s_demuxReg.m_properties;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 int FFmpegDemux::dynamicallyInitialize () {
     // NOTE: for demux already initialized , here we just set up the output infos. also ignore 'ctx'
@@ -187,10 +199,4 @@ int FFmpegDemux::onProcess(DavProcCtx & ctx) {
     return 0;
 }
 
-//// Register ////
-DavImplRegister g_demuxReg(DavWaveClassDemux(), vector<string>({"auto", "ffmpeg"}),
-                           [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                               unique_ptr<FFmpegDemux> p(new FFmpegDemux(options));
-                               return p;
-                           });
 } // namespace

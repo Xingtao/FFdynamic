@@ -24,6 +24,7 @@ private:
     virtual int onProcess(DavProcCtx & ctx);
     virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {return 0;}
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
+    virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
 
 private: // helpers
     int hardSettings();

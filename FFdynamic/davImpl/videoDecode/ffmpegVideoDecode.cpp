@@ -3,7 +3,18 @@
 #include "davImplTravel.h"
 
 namespace ff_dynamic {
+//// Register ////
+static DavImplRegister s_videoDecodeReg(DavWaveClassVideoDecode(), vector<string>({"auto", "ffmpeg"}), {},
+                                        [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                            unique_ptr<FFmpegVideoDecode> p(new FFmpegVideoDecode(options));
+                                            return p;
+                                        });
 
+const DavRegisterProperties & FFmpegVideoDecode::getRegisterProperties() const noexcept {
+    return s_videoDecodeReg.m_properties;
+}
+
+/////////////////////
 // after got the first input, retrieve the travel static info to do the initialize
 int FFmpegVideoDecode::dynamicallyInitialize(const AVCodecParameters *codecpar) {
     int ret = 0;
@@ -133,11 +144,4 @@ int FFmpegVideoDecode::onProcess(DavProcCtx & ctx) {
 
     return 0;
 }
-
-//// Register ////
-DavImplRegister g_videoDecodeReg(DavWaveClassVideoDecode(), vector<string>({"auto", "ffmpeg"}),
-                                 [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                     unique_ptr<FFmpegVideoDecode> p(new FFmpegVideoDecode(options));
-                                     return p;
-                                 });
 } // namespace

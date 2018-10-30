@@ -3,7 +3,18 @@
 #include "davImplTravel.h"
 
 namespace ff_dynamic {
+//// Register ////
+static DavImplRegister s_audioDecodeReg(DavWaveClassAudioDecode(), vector<string>({"auto", "ffmpeg"}), {},
+                                        [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                            unique_ptr<FFmpegAudioDecode> p(new FFmpegAudioDecode(options));
+                                            return p;
+                                        });
 
+const DavRegisterProperties & FFmpegAudioDecode::getRegisterProperties() const noexcept {
+    return s_audioDecodeReg.m_properties;
+}
+
+//////////////////////////////////
 // after got the first input, retrieve the travel static info to do the initialize
 int FFmpegAudioDecode::dynamicallyInitialize(const AVCodecParameters *codecpar) {
     int ret = 0;
@@ -130,12 +141,4 @@ int FFmpegAudioDecode::onProcess(DavProcCtx & ctx) {
     LOG_IF(INFO, m_outputFrames % 1000 == 1) << m_logtag << "audio decode output frame " << m_outputFrames;
     return 0;
 }
-
-//// Register ////
-DavImplRegister g_audioDecodeReg(DavWaveClassAudioDecode(), vector<string>({"auto", "ffmpeg"}),
-                                 vector<DavDataType>({DavDataAudioInBitStream(), DavDataAudioOutRaw()}),
-                                 [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                     unique_ptr<FFmpegAudioDecode> p(new FFmpegAudioDecode(options));
-                                     return p;
-                                 });
 } // namespace

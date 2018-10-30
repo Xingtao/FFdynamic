@@ -3,7 +3,18 @@
 #include "videoMix.h"
 
 namespace ff_dynamic {
+//// Register ////
+static DavImplRegister s_videoMixReg(DavWaveClassVideoMix(), vector<string>({"auto", "VideoMix"}), {},
+                                     [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                         unique_ptr<VideoMix> p(new VideoMix(options));
+                                         return p;
+                                     });
 
+const DavRegisterProperties & VideoMix::getRegisterProperties() const noexcept {
+    return s_videoMixReg.m_properties;
+}
+
+ ////////////////////////////////
 /* The base assumptions is:
      0. video send sync event, then audio can output with pts bigger than sync pts;
      1. video's sync pts monotonic increase
@@ -219,10 +230,4 @@ int VideoMix::onProcess(DavProcCtx & ctx) {
     return ret;
 }
 
-//// Register ////
-DavImplRegister g_videoMixReg(DavWaveClassVideoMix(), vector<string>({"auto", "VideoMix"}),
-                              [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                  unique_ptr<VideoMix> p(new VideoMix(options));
-                                  return p;
-                              });
 } // namespace

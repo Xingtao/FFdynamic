@@ -50,6 +50,9 @@ public: /* properties set & get */
     inline const string & getClassName() const noexcept {return m_className;}
     inline const string & getClassTag() const noexcept {return m_logtag;}
     inline const DavWaveClassCategory & getDavWaveCategory() const noexcept {return m_waveCategory;}
+    inline const DavRegisterProperties & getDavRegisterProperties() const noexcept {
+        return m_impl->getRegisterProperties();
+    }
 
 protected: /* process */
     int runDavProcThread();
@@ -87,12 +90,6 @@ protected:
                  (m_processEnd.tv_usec - m_processStart.tv_usec) / 1000.0 );
     }
 
-private: /* */
-    struct timeval m_processStart;
-    struct timeval m_processEnd;
-    inline void getProcessStartTime() noexcept {gettimeofday(&m_processStart, nullptr);}
-    inline void getProcessEndTime() noexcept {gettimeofday(&m_processEnd, nullptr);}
-
 protected:
     const int m_idx;
     DavWaveClassCategory m_waveCategory = DavWaveClassNotACategory();
@@ -115,6 +112,12 @@ private:
     DavExpect<DavProcFrom> m_expectInput;
     /* extending its scope, for limitor will travel with ProcBuf */
     shared_ptr<DavProcBufLimiter> m_outbufLimiter;
+
+private: /* trvial */
+    struct timeval m_processStart;
+    struct timeval m_processEnd;
+    inline void getProcessStartTime() noexcept {gettimeofday(&m_processStart, nullptr);}
+    inline void getProcessEndTime() noexcept {gettimeofday(&m_processEnd, nullptr);}
 
 //// static helpers
 private: /* generate unique increase class index number */

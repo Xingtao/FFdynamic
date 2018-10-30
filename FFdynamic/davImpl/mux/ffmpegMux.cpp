@@ -4,6 +4,18 @@
 
 namespace ff_dynamic {
 
+//// Register ////
+static DavImplRegister s_muxReg(DavWaveClassMux(), vector<string>({"auto", "ffmpeg"}),
+                                {},
+                                [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                    unique_ptr<FFmpegMux> p(new FFmpegMux(options));
+                                    return p;
+                                });
+
+const DavRegisterProperties & FFmpegMux::getRegisterProperties() const noexcept {
+    return s_muxReg.m_properties;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 //int FFmpegMux::interruptCallback(void *p) {
@@ -163,11 +175,4 @@ int FFmpegMux::muxMetaDataSettings() {
     av_dict_set(&m_fmtCtx->metadata, "title", "ff_dynamic", 0);
     return 0;
 }
-
-//// Register ////
-DavImplRegister s_muxReg(DavWaveClassMux(), vector<string>({"auto", "ffmpeg"}),
-                         [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                             unique_ptr<FFmpegMux> p(new FFmpegMux(options));
-                             return p;
-                         });
 } //namespace

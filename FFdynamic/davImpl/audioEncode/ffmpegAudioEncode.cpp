@@ -4,6 +4,18 @@
 
 namespace ff_dynamic {
 
+//// Register ////
+static DavImplRegister s_auidoEncodeReg(DavWaveClassAudioEncode(), vector<string>({"auto", "ffmpeg"}), {},
+                                        [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                            unique_ptr<FFmpegAudioEncode> p(new FFmpegAudioEncode(options));
+                                            return p;
+                                        });
+
+const DavRegisterProperties & FFmpegAudioEncode::getRegisterProperties() const noexcept {
+    return s_auidoEncodeReg.m_properties;
+}
+
+//////////////////
 static int isFormatSupported(const AVCodec *codec, enum AVSampleFormat sampleFmt) {
     const enum AVSampleFormat *p = codec->sample_fmts;
     while (*p != AV_SAMPLE_FMT_NONE) {
@@ -244,11 +256,4 @@ int FFmpegAudioEncode::receiveEncodeFrames(DavProcCtx & ctx) {
                             << ", encode bytes " << m_totalOutputBytes;
     return ret;
 }
-
-//// Register ////
-DavImplRegister s_auidoEncodeReg(DavWaveClassAudioEncode(), vector<string>({"auto", "ffmpeg"}),
-                                 [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                     unique_ptr<FFmpegAudioEncode> p(new FFmpegAudioEncode(options));
-                                     return p;
-                                 });
 } // namespace

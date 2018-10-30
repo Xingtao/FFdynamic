@@ -1,6 +1,17 @@
 #include "ffmpegVideoEncode.h"
 
 namespace ff_dynamic {
+///////////////////////////////////////
+// [Register - auto, ffmpegVideoEncode]
+static DavImplRegister s_videoEncodeReg(DavWaveClassVideoEncode(), vector<string>({"auto", "ffmpeg"}), {},
+                                        [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                            unique_ptr<FFmpegVideoEncode> p(new FFmpegVideoEncode(options));
+                                            return p;
+                                        });
+
+const DavRegisterProperties & FFmpegVideoEncode::getRegisterProperties() const noexcept {
+    return s_videoEncodeReg.m_properties;
+}
 
 ////////////////////////////////////
 //  [initialization]
@@ -273,11 +284,4 @@ int FFmpegVideoEncode::onProcess(DavProcCtx & ctx) {
     return receiveEncodeFrames(ctx);
 }
 
-///////////////////////////////////////
-// [Register - auto, ffmpegVideoEncode]
-DavImplRegister g_videoEncodeReg(DavWaveClassVideoEncode(),vector<string>({"auto", "ffmpeg"}),
-                                 [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                     unique_ptr<FFmpegVideoEncode> p(new FFmpegVideoEncode(options));
-                                     return p;
-                                 });
 } // namespace

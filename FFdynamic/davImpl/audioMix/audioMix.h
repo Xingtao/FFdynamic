@@ -23,6 +23,8 @@ private:
         return 0;
     }
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
+    virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
+
     int processVideoMixSync(const DavEventVideoMixSync &);
     int processMuteUnute(const DavDynaEventAudioMixMuteUnmute & event);
 

@@ -2,6 +2,28 @@
 #include "fmtScale.h"
 
 namespace ff_dynamic {
+///////////////////////////////////////
+// [Register - auto, dehaze]: this will create PluginDehazor instance for dehaze
+static DavImplRegister s_dehazeReg(DavWaveClassDehaze(), vector<string>({"auto", "dehaze"}), {},
+                                   [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                       unique_ptr<PluginDehazor> p(new PluginDehazor(options));
+                                       return p;
+                                   });
+const DavRegisterProperties & PluginDehazor::getRegisterProperties() const noexcept {
+    return s_dehazeReg.m_properties;
+}
+
+/* Register Explaination */
+/* If we have another dehaze implementation, let's say DehazorImpl2, we could register it as:
+static DavImplRegister s_regDehazeP2(DavWaveClassVideoDehaze(), vector<string>({"dehazeImpl2"}), {},
+                                     [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                         unique_ptr<DehazorImpl2> p(new DehazorImpl2(options));
+                                         return p;
+                                     });
+   And, we could select them by set options:
+       options..setDavWaveCategory((DavWaveClassDehaze()));
+       options.set(EDavWaveOption::eImplType, "dehazeImpl2");
+*/
 
 ////////////////////////////////////
 //  [initialization]
@@ -137,25 +159,5 @@ int PluginDehazor::onProcess(DavProcCtx & ctx) {
     ctx.m_outBufs.push_back(outBuf);
     return 0;
 }
-
-///////////////////////////////////////
-// [Register - auto, dehaze]: this will create PluginDehazor instance for dehaze
-DavImplRegister g_dehazeReg(DavWaveClassDehaze(), vector<string>({"auto", "dehaze"}),
-                            [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                unique_ptr<PluginDehazor> p(new PluginDehazor(options));
-                                return p;
-                            });
-
-/* Register Explaination */
-/* If we have another dehaze implementation, let's say DehazorImpl2, we could register it as:
-DavImplRegister g_regDehazeP2(DavWaveClassVideoDehaze(), vector<string>({"dehazeImpl2"}),
-                             [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                 unique_ptr<DehazorImpl2> p(new DehazorImpl2(options));
-                                 return p;
-                             });
-   And, we could select them by set options:
-       options..setDavWaveCategory((DavWaveClassDehaze()));
-       options.set(EDavWaveOption::eImplType, "dehazeImpl2");
-  */
 
 } // namespace ff_dynamic

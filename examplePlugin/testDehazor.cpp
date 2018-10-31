@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
                                                DavDefaultOutputStreamletTag("output"));
     CHECK(streamletOutput != nullptr);
 
-    singleWaveOption.setCategory(DavOptionInputDataTypeCategory(), DavDataVideoRaw());
-    singleWaveOption.setCategory(DavOptionOutputDataTypeCategory(), DavDataVideoRaw());
+    singleWaveOption.setCategory(DavOptionInputDataTypeCategory(), DavDataInVideoRaw());
+    singleWaveOption.setCategory(DavOptionOutputDataTypeCategory(), DavDataOutVideoRaw());
     auto dehazeStreamlet = singleWaveBuilder.build({videoDehazeOption},
                                                    DavSingleWaveStreamletTag("dehaze"), singleWaveOption);
     /* connect streamlets */

@@ -44,6 +44,7 @@ private: /* Interface we should implement */
     virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
     /* if no travel dynamic needed, leave it empty */
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
+    virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
 
 private:
     int processFogFactorUpdate(const FogFactorChangeEvent & e);

@@ -13,13 +13,13 @@ struct CvObjDetectEvent : public DavPeerEvent {
     string m_detectorFrameworkTag; /* detailed tag of the model: yolo, ssd, etc.. */
     struct DetectResult {
         string m_objName;
-        double m_confidence;
+        double m_conf;
         DavRect m_rect; /* not used for classify */
     };
     DetectResult m_results;
 };
 
 /* external dynamic events */
-struct CvDynaEventChangeConfidenceThreshold {
-    double m_confidenceThreshold = 0.7;
+struct CvDynaEventChangeConfThreshold {
+    double m_confThreshold = 0.7;
 };

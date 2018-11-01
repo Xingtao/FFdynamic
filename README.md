@@ -284,12 +284,10 @@ To alleviate the build process, there is a [docker](tools/dockerlize/README.md) 
 -----------------
 ## `Contribution`
 
-Welcome all contributions.
-**FFdynamic** still in its early stage, although it is already deploied to thousands of server. Here are some TODO list:
+All contributions are welcome. Some TODOs:
 
-* An auto data format negotiate module between components;
 - A webui that can easily operate on Interactive Live application;
-* Statistics for each component, process time, latency time, detailed info, etc..;
-- Build an ELK, then it is easily to know and analyze running data;
 * Nvidia codec supports (it is ongoing, will do it via ffmpeg);
 - 'Interactive live' set video cell's border line, border color;
+* Statistics for each component, process time, latency time, detailed info, etc..;
+- An auto data format negotiate module between components;

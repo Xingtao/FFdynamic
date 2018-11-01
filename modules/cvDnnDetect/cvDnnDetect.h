@@ -33,22 +33,24 @@ private:
     virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
 
 private: // event process
-    int processChangeConfidenceThreshold(const CvDynaEventChangeConfThreshold & e);
+    int processChangeConfThreshold(const CvDynaEventChangeConfThreshold & e);
 
 private:
-    unique_ptr<cv::dnn::Net> m_net;
+    cv::dnn::Net m_net;
     struct DetectParams { /* internal use, for clearity */
         string m_detectorType;
         string m_detectorFrameworkTag;
-        int m_backend = 3;
+        string m_modelPath;
+        string m_configPath;
+        string m_classnamePath;
+        int m_backendId = 3;
         int m_targetId = 0;
         double m_scaleFactor;
-        double means = 12; // Scalar mean;
-        bool swap_rb = 13;
-        int32 width = 14;
-        int32 height = 15;
-        string model_path = 20;
-        string config_path = 21;
+        Scalar m_means; // Scalar mean, BGR order
+        bool m_bSwapRb = false;
+        int32 m_width = -1;
+        int32 m_height = -1;
+        double m_confThreshold = 0.7;
     };
     DetectParams m_dps;
 };

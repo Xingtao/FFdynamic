@@ -1,55 +1,42 @@
 #pragma once
 
+#include <opencv2/dnn.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 #include "davWave.h"
 #include "davImpl.h"
-#include "dehazor.h"
+#include "cvPeerDynaEvent.h"
 
 namespace ff_dynamic {
 
-/* create cvDnnDetect component category */
-struct DavWaveClassCVDnnDetect : public DavWaveClassCategory {
-    DavWaveClassCVDnnDetect () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "CVDnnDetect") {}
+/* create CvDnnDetect class category */
+struct DavWaveClassCvDnnDetect : public DavWaveClassCategory {
+    DavWaveClassCvDnnDetect () :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "CvDnnDetect") {}
 };
 
-/* options to control */
-struct DavOptionCVDnnDetectNetModel : public DavOption {
-    DavOptionCVDnnDetectFogFactor() :
-        DavOption(type_index(typeid(*this)), type_index(typeid(std::string)), "CVDnnDetectNetModel") {}
-};
-
-struct CVDnnDetectorAddEvent {
-    string m_netModelType; /* yolo3, ssd, tensorflow, pytorch, caffe */
-    string m_modelPath;
-    string m_
-};
-
-/* cvDnnDetect component may have diffrent implementation;
-   so we would also register impl later, refer to register part at bottom of ffdynaDehazor.cpp's file */
-
-/* here is one implementation called, CVDnnDetect */
-class CVDnnDetect : public DavImpl {
+/* options passing use AVDictionary */
+class CvDnnDetect : public DavImpl {
 public:
-    CVDnnDetect(const DavWaveOption & options) : DavImpl(options) {
+    CvDnnDetect(const DavWaveOption & options) : DavImpl(options) {
         implDefaultInstantiate();
     }
-    virtual ~CVDnnDetect() {onDestruct();}
+    virtual ~CvDnnDetect() {onDestruct();}
 
-private: /* Interface we should implement */
-    CVDnnDetect(const CVDnnDetect &) = delete;
-    CVDnnDetect & operator= (const CVDnnDetect &) = delete;
+private:
+    CvDnnDetect(const CvDnnDetect &) = delete;
+    CvDnnDetect & operator= (const CvDnnDetect &) = delete;
     virtual int onConstruct();
     virtual int onDestruct();
     virtual int onProcess(DavProcCtx & ctx);
-    virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
-    /* if no travel dynamic needed, leave it empty */
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
+    virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
+
+private: // event process
+    int processChangeConfidenceThreshold(const CvDynaEventChangeConfidenceThreshold & e);
 
 private:
-    int processFogFactorUpdate(const FogFactorChangeEvent & e);
-
-private:
-    unique_ptr<Dehazor> m_dehazor;
+    unique_ptr<cv::dnn::Net> m_net;
 };
 
 } //namespace ff_dynamic

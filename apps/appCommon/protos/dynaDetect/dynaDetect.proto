@@ -10,11 +10,30 @@ message DynaDetectGlobalSetting {
 }
 
 // message Dynamic
-
 message DynaDetectTaskConfig {
     AppGlobalSetting.GlobalSetting app_global_setting = 1;
     IalGlobalSetting dyna_detect_global_setting = 2;
     DavStreamletSetting.InputStreamletSetting input_setting = 10;
     DavStreamletSetting.OutputStreamletSetting output_setting = 11;
-
 }
+
+message DynaDetectorSetting {
+    string detector_type = 1;
+    string detector_framework_tag = 2;
+    int32 target_id = 3; //
+    float scale = 11;
+    repeated double meas = 12; // Scalar mean;
+    bool swap_rb = 13;
+    int32 width = 14;
+    int32 height = 15;
+    string model_path = 20;
+    string config_path = 21;
+}
+
+/*
+ "{ target      | 0 | Choose one of target computation devices: "
+                      "0: CPU target (by default), "
+                      "1: OpenCL, "
+                      "2: OpenCL fp16 (half-float precision), "
+                      "3: VPU }";
+*/

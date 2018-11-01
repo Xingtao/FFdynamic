@@ -8,11 +8,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 namespace ff_dynamic {
 
-struct DavCVDnnDetectStreamletTag : public DavStreamletTag {
-    DavCVDnnDetectStreamletTag() :
-        DavStreamletTag("CVDnnDetectStreamlet", type_index(typeid(DavCVDnnDetectStreamletTag))) {}
-    explicit DavCVDnnDetectStreamletTag(const string & streamletName)
-        : DavStreamletTag(streamletName, type_index(typeid(DavCVDnnDetectStreamletTag))) {}
+struct DavCvDnnDetectStreamletTag : public DavStreamletTag {
+    DavCvDnnDetectStreamletTag() :
+        DavStreamletTag("CvDnnDetectStreamlet", type_index(typeid(DavCvDnnDetectStreamletTag))) {}
+    explicit DavCvDnnDetectStreamletTag(const string & streamletName)
+        : DavStreamletTag(streamletName, type_index(typeid(DavCvDnnDetectStreamletTag))) {}
 };
 
 struct DavCvObjClassifyStreamletTag : public DavStreamletTag {
@@ -23,7 +23,7 @@ struct DavCvObjClassifyStreamletTag : public DavStreamletTag {
 };
 
 /* Customize cv streamlet builders */
-class DavCVDnnDetectStreamletBuilder : public DavStreamletBuilder {
+class DavCvDnnDetectStreamletBuilder : public DavStreamletBuilder {
 public:
     virtual shared_ptr<DavStreamlet> build(const vector<DavWaveOption> & waveOptions,
                                            const DavStreamletTag & streamletTag,

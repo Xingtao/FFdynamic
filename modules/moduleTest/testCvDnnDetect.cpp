@@ -1,5 +1,5 @@
 #include <string>
-#include "cliCommon.h"
+#include "testCommon.h"
 #include "cvDnnDetect.h"
 #include "cvStreamlet.h"
 
@@ -7,12 +7,12 @@ using namespace ff_dynamic;
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        std::cout << "usage: cliDehazor inputFile\n";
+        std::cout << "usage: testDehazor inputFile\n";
         return -1;
     }
 
-    cli_common::cliInit(argv[0]);
-    LOG(INFO) << "starting cli: " << argv[1];
+    test_common::testInit(argv[0]);
+    LOG(INFO) << "starting test: " << argv[1];
     // 1. create demux and get stream info
     DavWaveOption demuxOption((DavWaveClassDemux()));
     demuxOption.set(DavOptionInputUrl(), argv[1]);
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
     // start
     DavRiver river({streamletInput, dehazeStreamlet, streamletMix, streamletOutput});
     river.start();
-    cli_common::cliRun(river);
+    test_common::testRun(river);
     river.stop();
     river.clear();
     return 0;

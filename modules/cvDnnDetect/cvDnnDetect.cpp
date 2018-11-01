@@ -173,7 +173,7 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     return 0;
 }
 
-///////////////////
+////////////
 // [helpers]
 int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs,
                              shared_ptr<CvDnnDetectEvent> & detectEvent) {
@@ -186,95 +186,74 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
     /* result assign */
     vector<int> outLayers = net.getUnconnectedOutLayers();
     string outLayerType = net.getLayer(outLayers[0])->type;
-
-    vector<int> classIds;
-    vector<float> confidences;
-    vector<Rect> boxes;
-
     if (net.getLayer(0)->outputNameToIndex("im_info") != -1) { // Faster-RCNN or R-FCN
         // Network produces output blob with a shape 1x1xNx7 where N is a number of detections.
         // each detection is: [batchId, classId, confidence, left, top, right, bottom]
-        CHECK(outs.size() == 1) << "Faster-Rcnn or R-FCN ";
-        float* data = (float*)outs[0].data;
-        for (size_t i = 0; i < outs[0].total(); i += 7) {
+        CHECK(outs.size() == 1) << "Faster-Rcnn or R-FCN output should have size 1";
+        const float* data = (float*)outs[0].data;
+        for (size_t i=0; i < outs[0].total(); i+=7) {
             CvDnnDetectEvent::DetectResult result;
-            float confidence = data[i + 2];
-            if (confidence > confThreshold) {
-                int left = (int)data[i + 3];
-                int top = (int)data[i + 4];
-                int right = (int)data[i + 5];
-                int bottom = (int)data[i + 6];
-                int width = right - left + 1;
-                int height = bottom - top + 1;
-                classIds.push_back((int)(data[i + 1]) - 1);  // Skip 0th background class id.
-                boxes.push_back(Rect(left, top, width, height));
-                confidences.push_back(confidence);
+            result.m_confidence = data[i + 2];
+            if (result.confidence > m_dps.m_confThreshold) {
+                result.m_rect.x = (int)data[i + 3];
+                result.m_rect.y = (int)data[i + 4];
+                const int right = (int)data[i + 5];
+                const int bottom = (int)data[i + 6];
+                result.m_rect.width = right - result.m_rect.x + 1;
+                result.m_rect.height = bottom - result.m_rect.y + 1;
+                const int classId = (int)(data[i + 1]) - 1; // classId 0 is background
+                if (classId < (int)m_classNames.size())
+                    result.m_className = m_classNames[classId];
             }
+            detectEvent.emplace_back(result);
         }
-    }
-    else if (outLayerType == "DetectionOutput")
-    {
-        // Network produces output blob with a shape 1x1xNx7 where N is a number of
-        // detections and an every detection is a vector of values
-        // [batchId, classId, confidence, left, top, right, bottom]
-        CV_Assert(outs.size() == 1);
-        float* data = (float*)outs[0].data;
-        for (size_t i = 0; i < outs[0].total(); i += 7)
-        {
-            float confidence = data[i + 2];
-            if (confidence > confThreshold)
-            {
-                int left = (int)(data[i + 3] * frame.cols);
-                int top = (int)(data[i + 4] * frame.rows);
-                int right = (int)(data[i + 5] * frame.cols);
-                int bottom = (int)(data[i + 6] * frame.rows);
-                int width = right - left + 1;
-                int height = bottom - top + 1;
-                classIds.push_back((int)(data[i + 1]) - 1);  // Skip 0th background class id.
-                boxes.push_back(Rect(left, top, width, height));
-                confidences.push_back(confidence);
+    } else if (outLayerType == "DetectionOutput") {
+        // Network produces output blob with a shape 1x1xNx7 where N is a number of detections。
+        // each detection: [batchId, classId, confidence, left, top, right, bottom]
+        CHECK(outs.size() == 1) << "DetectionOutput should have size one";
+        const float* data = (float*)outs[0].data;
+        for (size_t i=0; i < outs[0].total(); i+=7) {
+            CvDnnDetectEvent::DetectResult result;
+            result.m_confidence = data[i + 2];
+            if (result.confidence > m_dps.m_confThreshold) {
+                result.m_rect.x = (int)(data[i + 3] * image.cols);
+                result.m_rect.y = (int)(data[i + 4] * image.rows);
+                const int right = (int)(data[i + 5] * image.cols);
+                const int bottom = (int)(data[i + 6] * image.rows);
+                result.m_rect.w = right - result.m_rect.x + 1;
+                result.m_rect.h = bottom - result.m_rect.y + 1;
+                const int classId = (int)(data[i + 1]) - 1; // classId 0 is background
+                if (classId < (int)m_classNames.size())
+                    result.m_className = m_classNames[classId];
             }
+            detectEvent.emplace_back(result);
         }
-    }
-    else if (outLayerType == "Region")
-    {
-        for (size_t i = 0; i < outs.size(); ++i)
-        {
-            // Network produces output blob with a shape NxC where N is a number of
-            // detected objects and C is a number of classes + 4 where the first 4
-            // numbers are [center_x, center_y, width, height]
+    } else if (outLayerType == "Region") {
+        for (size_t i = 0; i < outs.size(); ++i) {
+            // Network produces output blob with a shape NxC where N is a number of detected objects
+            // and C is a number of classes + 4; 4 numbers are [center_x, center_y, width, height]
             float* data = (float*)outs[i].data;
-            for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols)
-            {
+            for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols) {
                 Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
                 Point classIdPoint;
-                double confidence;
-                minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
-                if (confidence > confThreshold)
-                {
-                    int centerX = (int)(data[0] * frame.cols);
-                    int centerY = (int)(data[1] * frame.rows);
-                    int width = (int)(data[2] * frame.cols);
-                    int height = (int)(data[3] * frame.rows);
-                    int left = centerX - width / 2;
-                    int top = centerY - height / 2;
-
-                    classIds.push_back(classIdPoint.x);
-                    confidences.push_back((float)confidence);
-                    boxes.push_back(Rect(left, top, width, height));
+                minMaxLoc(scores, 0, &result.m_confidence, 0, &classIdPoint);
+                if (result.m_confidence > m_dps.m_confThreshold) {
+                    int centerX = (int)(data[0] * image.cols);
+                    int centerY = (int)(data[1] * image.rows);
+                    result.m_rect.w = (int)(data[2] * image.cols);
+                    result.m_rect.h = (int)(data[3] * image.rows);
+                    result.m_rect.x = centerX - result.m_rect.w / 2;
+                    result.m_rect.y = centerY - result.m_rect.h / 2;
+                    if (classIdPoint.x < (int)m_classNames.size())
+                        result.m_className = m_classNames[classIdPoint.x];
                 }
             }
+            detectEvent.emplace_back(result);
         }
-    }
-    else
+    } else {
         LOG(ERROR) << m_logtag << "Unknown output layer type: " << outLayerType;
-
-    struct DetectResult {
-        string m_className;
-        double m_confidence;
-        DavRect m_rect; /* not used for classify */
-    };
-    vector<DetectResult> m_results;
+        return -1;
+    }
     return 0;
 }
 

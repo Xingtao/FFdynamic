@@ -1,8 +1,8 @@
-#include "testCommon.h"
+#include "cliCommon.h"
 
 using namespace ff_dynamic;
 
-namespace test_common {
+namespace cli_common {
 
 std::atomic<bool> g_bExit = ATOMIC_VAR_INIT(false);
 std::atomic<int> g_bInterruptCount = ATOMIC_VAR_INIT(0);
@@ -16,7 +16,7 @@ void sigIntHandle(int sig) {
     }
 }
 
-int testInit(const string & logtag) {
+int cliInit(const string & logtag) {
     google::InitGoogleLogging(logtag.c_str());
     google::InstallFailureSignalHandler();
     FLAGS_stderrthreshold = 0;
@@ -26,4 +26,4 @@ int testInit(const string & logtag) {
     return 0;
 }
 
-} // namespace test_common
+} // namespace cli_common

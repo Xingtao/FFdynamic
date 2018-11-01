@@ -13,20 +13,19 @@
 #include "davMessager.h"
 #include "davStreamlet.h"
 
-namespace test_common {
+namespace cli_common {
 using ::std::string;
 using namespace ff_dynamic;
 using namespace global_sighandle;
 
 extern std::atomic<bool> g_bExit;
-extern int testInit(const string & logtag);
+extern int cliInit(const string & logtag);
 
 template<typename T>
-int testRun(T & t) {
+int cliRun(T & t) {
     LOG(INFO) << "-- Start river process";
     int ret = 0;
     auto & collector = DavMsgCollector::getInstance();
-
     do {
         if (t.isStopped()) {
             break;
@@ -41,18 +40,16 @@ int testRun(T & t) {
         }
 
         auto msg = collector.getMsg();
-        if (0 && msg) {
-            /* report collected msg to whereever needed */
+        if (0 && msg) { /* report collected msg to whereever needed */
             char *buf = nullptr;
             av_dict_get_string(msg.get(), &buf, ':', ',');
-            LOG(INFO) << "FILTER-TEST " << buf;
+            LOG(INFO) << "[cli common] " << buf;
             av_freep(&buf);
         }
-
         usleep(static_cast<int>(EUSleepTime::e100ms));
-    } while(!g_bExit);
+    } while (!g_bExit);
 
     return 0;
 }
 
-} // namespace test_common
+} // namespace cli_common

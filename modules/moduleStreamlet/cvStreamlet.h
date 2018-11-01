@@ -15,13 +15,6 @@ struct DavCvDnnDetectStreamletTag : public DavStreamletTag {
         : DavStreamletTag(streamletName, type_index(typeid(DavCvDnnDetectStreamletTag))) {}
 };
 
-struct DavCvObjClassifyStreamletTag : public DavStreamletTag {
-    DavCvObjClassifyStreamletTag() :
-        DavStreamletTag("CvObjClassifyStreamlet", type_index(typeid(DavCvObjClassifyStreamletTag))) {}
-    explicit DavCvObjClassifyStreamletTag(const string & streamletName)
-        : DavStreamletTag(streamletName, type_index(typeid(DavCvObjClassifyStreamletTag))) {}
-};
-
 /* Customize cv streamlet builders */
 class DavCvDnnDetectStreamletBuilder : public DavStreamletBuilder {
 public:
@@ -30,13 +23,6 @@ public:
                                            const DavStreamletOption & streamletOptions = DavStreamletOption());
 };
 
-/* Customize your builders if it does't meet the scenario */
-class DavCvObjClassifyStreamletBuilder : public DavStreamletBuilder {
-public:
-    virtual shared_ptr<DavStreamlet> build(const vector<DavWaveOption> & waveOptions,
-                                           const DavStreamletTag & streamletTag,
-                                           const DavStreamletOption & streamletOptions = DavStreamletOption());
-};
-
+/* follow other cv streamlet builders */
 
 } // namespace ff_dynamic

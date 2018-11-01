@@ -12,8 +12,8 @@ struct CvDnnDetectEvent : public DavPeerEvent {
     string m_detectorFrameworkTag; /* detailed tag of the model: yolo, ssd, etc.. */
     double m_inferTime = -1.0; /* negative if unknown */
     struct DetectResult {
-        string m_className;
-        double m_confidence;
+        string m_className{"unknown"};
+        double m_confidence = 0.0;
         DavRect m_rect; /* not used for classify */
     };
     vector<DetectResult> m_results;

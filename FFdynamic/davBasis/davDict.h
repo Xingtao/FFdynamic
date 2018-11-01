@@ -71,6 +71,7 @@ public:
     }
     int getAVRational(const string & key, AVRational & r) const;
     int getVideoSize(int & width, int & height) const;
+
     ///////////////////
     /* DavOption Get */
     inline string get(const DavOption & davOpt) const {
@@ -107,6 +108,20 @@ public:
         if (o.valueType() != type_index(typeid(c)))
             return DAV_ERROR_DICT_TYPE_MISMATCH;
         c = m_categoryOptions.at(o);
+        return 0;
+    }
+    /////////////////////////
+    /* DavOption Array Get */
+    inline int getIntArray(const string & o, vector<int> & a) const {
+        if (!m_intArrayOptions.count(o))
+            return DAV_ERROR_DICT_KEY_EXIST;
+        a = m_intArrayOptions.at(o);
+        return 0;
+    }
+    inline int getDoubleArray(const string & o, vector<double> & a) const {
+        if (!m_doubleArrayOptions.count(o))
+            return DAV_ERROR_DICT_KEY_EXIST;
+        a = m_doubleArrayOptions.at(o);
         return 0;
     }
 
@@ -171,6 +186,20 @@ public:
         m_categoryOptions.emplace(o, v);
         return 0;
     }
+    /* array settings */
+    inline int setIntArray(const string & key, const vector<int> & a) {
+        if (m_intArrayOptions.count(key))
+            return DAV_ERROR_DICT_KEY_EXIST;
+        m_intArrayOptions.emplace(key, a);
+        return 0;
+    }
+    inline int setDoubleArray(const string & key, const vector<double> & a) {
+        if (m_doubleArrayOptions.count(key))
+            return DAV_ERROR_DICT_KEY_EXIST;
+        m_doubleArrayOptions.emplace(key, a);
+        return 0;
+    }
+
     /* delete option */
     inline int erase(const DavOption & o) {
         if (m_davOptions.count(o))
@@ -184,6 +213,9 @@ public:
 public:
     inline const map<DavOption, string> & getDavOptions() const {return m_davOptions;}
     inline const map<DavOption, DavOption> & getCategoryOptions() const {return m_categoryOptions;}
+    inline const map<string, vector<int>> & getIntArrayOptions() const {return m_intArrayOptions;}
+    inline const map<string, vector<double>> & getDoubleArrayOptions() const {return m_doubleArrayOptions;}
+
     inline bool isDavOptionsEmpty() const {return m_davOptions.size() == 0;}
     inline bool isCategoryOptionsEmpty() const {return m_categoryOptions.size() == 0;}
     string dump() const;
@@ -202,12 +234,16 @@ private:
         av_dict_copy(&m_d, r.get(), 0);
         m_categoryOptions = r.getCategoryOptions();
         m_davOptions = r.getDavOptions();
+        m_intArrayOptions = r.getIntArrayOptions();
+        m_doubleArrayOptions = r.getDoubleArrayOptions();
     }
 
 private:
-    AVDictionary *m_d = nullptr;
+    AVDictionary *m_d = nullptr; /* ffmpeg's options passing structure */
     map<DavOption, string> m_davOptions; /* primitives: int double string */
     map<DavOption, DavOption> m_categoryOptions; /* DavOption derived class as category (enum) */
+    map<string, vector<int>> m_intArrayOptions;
+    map<string, vector<double>> m_doubleArrayOptions;
     std::mutex m_mutex; /* TODO: mutex needed ? Not right now */
 };
 

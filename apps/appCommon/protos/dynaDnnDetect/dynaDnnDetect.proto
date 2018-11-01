@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+import "davStreamletSetting.proto";
+import "appGlobalSetting.proto";
+
+package DynaDnnDetect;
+
+// config
+message DynaDnnDetectTaskConfig {
+    AppGlobalSetting.GlobalSetting app_global_setting = 1;
+    IalGlobalSetting dyna_detect_global_setting = 2;
+    DavStreamletSetting.InputStreamletSetting input_setting = 10;
+    DavStreamletSetting.OutputStreamletSetting output_setting = 11;
+    repeated DynaDnnDetectSetting dnn_detector_settings;
+}
+
+message DynaDetectGlobalSetting {
+    int32 max_detectors = 5; /* max detectors run in parallel */
+}
+
+message DnnDetectSetting {
+    string detector_type = 1;
+    string detector_framework_tag = 2;
+    string model_path = 3;
+    string config_path = 4;
+    string classname_path = 5;
+    int32 backend_id = 6;
+    int32 target_id = 7;
+
+    float scaleFactor = 11;
+    repeated double means = 12; // Scalar mean (4 'double' element vector )
+    bool swap_rb = 13;
+    int32 width = 14;
+    int32 height = 15;
+}

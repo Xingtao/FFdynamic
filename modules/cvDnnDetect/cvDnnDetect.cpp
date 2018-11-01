@@ -48,7 +48,7 @@ int CvDnnDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
 
 ////////////////////////////////////
 //  [event process]
-int CvDnnDetect::processChangeConfidenceThreshold(const CvDynaEventChangeConfidenceThreshold & e) {
+int CvDnnDetect::processChangeConfidenceThreshold(const CvDynaEventChangeConfThreshold & e) {
     m_confidenceThreshold = e.m_confidenceThreshold;
     return 0;
 }
@@ -61,12 +61,19 @@ int CvDnnDetect::onConstruct() {
        Let's say we require dynamically change some dehaze's parameters, 'FogFactor':
        We can register an handler to process this.
     */
-    std::function<int (const CvDynaEventChangeConfidenceThreshold &)> f =
-        [this] (const CvDynaEventChangeConfidenceThreshold & e) {return processChangeConfidenceThreshold(e);};
+    std::function<int (const CvDynaEventChangeConfThreshold &)> f =
+        [this] (const CvDynaEventChangeConfThreshold & e) {return processChangeConfidenceThreshold(e);};
     m_implEvent.registerEvent(f);
 
-    /* tells we only output one video stream */
-    m_outputMediaMap.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO));
+    = m_options.getDouble("thr", confThreshold);
+    nmsThreshold = parser.get<float>("nms");
+    float scale = parser.get<float>("scale");
+    Scalar mean = parser.get<Scalar>("mean");
+    bool swapRB = parser.get<bool>("rgb");
+    int inpWidth = parser.get<int>("width");
+    int inpHeight = parser.get<int>("height");
+
+    /* there is no data output but event (detect results) */
     return 0;
 }
 

@@ -36,10 +36,9 @@ private: // event process
     int processChangeConfThreshold(const CvDynaEventChangeConfThreshold & e);
 
 private: /* helpers */
-    vector<string> & CvDnnDetect::getOutputsNames() {
+    vector<string> & CvDnnDetect::getOutputsNames();
 
-private:
-    cv::dnn::Net m_net;
+public:
     struct DetectParams { /* internal use, for clearity */
         string m_detectorType;
         string m_detectorFrameworkTag;
@@ -55,9 +54,14 @@ private:
         int32 m_height = -1;
         double m_confThreshold = 0.7;
     };
+
+private:
+    cv::dnn::Net m_net;
     DetectParams m_dps;
     vector<cv::String> m_outBlobNames;
-    vector<cv::String> m_
+    vector<string> m_classNames;
 };
+
+extern std::ostream & operator<<(std::ostream & os, const DetectParams & p);
 
 } //namespace ff_dynamic

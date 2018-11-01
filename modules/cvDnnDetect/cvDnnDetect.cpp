@@ -1,3 +1,5 @@
+#include <iostream>
+#include <fstream>
 #include "cvDnnDetector.h"
 
 namespace ff_dynamic {
@@ -32,7 +34,6 @@ int CvDnnDetect::onConstruct() {
     m_dps.m_modelPath = m_options.get("model_path");
     m_dps.m_configPath = m_options.get("config_path");
     m_dps.m_classnamePath = m_options.get("classname_path");
-
     m_options.getInt("backend_id", m_dps.m_backendID);
     m_options.getInt("target_id", m_dps.m_targetId);
     m_options.getDouble("scale_factor", m_dps.m_scaleFactor);
@@ -45,10 +46,28 @@ int CvDnnDetect::onConstruct() {
     m_options.getDoubleArray("means", means);
     for (auto & m : means)
         m_dps.m_means.emplace_back(m);
+
     // what about fail ?
-    m_net = readNet(m_dps.m_modelPath, m_dps.m_configPath, m_dps.m_detectorFrameworkTag);
+    try {
+        m_net = readNet(m_dps.m_modelPath, m_dps.m_configPath, m_dps.m_detectorFrameworkTag);
+    } catch (const std::exception & e) {
+        string detail = "Fail create cv dnn net model. model path " + m_dps.m_modelPath +
+            ", confit path" +  m_dps.m_configPath +  e.what()
+        ERRORIT(DAV_ERROR_IMPL_ON_CONSTRUCT, detail);
+        return DAV_ERROR_IMPL_ON_CONSTRUCT;
+    }
     m_net.setPreferableBackend(m_dps.m_backendId);
     m_net.setPreferableTarget(m_dps.m_targetId);
+
+    std::ifstream ifs(m_dps.m_classnamePath.c_str());
+    if (!ifs.is_open()) {
+        ERRORIT(DAV_ERROR_IMPL_ON_CONSTRUCT, "fail to open class name file " + m_dps.m_classnamePath);
+        return DAV_ERROR_IMPL_ON_CONSTRUCT;
+    }
+    std::string line;
+    while (std::getline(ifs, line)) {
+        m_classNames.emplace_back(line);
+    }
     LOG(INFO) << m_logtag << "CvDnnDetect create done: " << m_dps;
     return 0;
 }
@@ -60,41 +79,26 @@ int CvDnnDetect::onDestruct() {
 
 ////////////////////////////////////
 //  [dynamic initialization]
+
 int CvDnnDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
-    CHECK(m_inputTravelStatic.size() == ctx.m_froms.size() && ctx.m_froms.size() == 1);
     DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(ctx.m_froms[0]);
     if (!in.m_codecpar && (in.m_pixfmt == AV_PIX_FMT_NONE)) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
                 m_logtag + "dehaze cannot get valid codecpar or videopar");
         return DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR;
     }
-
-    /* Ok, get input parameters, for some implementations may need those paramters do init */
-    m_net.reset(new Dehazor());
-    /* dehaze's options: if get fail, will use default one */
-    double fogFactor = 0.95;
-    m_options.getDouble(DavOptionDehazeFogFactor(), fogFactor);
-    m_net->setFogFactor(fogFactor);
-
     /* set output infos */
     m_timestampMgr.clear();
     m_outputTravelStatic.clear();
-    DavImplTravel::TravelStatic out(in); /* use the same timebase with the input */
-    LOG(INFO) << m_logtag << "travel static input/output for dehaze is the same: " << in;
     m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in.m_timebase, in.m_timebase)));
-    /* output only one stream: dehazed video stream */
-    m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out));
-
-    /* ok, no other works needed */
-    /* must set this one after init done */
+    /* output no data stream, so no output travel static info */
     m_bDynamicallyInitialized = true;
-    LOG(INFO) << m_logtag << "dynamically create dehazor done.\nin static: " << in << ", \nout: " << out;
     return 0;
 }
 
 ////////////////////////////
 //  [dynamic initialization]
-/* here is the data process */
+
 int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
     if (!ctx.m_inBuf) {
@@ -148,19 +152,14 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     /* prepare output events*/
     auto detectEvent = make_shared<CvDnnDetectEvent>();
     detectEvent.m_framePts = inFrame->pts;
-    detectEvent.m_m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
+    postprocess(image, outs, detectEvent);
 
-    postprocess(image, outs);
+    detectEvent.m_inferTime =
     // Put efficiency information.
     std::vector<double> layersTimes;
-    double freq = getTickFrequency() / 1000;
-    double t = m_net.getPerfProfile(layersTimes) / freq;
-    std::string label = format("Inference time: %.2f ms", t);
-    putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0));
+    const double freq = cv::getTickFrequency() / 1000;
+    const double t = m_net.getPerfProfile(layersTimes) / freq;
 
-    int64_t m_framePts = 0;
-    string m_detectorType; /* for simplicity, use string. only two right now: 'classify' or 'detect' */
-    string ; /* detailed tag of the model: yolo, ssd, etc.. */
     double m_inferTime = 0.0;
     struct DetectResult {
         string m_className;
@@ -175,15 +174,108 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
 }
 
 ///////////////////
-// [Trival helpers]
-std::ostream & operator<<(std::ostream & os, const DetectParams & p) {
-    os << "[dectorType " << p.m_detectorType << ", detectorFrameworkTag " << p.m_detectorFrameworkTag
-       << ", modelPath " << p.m_modelPath << ", configPath " << p.m_configPath
-       << ", classnamePath " << p.m_classnamePath << ", backendId " << p.m_backendId
-       << ", targetId " << p.m_targetId << ", scaleFactor " << p.m_scaleFactor
-       << ", means " << Scalar << ", bSwapRb " << p.m_bSwapRb << ", width " << p.m_width
-       << ", height " << p.m_height << ", confThreshold " << m_confThreshold;
-    return os;
+// [helpers]
+int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs,
+                             shared_ptr<CvDnnDetectEvent> & detectEvent) {
+    vector<double> layersTimes;
+    const double freq = cv::getTickFrequency() / 1000;
+    detectEvent.m_inferTime = m_net.getPerfProfile(layersTimes) / freq;
+    detectEvent.m_detectorType = m_dps.m_detectorType;
+    detectEvent.m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
+
+    /* result assign */
+    vector<int> outLayers = net.getUnconnectedOutLayers();
+    string outLayerType = net.getLayer(outLayers[0])->type;
+
+    vector<int> classIds;
+    vector<float> confidences;
+    vector<Rect> boxes;
+
+    if (net.getLayer(0)->outputNameToIndex("im_info") != -1) { // Faster-RCNN or R-FCN
+        // Network produces output blob with a shape 1x1xNx7 where N is a number of detections.
+        // each detection is: [batchId, classId, confidence, left, top, right, bottom]
+        CHECK(outs.size() == 1) << "Faster-Rcnn or R-FCN ";
+        float* data = (float*)outs[0].data;
+        for (size_t i = 0; i < outs[0].total(); i += 7) {
+            CvDnnDetectEvent::DetectResult result;
+            float confidence = data[i + 2];
+            if (confidence > confThreshold) {
+                int left = (int)data[i + 3];
+                int top = (int)data[i + 4];
+                int right = (int)data[i + 5];
+                int bottom = (int)data[i + 6];
+                int width = right - left + 1;
+                int height = bottom - top + 1;
+                classIds.push_back((int)(data[i + 1]) - 1);  // Skip 0th background class id.
+                boxes.push_back(Rect(left, top, width, height));
+                confidences.push_back(confidence);
+            }
+        }
+    }
+    else if (outLayerType == "DetectionOutput")
+    {
+        // Network produces output blob with a shape 1x1xNx7 where N is a number of
+        // detections and an every detection is a vector of values
+        // [batchId, classId, confidence, left, top, right, bottom]
+        CV_Assert(outs.size() == 1);
+        float* data = (float*)outs[0].data;
+        for (size_t i = 0; i < outs[0].total(); i += 7)
+        {
+            float confidence = data[i + 2];
+            if (confidence > confThreshold)
+            {
+                int left = (int)(data[i + 3] * frame.cols);
+                int top = (int)(data[i + 4] * frame.rows);
+                int right = (int)(data[i + 5] * frame.cols);
+                int bottom = (int)(data[i + 6] * frame.rows);
+                int width = right - left + 1;
+                int height = bottom - top + 1;
+                classIds.push_back((int)(data[i + 1]) - 1);  // Skip 0th background class id.
+                boxes.push_back(Rect(left, top, width, height));
+                confidences.push_back(confidence);
+            }
+        }
+    }
+    else if (outLayerType == "Region")
+    {
+        for (size_t i = 0; i < outs.size(); ++i)
+        {
+            // Network produces output blob with a shape NxC where N is a number of
+            // detected objects and C is a number of classes + 4 where the first 4
+            // numbers are [center_x, center_y, width, height]
+            float* data = (float*)outs[i].data;
+            for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols)
+            {
+                Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
+                Point classIdPoint;
+                double confidence;
+                minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
+                if (confidence > confThreshold)
+                {
+                    int centerX = (int)(data[0] * frame.cols);
+                    int centerY = (int)(data[1] * frame.rows);
+                    int width = (int)(data[2] * frame.cols);
+                    int height = (int)(data[3] * frame.rows);
+                    int left = centerX - width / 2;
+                    int top = centerY - height / 2;
+
+                    classIds.push_back(classIdPoint.x);
+                    confidences.push_back((float)confidence);
+                    boxes.push_back(Rect(left, top, width, height));
+                }
+            }
+        }
+    }
+    else
+        LOG(ERROR) << m_logtag << "Unknown output layer type: " << outLayerType;
+
+    struct DetectResult {
+        string m_className;
+        double m_confidence;
+        DavRect m_rect; /* not used for classify */
+    };
+    vector<DetectResult> m_results;
+    return 0;
 }
 
 std::vector<cv::String> & CvDnnDetect::getOutputsNames() {
@@ -195,6 +287,16 @@ std::vector<cv::String> & CvDnnDetect::getOutputsNames() {
             m_outBlobNames[i] = layersNames[outLayers[i] - 1];
     }
     return m_outBlobNames;
+}
+
+std::ostream & operator<<(std::ostream & os, const DetectParams & p) {
+    os << "[dectorType " << p.m_detectorType << ", detectorFrameworkTag " << p.m_detectorFrameworkTag
+       << ", modelPath " << p.m_modelPath << ", configPath " << p.m_configPath
+       << ", classnamePath " << p.m_classnamePath << ", backendId " << p.m_backendId
+       << ", targetId " << p.m_targetId << ", scaleFactor " << p.m_scaleFactor
+       << ", means " << Scalar << ", bSwapRb " << p.m_bSwapRb << ", width " << p.m_width
+       << ", height " << p.m_height << ", confThreshold " << m_confThreshold;
+    return os;
 }
 
 } // namespace ff_dynamic

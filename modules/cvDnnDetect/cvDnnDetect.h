@@ -35,6 +35,9 @@ private:
 private: // event process
     int processChangeConfThreshold(const CvDynaEventChangeConfThreshold & e);
 
+private: /* helpers */
+    vector<string> & CvDnnDetect::getOutputsNames() {
+
 private:
     cv::dnn::Net m_net;
     struct DetectParams { /* internal use, for clearity */
@@ -53,6 +56,8 @@ private:
         double m_confThreshold = 0.7;
     };
     DetectParams m_dps;
+    vector<cv::String> m_outBlobNames;
+    vector<cv::String> m_
 };
 
 } //namespace ff_dynamic

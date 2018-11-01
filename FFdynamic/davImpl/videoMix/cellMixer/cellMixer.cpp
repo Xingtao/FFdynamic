@@ -350,7 +350,7 @@ int CellMixer::mixOneFrame() {
             continue;
         }
         cellPasteCount++;
-        videoSyncEvent->m_videoStreamInfos.push_back(DavEventVideoMixSync::VideoStreamInfo());
+        videoSyncEvent->m_videoStreamInfos.emplace_back(DavEventVideoMixSync::VideoStreamInfo());
         auto & videoStreamSyncInfo = videoSyncEvent->m_videoStreamInfos.back();
         videoStreamSyncInfo.m_from = orderedFrom.second;
         videoStreamSyncInfo.m_curPts = frame->pts;
@@ -363,8 +363,8 @@ int CellMixer::mixOneFrame() {
     m_canvasFrame->pts = m_curMixPts;
     /* put ready mixed frame */
     auto outFrame = copyMixedFrame();
-    m_mixedFrames.push_back(outFrame);
-    m_mixerPeerEvents.push_back(videoSyncEvent);
+    m_mixedFrames.emplace_back(outFrame);
+    m_mixerPeerEvents.emplace_back(videoSyncEvent);
     return 0;
 }
 

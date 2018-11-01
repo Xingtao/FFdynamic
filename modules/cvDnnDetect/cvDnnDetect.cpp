@@ -107,12 +107,11 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
        but timestamp is convert to current impl's timebase */
     auto inFrame = ctx.m_inRefFrame;
     if (!inFrame) {
-        LOG(INFO) << m_logtag << "video dehaze reciving flush frame";
+        LOG(INFO) << m_logtag << "cv dnn detector reciving flush frame";
         ctx.m_bInputFlush = true;
-        /* no implementation flush needed, so just return EOF */
+        /* no flush needed, so just return EOF */
         return AVERROR_EOF;
     }
-    /* const DavProcFrom & from = ctx.m_inBuf->getAddress(); */
 
     // convert this frame to opencv Mat
     CHECK((enum AVPixelFormat)inFrame->format == AV_PIX_FMT_YUV420P);
@@ -127,30 +126,51 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
         memcpy(v + k * inFrame->width/2, inFrame->data[2] + k * inFrame->linesize[2], inFrame->width/2);
     }
 
-    cv::Mat bgrMat;
-    cv::cvtColor(yuvMat, bgrMat, CV_YUV2BGR_I420);
-    cv::Mat dehazedMat = m_net->process(bgrMat); /* do dehaze */
-    cv::cvtColor(dehazedMat, yuvMat, CV_BGR2YUV_I420);
+    cv::Mat image, blob;
+    if (m_dps.m_bSwapRb)
+        cv::cvtColor(yuvMat, image, CV_YUV2RGB_I420);
+    else
+        cv::cvtColor(yuvMat, image, CV_YUV2BGR_I420);
 
-    /* then convert back to YUV420p (because our output travel static says so);
-       if we state it is AV_PIX_FMT_BGR24, then no convertion needed here. */
-    auto outBuf = make_shared<DavProcBuf>();
-    auto outFrame = outBuf->mkAVFrame();
-    outFrame->width = inFrame->width;
-    outFrame->height = inFrame->height;
-    outFrame->format = inFrame->format;
-    av_frame_get_buffer(outFrame, 16);
-    for (int k=0; k < outFrame->height; k++)
-        memcpy(outFrame->data[0] + k * outFrame->linesize[0], yuvMat.data + k * outFrame->width, outFrame->width);
-    for (int k=0; k < outFrame->height/2; k++) {
-        memcpy(outFrame->data[1] + k * outFrame->linesize[1], u + k * outFrame->width/2, outFrame->width/2);
-        memcpy(outFrame->data[2] + k * outFrame->linesize[2], v + k * outFrame->width/2, outFrame->width/2);
+    cv::Size inpSize(m_dps.m_width > 0 ? m_dps.m_width : image.cols,
+                     m_dps.m_height > 0 ? m_dps.m_height : image.rows);
+    blobFromImage(image, blob, m_dps.m_scaleFactor, isSize, m_dps.m_means, false, false);
+    m_net.setInptu(blob);
+    if (m_net.getLayer(0)->outputNameToIndex("im_info") != -1) { // Faster-RCNN or R-FCN
+        resize(image, image, inpSize);
+        Mat imInfo = (Mat_<float>(1, 3) << inpSize.height, inpSize.width, 1.6f);
+        net.setInput(imInfo, "im_info");
     }
 
-    /* prepare output */
-    outFrame->pts = inFrame->pts;
-    outBuf->m_travel.m_static = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
-    ctx.m_outBufs.push_back(outBuf);
+    std::vector<cv::Mat> outs;
+    m_net.forward(outs, getOutputsNames(net));
+
+    /* prepare output events*/
+    auto detectEvent = make_shared<CvDnnDetectEvent>();
+    detectEvent.m_framePts = inFrame->pts;
+    detectEvent.m_m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
+
+    postprocess(image, outs);
+    // Put efficiency information.
+    std::vector<double> layersTimes;
+    double freq = getTickFrequency() / 1000;
+    double t = m_net.getPerfProfile(layersTimes) / freq;
+    std::string label = format("Inference time: %.2f ms", t);
+    putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0));
+
+    int64_t m_framePts = 0;
+    string m_detectorType; /* for simplicity, use string. only two right now: 'classify' or 'detect' */
+    string ; /* detailed tag of the model: yolo, ssd, etc.. */
+    double m_inferTime = 0.0;
+    struct DetectResult {
+        string m_className;
+        double m_confidence;
+        DavRect m_rect; /* not used for classify */
+    };
+    vector<DetectResult> m_results;
+
+    ctx.m_pubEvents.empalce_back(detectEvent);
+    /* No travel static needed for detectors, just events */
     return 0;
 }
 
@@ -164,6 +184,17 @@ std::ostream & operator<<(std::ostream & os, const DetectParams & p) {
        << ", means " << Scalar << ", bSwapRb " << p.m_bSwapRb << ", width " << p.m_width
        << ", height " << p.m_height << ", confThreshold " << m_confThreshold;
     return os;
+}
+
+std::vector<cv::String> & CvDnnDetect::getOutputsNames() {
+    if (m_outBlobNames.empty()) {
+        vector<int> outLayers = m_net.getUnconnectedOutLayers();
+        vector<cv::String> layersNames = m_net.getLayerNames();
+        m_outBlobNames.resize(outLayers.size());
+        for (size_t i = 0; i < outLayers.size(); ++i)
+            m_outBlobNames[i] = layersNames[outLayers[i] - 1];
+    }
+    return m_outBlobNames;
 }
 
 } // namespace ff_dynamic

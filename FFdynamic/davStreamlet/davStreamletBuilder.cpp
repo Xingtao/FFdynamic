@@ -225,9 +225,7 @@ DavSingleWaveStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
         streamlet->addOneInVideoBitstreamEntry(wave);
     } else if (inDataType == DavDataInVideoRaw()) {
         streamlet->addOneInVideoRawEntry(wave);
-    }
-
-    if (inDataType == DavDataInAudioBitstream()) {
+    } else if (inDataType == DavDataInAudioBitstream()) {
         streamlet->addOneInAudioBitstreamEntry(wave);
     } else if (inDataType == DavDataInAudioRaw()) {
         streamlet->addOneInAudioRawEntry(wave);
@@ -235,12 +233,11 @@ DavSingleWaveStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
 
     if (outDataType == DavDataOutVideoBitstream()) {
         streamlet->addOneOutVideoBitstreamEntry(wave);
-    } else if outDataType == DavDataOutVideoRaw() {
+    } else if (outDataType == DavDataOutVideoRaw()) {
         streamlet->addOneOutVideoRawEntry(wave);
-    }
-    if (outDataType == DavDataOutAudioBitstream()) {
+    } else if (outDataType == DavDataOutAudioBitstream()) {
         streamlet->addOneOutAudioBitstreamEntry(wave);
-    } else if outDataType == DavDataOutAudioRaw() {
+    } else if (outDataType == DavDataOutAudioRaw()) {
         streamlet->addOneOutAudioRawEntry(wave);
     }
 

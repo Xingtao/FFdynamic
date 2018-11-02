@@ -38,6 +38,7 @@ set(FFdynamicSrc
   davBasis/davWave.cpp
   davImpl/davImpl.cpp
   davImpl/davImplTravel.cpp
+  davImpl/dataRelay/dataRelay.cpp
   davImpl/filter/ffmpegFilter.cpp
   davImpl/filter/filterGeneral.cpp
   davImpl/filter/scaleFilter.cpp
@@ -73,9 +74,9 @@ target_include_directories(ffdynamic
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/davTools/imageToRawFrame>
       $<INSTALL_INTERFACE:include>
     PRIVATE
-      davImpl/demux       davImpl/mux         davImpl/filter
+      davImpl/dataRelay   davImpl/demux       davImpl/mux
       davImpl/audioDecode davImpl/audioEncode davImpl/audioMix
-      davImpl/videoDecode davImpl/videoEncode
+      davImpl/filter      davImpl/videoDecode davImpl/videoEncode
       davImpl/videoMix    davImpl/videoMix/cellMixer
     )
 

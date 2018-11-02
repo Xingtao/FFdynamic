@@ -122,10 +122,9 @@ struct DavWaveClassNotACategory : public DavWaveClassCategory {
     DavWaveClassNotACategory () :
         DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "NotAClass") {}
 };
-
 struct DavWaveClassDataRelay : public DavWaveClassCategory {
     DavWaveClassDataRelay() :
-        DavWaveClassDataRelay(type_index(typeid(*this)), type_index(typeid(std::string)), "DataRelay") {}
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "DataRelay") {}
 };
 struct DavWaveClassDemux : public DavWaveClassCategory {
     DavWaveClassDemux () :

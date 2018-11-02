@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <memory>
-#include "ffmpegDemux.h"
+#include "dataRelay.h"
 
 namespace ff_dynamic {
 using ::std::shared_ptr;
@@ -14,7 +14,7 @@ static DavImplRegister s_dataRelay(DavWaveClassDemux(), vector<string>({"auto", 
                                    });
 
 const DavRegisterProperties & DataRelay::getRegisterProperties() const noexcept {
-    return s_demuxReg.m_properties;
+    return s_dataRelay.m_properties;
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 int DataRelay::onConstruct() {
@@ -41,7 +41,7 @@ int DataRelay::onProcess(DavProcCtx & ctx) {
         return 0;
     }
     // relay input data
-    ctx.m_outBufs.emplate_back(ctx.m_inBuf);
+    ctx.m_outBufs.emplace_back(ctx.m_inBuf);
     return 0;
 }
 

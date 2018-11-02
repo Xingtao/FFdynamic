@@ -54,21 +54,23 @@ int CvDnnDetect::onConstruct() {
         m_net = cv::dnn::readNet(m_dps.m_modelPath, m_dps.m_configPath, m_dps.m_detectorFrameworkTag);
     } catch (const std::exception & e) {
         string detail = "Fail create cv dnn net model. model path " + m_dps.m_modelPath +
-            ", confit path" +  m_dps.m_configPath +  e.what();
+            ", confit path " +  m_dps.m_configPath;
         ERRORIT(DAV_ERROR_IMPL_ON_CONSTRUCT, detail);
         return DAV_ERROR_IMPL_ON_CONSTRUCT;
     }
     m_net.setPreferableBackend(m_dps.m_backendId);
     m_net.setPreferableTarget(m_dps.m_targetId);
 
-    std::ifstream ifs(m_dps.m_classnamePath.c_str());
-    if (!ifs.is_open()) {
-        ERRORIT(DAV_ERROR_IMPL_ON_CONSTRUCT, "fail to open class name file " + m_dps.m_classnamePath);
-        return DAV_ERROR_IMPL_ON_CONSTRUCT;
-    }
-    std::string line;
-    while (std::getline(ifs, line)) {
-        m_classNames.emplace_back(line);
+    if (!m_dps.m_classnamePath.empty()) {
+        std::ifstream ifs(m_dps.m_classnamePath.c_str());
+        if (!ifs.is_open()) {
+            ERRORIT(DAV_ERROR_IMPL_ON_CONSTRUCT, "fail to open class name file " + m_dps.m_classnamePath);
+            return DAV_ERROR_IMPL_ON_CONSTRUCT;
+        }
+        std::string line;
+        while (std::getline(ifs, line)) {
+            m_classNames.emplace_back(line);
+        }
     }
     LOG(INFO) << m_logtag << "CvDnnDetect create done: " << m_dps;
     return 0;

@@ -39,9 +39,9 @@ int main(int argc, char **argv) {
     cvDnnDetectOption1.set(DavOptionImplType(), "auto");
     cvDnnDetectOption1.set("detector_type", "detect");
     cvDnnDetectOption1.set("detector_framework_tag", "darknet/yolov3");
-    cvDnnDetectOption1.set("model_path", "yolov3.weights");
-    cvDnnDetectOption1.set("config_path", "yolov3.cfg");
-    cvDnnDetectOption1.set("classname_path", "coco.names");
+    cvDnnDetectOption1.set("model_path", "/Users/pengxingtao/practice/psn/FFdynamic/modules/moduleTest/yolov3.weights");
+    cvDnnDetectOption1.set("config_path", "/Users/pengxingtao/practice/psn/FFdynamic/modules/moduleTest/yolov3.cfg");
+    cvDnnDetectOption1.set("classname_path", "../moduleTest/coco.names");
     cvDnnDetectOption1.setInt("backend_id", 3);
     cvDnnDetectOption1.setInt("target_id", 0);
     cvDnnDetectOption1.setDouble("scale_factor", 1.0/255.0);
@@ -55,8 +55,8 @@ int main(int argc, char **argv) {
     cvDnnDetectOption2.set(DavOptionImplType(), "auto");
     cvDnnDetectOption2.set("detector_type", "detect");
     cvDnnDetectOption2.set("detector_framework_tag", "caffemodel/vgg_ssd_512");
-    cvDnnDetectOption2.set("model_path", "VGG_VOC0712Plus_SSD_512x512_ft_iter_160000.caffemodel");
-    cvDnnDetectOption2.set("config_path", "vgg_ssd_512.prototxt");
+    cvDnnDetectOption2.set("model_path", "../moduleTest/VGG_VOC0712Plus_SSD_512x512_ft_iter_160000.caffemodel");
+    cvDnnDetectOption2.set("config_path", "../moduleTest/vgg_ssd_512.prototxt");
     cvDnnDetectOption2.set("classname_path", ""); // not needed
     cvDnnDetectOption2.setInt("backend_id", 3);
     cvDnnDetectOption2.setInt("target_id", 0);
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     auto streamletOutput = outputBuilder.build({videoEncodeOption, audioEncodeOption, muxOption},
                                                DavDefaultOutputStreamletTag("output"));
     CHECK(streamletOutput != nullptr);
-    auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption1, cvDnnDetectOption2},
+    auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption2, cvDnnDetectOption1},
                                               CvDnnDetectStreamletTag("cvDnn"), cvDnnBuildOption);
     /* connect streamlets */
     streamletInput >> cvDnnStreamlet >> streamletOutput;

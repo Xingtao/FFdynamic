@@ -4,14 +4,11 @@
 #include "ffmpegDemux.h"
 
 namespace ff_dynamic {
-using ::std::shared_ptr;
-
 /* Limitations:
  1. Cannot deal with 'nb_program' > 1 (such as mpeg's MPTS)
  2. Won't demux streams other than audio/video, such as subtitle or data
  3. m_outputMediaMap's stream index (key) may not continuous since we skip subtitle or data streams
 */
-
 //// Register ////
 static DavImplRegister s_demuxReg(DavWaveClassDemux(), vector<string>({"auto", "ffmpeg"}),
                                   {}, /* static properties */

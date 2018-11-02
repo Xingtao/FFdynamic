@@ -7,7 +7,7 @@ namespace ff_dynamic {
 using ::std::shared_ptr;
 
 //// Register ////
-static DavImplRegister s_dataRelay(DavWaveClassDemux(), vector<string>({"auto", "dataRelay"}), {},
+static DavImplRegister s_dataRelay(DavWaveClassDataRelay(), vector<string>({"auto", "dataRelay"}), {},
                                    [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
                                        unique_ptr<DataRelay> p(new DataRelay(options));
                                        return p;

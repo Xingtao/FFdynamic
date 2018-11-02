@@ -23,6 +23,21 @@ int testInit(const string & logtag) {
     FLAGS_logtostderr = 1;
     auto & sigHandle = GlobalSignalHandle::getInstance();
     sigHandle.registe(SIGINT, sigIntHandle);
+
+    av_log_set_callback([] (void *ptr, int level, const char *fmt, va_list vl) {
+        if (level > AV_LOG_WARNING)
+            return ;
+        char message[8192];
+        const char *ffmpegModule = nullptr;
+        if (ptr) {
+            AVClass *avc = *(AVClass**) ptr;
+            if (avc->item_name)
+                ffmpegModule = avc->item_name(ptr);
+        }
+        vsnprintf(message, sizeof(message), fmt, vl);
+        LOG(WARNING) << "[FFMPEG][" << (ffmpegModule ? ffmpegModule : "") << "]" << message;
+    });
+
     return 0;
 }
 

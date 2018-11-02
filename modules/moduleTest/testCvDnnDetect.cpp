@@ -8,7 +8,7 @@ using namespace ff_dynamic;
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        std::cout << "usage: testDehazor inputFile\n";
+        std::cout << "usage: cvDnnDetect inputFile\n";
         return -1;
     }
 

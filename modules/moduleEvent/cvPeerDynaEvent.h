@@ -6,7 +6,7 @@ namespace ff_dynamic {
 
 /* Peer events (Public-Subscribe) */
 struct CvDnnDetectEvent : public DavPeerEvent {
-    virtual const CvObjDetectEvent & getSelf() const {return *this;}
+    virtual const CvDnnDetectEvent & getSelf() const {return *this;}
     int64_t m_framePts = 0;
     string m_detectorType; /* for simplicity, use string. only two right now: 'classify' or 'detect' */
     string m_detectorFrameworkTag; /* detailed tag of the model: yolo, ssd, etc.. */

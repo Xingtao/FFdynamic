@@ -31,12 +31,13 @@ private:
     virtual int onProcess(DavProcCtx & ctx);
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
     virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
+    virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
 
 private: // event process
     int processChangeConfThreshold(const CvDynaEventChangeConfThreshold & e);
 
 private: /* helpers */
-    vector<string> & CvDnnDetect::getOutputsNames();
+    vector<string> & getOutputsNames();
 
 public:
     struct DetectParams { /* internal use, for clearity */
@@ -48,10 +49,10 @@ public:
         int m_backendId = 3;
         int m_targetId = 0;
         double m_scaleFactor;
-        Scalar m_means; // Scalar mean, BGR order
+        cv::Scalar m_means; // Scalar mean, BGR order
         bool m_bSwapRb = false;
-        int32 m_width = -1;
-        int32 m_height = -1;
+        int m_width = -1;
+        int m_height = -1;
         double m_confThreshold = 0.7;
     };
 
@@ -62,6 +63,6 @@ private:
     vector<string> m_classNames;
 };
 
-extern std::ostream & operator<<(std::ostream & os, const DetectParams & p);
+extern std::ostream & operator<<(std::ostream & os, const CvDnnDetect::DetectParams & p);
 
 } //namespace ff_dynamic

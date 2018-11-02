@@ -27,21 +27,48 @@ else(TARGET ffdynamic::ffdynamic)
   endif()
 endif()
 
+########################################################
+# here we build opencv plugin module: libcvmodule
+set(OpencvModuleSrc
+  cvDnnDetect/cvDnnDetect.cpp
+  cvPostDraw/cvPostDraw.cpp
+  moduleStreamlet/cvStreamlet.cpp
+  )
+
+add_library(cvmodule_plugin SHARED ${OpencvModuleSrc}) # Be Note: only shared library supported right now
+
+target_include_directories(ffdynamic
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleEvent/>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleStreamlet>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cvPostdraw>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cvDnnDetect>
+      $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
+      $<INSTALL_INTERFACE:include>
+    )
+
+add_library(cvmodule_plugin::cvmodule_plugin ALIAS cvmodule_plugin)
+
+target_link_libraries(cvmodule_plugin PUBLIC ffdynamic::ffdynamic ${OpenCV_INCLUDE_DIRS})
+target_compile_features(cvmodule_plugin PUBLIC cxx_auto_type cxx_lambdas cxx_variadic_templates)
+target_compile_options(cvmodule_plugin
+  PUBLIC $<$<CXX_COMPILER_ID:GNU>:-Wall -Wpedantic -g -O2 -fPIC>
+  PUBLIC $<$<CXX_COMPILER_ID:Clang>:-Wall -Wpedantic -g -O2>
+  )
+
+
+##########################################
 # each plugin module has an accompany test
-add_executable(cvDnnDetect cvDnnDetect/cvDnnDetect.cpp moduleCLI/testCvDnnDetect.cpp cliCommon.cpp)
+add_executable(cvDnnDetect moduleTest/testCvDnnDetect.cpp moduleTest/testCommon.cpp)
 
 set(bins cvDnnDetect)
 
 foreach (bin ${bins})
   target_include_directories(${bin}
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleCLI>
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleEvent>
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cvDnnDetect>
-    PUBLIC ${OpenCV_INCLUDE_DIRS}
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleTest>
   )
   target_compile_features(${bin} PUBLIC cxx_auto_type cxx_lambdas)
   target_compile_options(${bin} PUBLIC $<$<CXX_COMPILER_ID:GNU>: -Wall -Wpedantic>
                                 PUBLIC $<$<CXX_COMPILER_ID:Clang>: -Wall -Wpedantic>)
-  target_link_libraries(${bin} PUBLIC FFdynamic::FFdynamic ${OpenCV_LIBS})
+  target_link_libraries(${bin} PUBLIC cvmodule_plugin::cvmodule_plugin)
 endforeach()

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "cvDnnDetector.h"
+#include "cvDnnDetect.h"
 
 namespace ff_dynamic {
 /////////////////////////////////
@@ -34,7 +34,7 @@ int CvDnnDetect::onConstruct() {
     m_dps.m_modelPath = m_options.get("model_path");
     m_dps.m_configPath = m_options.get("config_path");
     m_dps.m_classnamePath = m_options.get("classname_path");
-    m_options.getInt("backend_id", m_dps.m_backendID);
+    m_options.getInt("backend_id", m_dps.m_backendId);
     m_options.getInt("target_id", m_dps.m_targetId);
     m_options.getDouble("scale_factor", m_dps.m_scaleFactor);
     m_options.getBool("swap_rb", m_dps.m_bSwapRb);
@@ -268,7 +268,7 @@ std::vector<cv::String> & CvDnnDetect::getOutputsNames() {
     return m_outBlobNames;
 }
 
-std::ostream & operator<<(std::ostream & os, const DetectParams & p) {
+std::ostream & operator<<(std::ostream & os, const CvDnnDetect::DetectParams & p) {
     os << "[dectorType " << p.m_detectorType << ", detectorFrameworkTag " << p.m_detectorFrameworkTag
        << ", modelPath " << p.m_modelPath << ", configPath " << p.m_configPath
        << ", classnamePath " << p.m_classnamePath << ", backendId " << p.m_backendId

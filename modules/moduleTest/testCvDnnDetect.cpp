@@ -30,7 +30,11 @@ int main(int argc, char **argv) {
     muxOption.set(DavOptionOutputUrl(), "dynaDetect.flv");
 
     // 6. dynamic dnn detection streamlet
-    DavWaveOption cvDnnDetectOption((DavWaveClassCvDnnDetect()));
+    DavWaveOption dataRelayOption((DavWaveDataRelay()));
+    DavWaveOption cvPostDrawOption((DavWaveCvPostDraw()));
+
+    // we craete two detectors
+    DavWaveOption cvDnnDetectOption1((DavWaveClassCvDnnDetect()));
     cvDnnDetectOption.set(DavOptionImplType(), "auto");
     cvDnnDetectOption.set("detector_type", );
     cvDnnDetectOption.set("detector_framework_tag", );
@@ -61,15 +65,13 @@ int main(int argc, char **argv) {
     auto streamletOutput = outputBuilder.build({videoEncodeOption, audioEncodeOption, muxOption},
                                                DavDefaultOutputStreamletTag("output"));
     CHECK(streamletOutput != nullptr);
-    // TODO:
-    auto cvDnnStreamlet = cvDnnBuilder.build({videoDehazeOption},
+    auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption1, cvDnnDetectOption2},
                                               DavSingleWaveStreamletTag("dehaze"), singleWaveOption);
     /* connect streamlets */
-    streamletInput >> cvDnnStreamlet;
-    cvDnnStreamlet >> streamletOutput;
+    streamletInput >> cvDnnStreamlet >> streamletOutput;
 
     // start
-    DavRiver river({streamletInput, dehazeStreamlet, streamletMix, streamletOutput});
+    DavRiver river({streamletInput, cvDnnStreamlet, streamletOutput});
     river.start();
     test_common::testRun(river);
     river.stop();

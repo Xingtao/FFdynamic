@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "cvPostDrawor.h"
+#include "cvPostDraw.h"
 
 namespace ff_dynamic {
 /////////////////////////////////

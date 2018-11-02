@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <limits>
-#include "davStreamletBuilder.h"
+#include "cvPostDraw.h"
+#include "cvDnnDetect.h"
+#include "cvStreamlet.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace ff_dynamic {

@@ -23,3 +23,5 @@ struct CvDnnDetectEvent : public DavPeerEvent {
 struct CvDynaEventChangeConfThreshold {
     double m_confThreshold = 0.7;
 };
+
+} // namespace ff_dynamic

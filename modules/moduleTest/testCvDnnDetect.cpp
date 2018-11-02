@@ -1,6 +1,7 @@
 #include <string>
 #include "testCommon.h"
 #include "cvDnnDetect.h"
+#include "cvPostDraw.h"
 #include "cvStreamlet.h"
 
 using namespace ff_dynamic;
@@ -30,25 +31,41 @@ int main(int argc, char **argv) {
     muxOption.set(DavOptionOutputUrl(), "dynaDetect.flv");
 
     // 6. dynamic dnn detection streamlet
-    DavWaveOption dataRelayOption((DavWaveDataRelay()));
-    DavWaveOption cvPostDrawOption((DavWaveCvPostDraw()));
+    DavWaveOption dataRelayOption((DavWaveClassDataRelay()));
+    DavWaveOption cvPostDrawOption((DavWaveClassCvPostDraw()));
 
-    // we craete two detectors
+    // we craete two dnn detectors
     DavWaveOption cvDnnDetectOption1((DavWaveClassCvDnnDetect()));
-    cvDnnDetectOption.set(DavOptionImplType(), "auto");
-    cvDnnDetectOption.set("detector_type", );
-    cvDnnDetectOption.set("detector_framework_tag", );
-    cvDnnDetectOption.set("model_path", );
-    cvDnnDetectOption.set("config_path", );
-    cvDnnDetectOption.set("classname_path", );
-    cvDnnDetectOption.setInt("backend_id", );
-    cvDnnDetectOption.setInt("target_id", );
-    cvDnnDetectOption.setDouble("scale_factor", );
-    cvDnnDetectOption.setBool("swap_rb", );
-    cvDnnDetectOption.setInt("width", );
-    cvDnnDetectOption.setInt("height", );
-    cvDnnDetectOption.setDouble("conf_threshold", 0.7);
-    cvDnnDetectOption.setDoubleArray("means", {});
+    cvDnnDetectOption1.set(DavOptionImplType(), "auto");
+    cvDnnDetectOption1.set("detector_type", "detect");
+    cvDnnDetectOption1.set("detector_framework_tag", "darknet/yolov3");
+    cvDnnDetectOption1.set("model_path", "yolov3.weights");
+    cvDnnDetectOption1.set("config_path", "yolov3.cfg");
+    cvDnnDetectOption1.set("classname_path", "coco.names");
+    cvDnnDetectOption1.setInt("backend_id", 3);
+    cvDnnDetectOption1.setInt("target_id", 0);
+    cvDnnDetectOption1.setDouble("scale_factor", 1.0/255.0);
+    cvDnnDetectOption1.setBool("swap_rb", true);
+    cvDnnDetectOption1.setInt("width", 416);
+    cvDnnDetectOption1.setInt("height", 416);
+    cvDnnDetectOption1.setDouble("conf_threshold", 0.7);
+    cvDnnDetectOption1.setDoubleArray("means", {0,0,0});
+
+    DavWaveOption cvDnnDetectOption2((DavWaveClassCvDnnDetect()));
+    cvDnnDetectOption2.set(DavOptionImplType(), "auto");
+    cvDnnDetectOption2.set("detector_type", "detect");
+    cvDnnDetectOption2.set("detector_framework_tag", "caffemodel/vgg_ssd_512");
+    cvDnnDetectOption2.set("model_path", "VGG_VOC0712Plus_SSD_512x512_ft_iter_160000.caffemodel");
+    cvDnnDetectOption2.set("config_path", "vgg_ssd_512.prototxt");
+    cvDnnDetectOption2.set("classname_path", ""); // not needed
+    cvDnnDetectOption2.setInt("backend_id", 3);
+    cvDnnDetectOption2.setInt("target_id", 0);
+    cvDnnDetectOption2.setDouble("scale_factor", 1.0/255.0);
+    cvDnnDetectOption2.setBool("swap_rb", true);
+    cvDnnDetectOption2.setInt("width", 512);
+    cvDnnDetectOption2.setInt("height", 512);
+    cvDnnDetectOption2.setDouble("conf_threshold", 0.7);
+    cvDnnDetectOption2.setDoubleArray("means", {0,0,0});
 
     ////////////////////////////////////////////////////////////////////////////
     DavDefaultInputStreamletBuilder inputBuilder;
@@ -66,7 +83,7 @@ int main(int argc, char **argv) {
                                                DavDefaultOutputStreamletTag("output"));
     CHECK(streamletOutput != nullptr);
     auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption1, cvDnnDetectOption2},
-                                              DavSingleWaveStreamletTag("dehaze"), singleWaveOption);
+                                              CvDnnDetectStreamletTag("cvDnn"), cvDnnBuildOption);
     /* connect streamlets */
     streamletInput >> cvDnnStreamlet >> streamletOutput;
 

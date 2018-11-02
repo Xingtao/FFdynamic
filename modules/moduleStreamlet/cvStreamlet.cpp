@@ -8,9 +8,9 @@
 namespace ff_dynamic {
 ////////////////////////////////////////////////////////////////////////////////
 shared_ptr<DavStreamlet>
-DavCvDnnDetectStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
-                                      const DavStreamletTag & streamletTag,
-                                      const DavStreamletOption & streamletOptions) {
+CvDnnDetectStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
+                                   const DavStreamletTag & streamletTag,
+                                   const DavStreamletOption & streamletOptions) {
     auto streamlet = createStreamlet(waveOptions, streamletTag, streamletOptions);
     if (!streamlet)
         return streamlet;

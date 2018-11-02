@@ -46,7 +46,7 @@ int testRun(T & t) {
             LOG(INFO) << "[test common] " << buf;
             av_freep(&buf);
         }
-        usleep(static_cast<int>(EUSleepTime::e100ms));
+        usleep(100000);
     } while (!g_bExit);
 
     return 0;

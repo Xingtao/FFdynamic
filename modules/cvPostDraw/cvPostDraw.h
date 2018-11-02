@@ -31,11 +31,10 @@ private:
     virtual int onProcess(DavProcCtx & ctx);
     virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
     virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
+    virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
 
 private: // event process
     int processDnnDetectResult(const CvDnnDetectEvent & e);
 };
-
-extern std::ostream & operator<<(std::ostream & os, const DetectParams & p);
 
 } //namespace ff_dynamic

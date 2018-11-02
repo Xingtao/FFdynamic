@@ -136,7 +136,7 @@ public:
     inline int setInt(const string & key, const int val, const int flag = AV_DICT_DONT_OVERWRITE) {
         return av_dict_set(&m_d, key.c_str(), std::to_string(val).c_str(), flag);
     }
-    inline int setDouble(const string & key, const int val, const int flag = AV_DICT_DONT_OVERWRITE) {
+    inline int setDouble(const string & key, const double val, const int flag = AV_DICT_DONT_OVERWRITE) {
         return av_dict_set(&m_d, key.c_str(), std::to_string(val).c_str(), flag);
     }
    inline int setBool(const string & key, bool val, const int flag = AV_DICT_DONT_OVERWRITE) {
@@ -160,19 +160,19 @@ public:
         m_davOptions.emplace(o, val);
         return 0;
     }
-    inline int setInt(const DavOption & o, int val) {
+    inline int setInt(const DavOption & o, const int val) {
         if (m_davOptions.count(o))
             return DAV_ERROR_DICT_KEY_EXIST;
         m_davOptions.emplace(o, std::to_string(val));
         return 0;
     }
-    inline int setDouble(const DavOption & o, double val) {
+    inline int setDouble(const DavOption & o, const double val) {
         if (m_davOptions.count(o))
             return DAV_ERROR_DICT_KEY_EXIST;
         m_davOptions.emplace(o, std::to_string(val));
         return 0;
     }
-    inline int setBool(const DavOption & o, bool val) {
+    inline int setBool(const DavOption & o, const bool val) {
         if (m_davOptions.count(o))
             return DAV_ERROR_DICT_KEY_EXIST;
         m_davOptions.emplace(o, val ? "true" : "false");

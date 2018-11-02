@@ -49,13 +49,12 @@ target_include_directories(ffdynamic
 
 add_library(cvmodule_plugin::cvmodule_plugin ALIAS cvmodule_plugin)
 
-target_link_libraries(cvmodule_plugin PUBLIC ffdynamic::ffdynamic ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(cvmodule_plugin PUBLIC ffdynamic::ffdynamic ${OpenCV_LIBS})
 target_compile_features(cvmodule_plugin PUBLIC cxx_auto_type cxx_lambdas cxx_variadic_templates)
 target_compile_options(cvmodule_plugin
   PUBLIC $<$<CXX_COMPILER_ID:GNU>:-Wall -Wpedantic -g -O2 -fPIC>
   PUBLIC $<$<CXX_COMPILER_ID:Clang>:-Wall -Wpedantic -g -O2>
   )
-
 
 ##########################################
 # each plugin module has an accompany test

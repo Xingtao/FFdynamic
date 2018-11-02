@@ -37,7 +37,9 @@ private: // event process
     int processChangeConfThreshold(const CvDynaEventChangeConfThreshold & e);
 
 private: /* helpers */
-    vector<string> & getOutputsNames();
+    const vector<cv::String> & getOutputsNames();
+    int postprocess(const cv::Mat & image, const vector<cv::Mat> & outs,
+                    shared_ptr<CvDnnDetectEvent> & detectEvent);
 
 public:
     struct DetectParams { /* internal use, for clearity */

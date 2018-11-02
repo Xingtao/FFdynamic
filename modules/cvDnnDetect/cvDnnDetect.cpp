@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include "davImplTravel.h"
 #include "cvDnnDetect.h"
 
 namespace ff_dynamic {
@@ -10,6 +11,7 @@ static DavImplRegister s_cvDnnDetectReg(DavWaveClassCvDnnDetect(), vector<string
                                             unique_ptr<CvDnnDetect> p(new CvDnnDetect(options));
                                             return p;
                                         });
+
 const DavRegisterProperties & CvDnnDetect::getRegisterProperties() const noexcept {
     return s_cvDnnDetectReg.m_properties;
 }
@@ -44,15 +46,15 @@ int CvDnnDetect::onConstruct() {
     m_options.getDouble("conf_threshold", m_dps.m_confThreshold);
     vector<double> means;
     m_options.getDoubleArray("means", means);
-    for (auto & m : means)
-        m_dps.m_means.emplace_back(m);
-
+    if (means.size() == 3) {
+        m_dps.m_means = cv::Scalar{means[0], means[1], means[2]};
+    }
     // what about fail ?
     try {
-        m_net = readNet(m_dps.m_modelPath, m_dps.m_configPath, m_dps.m_detectorFrameworkTag);
+        m_net = cv::dnn::readNet(m_dps.m_modelPath, m_dps.m_configPath, m_dps.m_detectorFrameworkTag);
     } catch (const std::exception & e) {
         string detail = "Fail create cv dnn net model. model path " + m_dps.m_modelPath +
-            ", confit path" +  m_dps.m_configPath +  e.what()
+            ", confit path" +  m_dps.m_configPath +  e.what();
         ERRORIT(DAV_ERROR_IMPL_ON_CONSTRUCT, detail);
         return DAV_ERROR_IMPL_ON_CONSTRUCT;
     }
@@ -81,8 +83,8 @@ int CvDnnDetect::onDestruct() {
 //  [dynamic initialization]
 
 int CvDnnDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
-    DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(ctx.m_froms[0]);
-    if (!in.m_codecpar && (in.m_pixfmt == AV_PIX_FMT_NONE)) {
+    auto in = m_inputTravelStatic.at(ctx.m_froms[0]);
+    if (!in->m_codecpar && (in->m_pixfmt == AV_PIX_FMT_NONE)) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
                 m_logtag + "dehaze cannot get valid codecpar or videopar");
         return DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR;
@@ -90,7 +92,7 @@ int CvDnnDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     /* set output infos */
     m_timestampMgr.clear();
     m_outputTravelStatic.clear();
-    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in.m_timebase, in.m_timebase)));
+    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in->m_timebase, in->m_timebase)));
     /* output no data stream, so no output travel static info */
     m_bDynamicallyInitialized = true;
     return 0;
@@ -138,37 +140,22 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
 
     cv::Size inpSize(m_dps.m_width > 0 ? m_dps.m_width : image.cols,
                      m_dps.m_height > 0 ? m_dps.m_height : image.rows);
-    blobFromImage(image, blob, m_dps.m_scaleFactor, isSize, m_dps.m_means, false, false);
-    m_net.setInptu(blob);
+    cv::dnn::blobFromImage(image, blob, m_dps.m_scaleFactor, inpSize, m_dps.m_means, false, false);
+    m_net.setInput(blob);
     if (m_net.getLayer(0)->outputNameToIndex("im_info") != -1) { // Faster-RCNN or R-FCN
         resize(image, image, inpSize);
-        Mat imInfo = (Mat_<float>(1, 3) << inpSize.height, inpSize.width, 1.6f);
-        net.setInput(imInfo, "im_info");
+        cv::Mat imInfo = (cv::Mat_<float>(1, 3) << inpSize.height, inpSize.width, 1.6f);
+        m_net.setInput(imInfo, "im_info");
     }
 
     std::vector<cv::Mat> outs;
-    m_net.forward(outs, getOutputsNames(net));
+    m_net.forward(outs, getOutputsNames());
 
     /* prepare output events*/
     auto detectEvent = make_shared<CvDnnDetectEvent>();
-    detectEvent.m_framePts = inFrame->pts;
+    detectEvent->m_framePts = inFrame->pts;
     postprocess(image, outs, detectEvent);
-
-    detectEvent.m_inferTime =
-    // Put efficiency information.
-    std::vector<double> layersTimes;
-    const double freq = cv::getTickFrequency() / 1000;
-    const double t = m_net.getPerfProfile(layersTimes) / freq;
-
-    double m_inferTime = 0.0;
-    struct DetectResult {
-        string m_className;
-        double m_confidence;
-        DavRect m_rect; /* not used for classify */
-    };
-    vector<DetectResult> m_results;
-
-    ctx.m_pubEvents.empalce_back(detectEvent);
+    ctx.m_pubEvents.emplace_back(detectEvent);
     /* No travel static needed for detectors, just events */
     return 0;
 }
@@ -179,14 +166,14 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
                              shared_ptr<CvDnnDetectEvent> & detectEvent) {
     vector<double> layersTimes;
     const double freq = cv::getTickFrequency() / 1000;
-    detectEvent.m_inferTime = m_net.getPerfProfile(layersTimes) / freq;
-    detectEvent.m_detectorType = m_dps.m_detectorType;
-    detectEvent.m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
+    detectEvent->m_inferTime = m_net.getPerfProfile(layersTimes) / freq;
+    detectEvent->m_detectorType = m_dps.m_detectorType;
+    detectEvent->m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
 
     /* result assign */
-    vector<int> outLayers = net.getUnconnectedOutLayers();
-    string outLayerType = net.getLayer(outLayers[0])->type;
-    if (net.getLayer(0)->outputNameToIndex("im_info") != -1) { // Faster-RCNN or R-FCN
+    vector<int> outLayers = m_net.getUnconnectedOutLayers();
+    string outLayerType = m_net.getLayer(outLayers[0])->type;
+    if (m_net.getLayer(0)->outputNameToIndex("im_info") != -1) { // Faster-RCNN or R-FCN
         // Network produces output blob with a shape 1x1xNx7 where N is a number of detections.
         // each detection is: [batchId, classId, confidence, left, top, right, bottom]
         CHECK(outs.size() == 1) << "Faster-Rcnn or R-FCN output should have size 1";
@@ -194,18 +181,18 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
         for (size_t i=0; i < outs[0].total(); i+=7) {
             CvDnnDetectEvent::DetectResult result;
             result.m_confidence = data[i + 2];
-            if (result.confidence > m_dps.m_confThreshold) {
+            if (result.m_confidence > m_dps.m_confThreshold) {
                 result.m_rect.x = (int)data[i + 3];
                 result.m_rect.y = (int)data[i + 4];
                 const int right = (int)data[i + 5];
                 const int bottom = (int)data[i + 6];
-                result.m_rect.width = right - result.m_rect.x + 1;
-                result.m_rect.height = bottom - result.m_rect.y + 1;
+                result.m_rect.w = right - result.m_rect.x + 1;
+                result.m_rect.h = bottom - result.m_rect.y + 1;
                 const int classId = (int)(data[i + 1]) - 1; // classId 0 is background
                 if (classId < (int)m_classNames.size())
                     result.m_className = m_classNames[classId];
             }
-            detectEvent.emplace_back(result);
+            detectEvent->m_results.emplace_back(result);
         }
     } else if (outLayerType == "DetectionOutput") {
         // Network produces output blob with a shape 1x1xNx7 where N is a number of detections。
@@ -215,7 +202,7 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
         for (size_t i=0; i < outs[0].total(); i+=7) {
             CvDnnDetectEvent::DetectResult result;
             result.m_confidence = data[i + 2];
-            if (result.confidence > m_dps.m_confThreshold) {
+            if (result.m_confidence > m_dps.m_confThreshold) {
                 result.m_rect.x = (int)(data[i + 3] * image.cols);
                 result.m_rect.y = (int)(data[i + 4] * image.rows);
                 const int right = (int)(data[i + 5] * image.cols);
@@ -226,16 +213,17 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
                 if (classId < (int)m_classNames.size())
                     result.m_className = m_classNames[classId];
             }
-            detectEvent.emplace_back(result);
+            detectEvent->m_results.emplace_back(result);
         }
     } else if (outLayerType == "Region") {
         for (size_t i = 0; i < outs.size(); ++i) {
             // Network produces output blob with a shape NxC where N is a number of detected objects
             // and C is a number of classes + 4; 4 numbers are [center_x, center_y, width, height]
+            CvDnnDetectEvent::DetectResult result;
             float* data = (float*)outs[i].data;
             for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols) {
-                Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
-                Point classIdPoint;
+                cv::Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
+                cv::Point classIdPoint;
                 minMaxLoc(scores, 0, &result.m_confidence, 0, &classIdPoint);
                 if (result.m_confidence > m_dps.m_confThreshold) {
                     int centerX = (int)(data[0] * image.cols);
@@ -248,7 +236,7 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
                         result.m_className = m_classNames[classIdPoint.x];
                 }
             }
-            detectEvent.emplace_back(result);
+            detectEvent->m_results.emplace_back(result);
         }
     } else {
         LOG(ERROR) << m_logtag << "Unknown output layer type: " << outLayerType;
@@ -257,7 +245,7 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
     return 0;
 }
 
-std::vector<cv::String> & CvDnnDetect::getOutputsNames() {
+const vector<cv::String> & CvDnnDetect::getOutputsNames() {
     if (m_outBlobNames.empty()) {
         vector<int> outLayers = m_net.getUnconnectedOutLayers();
         vector<cv::String> layersNames = m_net.getLayerNames();
@@ -273,8 +261,8 @@ std::ostream & operator<<(std::ostream & os, const CvDnnDetect::DetectParams & p
        << ", modelPath " << p.m_modelPath << ", configPath " << p.m_configPath
        << ", classnamePath " << p.m_classnamePath << ", backendId " << p.m_backendId
        << ", targetId " << p.m_targetId << ", scaleFactor " << p.m_scaleFactor
-       << ", means " << Scalar << ", bSwapRb " << p.m_bSwapRb << ", width " << p.m_width
-       << ", height " << p.m_height << ", confThreshold " << m_confThreshold;
+       << ", means " << p.m_means << ", bSwapRb " << p.m_bSwapRb << ", width " << p.m_width
+       << ", height " << p.m_height << ", confThreshold " << p.m_confThreshold;
     return os;
 }
 

@@ -6,10 +6,10 @@ namespace ff_dynamic {
 /////////////////////////////////
 // [Register - auto, cvPostDraw]
 static DavImplRegister s_cvPostDrawReg(DavWaveClassCvPostDraw(), vector<string>({"auto", "cvPostDraw"}), {},
-                                        [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                            unique_ptr<CvPostDraw> p(new CvPostDraw(options));
-                                            return p;
-                                        });
+                                       [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
+                                           unique_ptr<CvPostDraw> p(new CvPostDraw(options));
+                                           return p;
+                                       });
 
 const DavRegisterProperties & CvPostDraw::getRegisterProperties() const noexcept {
     return s_cvPostDrawReg.m_properties;
@@ -32,7 +32,7 @@ int CvPostDraw::onConstruct() {
     /* only output one video stream */
     m_outputMediaMap.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO);
 
-    LOG(INFO) << m_logtag << "CvPostDraw create done: " << m_dps;
+    LOG(INFO) << m_logtag << "CvPostDraw create done";
     return 0;
 }
 
@@ -46,8 +46,8 @@ int CvPostDraw::onDestruct() {
 //  [dynamic initialization]
 
 int CvPostDraw::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
-    DavImplTravel::TravelStatic & in = m_inputTravelStatic.at(ctx.m_froms[0]);
-    if (!in.m_codecpar && (in.m_pixfmt == AV_PIX_FMT_NONE)) {
+    auto in = m_inputTravelStatic.at(ctx.m_froms[0]);
+    if (!in->m_codecpar && (in->m_pixfmt == AV_PIX_FMT_NONE)) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
                 m_logtag + "dehaze cannot get valid codecpar or videopar");
         return DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR;
@@ -55,7 +55,7 @@ int CvPostDraw::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     /* set output infos */
     m_timestampMgr.clear();
     m_outputTravelStatic.clear();
-    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in.m_timebase, in.m_timebase)));
+    m_timestampMgr.insert(std::make_pair(ctx.m_froms[0], DavImplTimestamp(in->m_timebase, in->m_timebase)));
 
     auto out = make_shared<DavTravelStatic>();
     *out = *in;
@@ -101,7 +101,6 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
     // draw the frame
     cv::Mat bgrImage;
     cv::cvtColor(yuvMat, bgrImage, CV_YUV2BGR_I420);
-    ctx.m_pubEvents.empalce_back(detectEvent);
     /* may cache frame in case not all detect results are present */
     return 0;
 }

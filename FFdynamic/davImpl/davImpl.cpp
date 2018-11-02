@@ -28,8 +28,10 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
         m_inputTravelStatic.emplace(from, ctx.m_inBuf->m_travelStatic);
     // /* else TODO: update, in case static changed before dynamicallly initialized */
 
-    /* already initialized, convert its timestamp to impl's timebase then*/
+    /* already initialized, convert its timestamp to impl's timebase then */
     if (m_bDynamicallyInitialized) {
+        if (m_bDataRelay) /* no timestamp mgr and travel static output needed, just relay the data */
+            return 0;
         if (m_timestampMgr.count(from) == 0) { /* newly connected peer */
             if (m_outputTravelStatic.size() > 1) /* multiple output streams, process inside implementation */
                 return 0;

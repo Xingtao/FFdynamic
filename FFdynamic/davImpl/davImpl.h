@@ -126,6 +126,8 @@ protected:
     map<DavProcFrom, shared_ptr<DavTravelStatic>> m_inputTravelStatic;
     map<DavProcFrom, DavImplTimestamp> m_timestampMgr;
     map<int, shared_ptr<DavTravelStatic>> m_outputTravelStatic;
+    /* for some impls, their travel static outputs is the same as inputs */
+    std::atomic<bool> m_bDataRelay = ATOMIC_VAR_INIT(false);
     /* impl output one or more audio/video streams to next peers */
     map<int, enum AVMediaType> m_outputMediaMap; /* TODO: may kill this one later*/
 

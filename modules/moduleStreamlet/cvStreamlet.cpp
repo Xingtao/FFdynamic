@@ -14,41 +14,29 @@ DavCvDnnDetectStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
         return streamlet;
 
     /* get waves used in this streamlet */
-    auto videoMixes = streamlet->getWavesByCategory(DavWaveClassVideoMix());
-    auto audioMixes = streamlet->getWavesByCategory(DavWaveClassAudioMix());
-    CHECK(videoMixes.size() == 1 && audioMixes.size() <= 1)
-        << m_logtag << "mix streamlet should have exactly 1 video mix and 0 or 1 audio mix: "
-        << audioMixes.size() << ", " << videoMixes.size();
-    auto videoMix = videoMixes[0];
-    shared_ptr<DavWave> audioMix;
-    if (audioMixes.size() > 0)
-        audioMix = audioMixes[0];
-    streamlet->addOneVideoInEntry(videoMix);
-    if (audioMix)
-        streamlet->addOneAudioInEntry(audioMix);
+    auto dataRelaies = streamlet->getWavesByCategory(DavWaveClassDataRelay());
+    auto postDraws = streamlet->getWavesByCategory(DavWaveClassCvPostDraw());
+    CHECK(dataRelaies.size() == 1 && postDraws.size() == 1)
+        << m_logtag << "cv dnn should only have one DataRelay and one PostDraw"
+        << dataRelaies.size() << ", " << postDraws.size();
+    auto dataRelay = dataRelaies[0];
+    auto postDraw = postDraws[0];
 
-    auto videoFilters = streamlet->getWavesByCategory(DavWaveClassVideoFilter());
-    auto audioFilters = streamlet->getWavesByCategory(DavWaveClassAudioFilter());
-    CHECK(videoFilters.size() <= 1 && audioFilters.size() <= 1)
-        << m_logtag << "mix streamlet cannot have audio/video filters more than one";
+    auto cvDnnDetectors = streamlet->getWavesByCategory(DavWaveClassCvDnnDetect());
+    CHECK(cvDnnDetectors.size() > 0)
+        << m_logtag << "at lease one detector enabled at the beginning";
 
-    if (videoFilters.size()) {
-        DavWave::connect(videoMix.get(), videoFilters[0].get());
-        streamlet->addOneVideoOutEntry(videoFilters[0]);
-     } else {
-        streamlet->addOneVideoOutEntry(videoMix);
+    /* connections */
+    streamlet->addOneInVideoRawEntry(dataRelay);
+    for (auto & d : cvDnnDetectors) {
+        streamlet->addOneInVideoRawEntry(d);
+        DavWave::connect(dataRelay.get(), d.get());
+        // peer event subscribe: postDraw subscribe detector's result event
+        DavWave::subscribe(d.get(), postDraw.get());
+
     }
-
-    if (audioMix) {
-        if (audioFilters.size()) {
-            DavWave::connect(audioMix.get(), audioFilters[0].get());
-            streamlet->addOneAudioOutEntry(audioFilters[0]);
-        } else {
-            streamlet->addOneAudioOutEntry(audioMix);
-        }
-        // peer event subscribe: audio mix subscribe video mix
-        DavWave::subscribe(videoMix.get(), audioMix.get());
-    }
+    streamlet->addOneOutVideoRawEntry(postDraw);
+    DavWave::connect(dataRelay.get(), postDraw.get());
     return streamlet;
 }
 

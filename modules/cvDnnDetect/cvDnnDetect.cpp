@@ -24,7 +24,7 @@ int CvDnnDetect::processChangeConfThreshold(const CvDynaEventChangeConfThreshold
 ////////////////////////////////////
 //  [construct - destruct - process]
 int CvDnnDetect::onConstruct() {
-    LOG(INFO) << m_logtag << "Creating open CvDnnDetect " << m_options.dump();
+    LOG(INFO) << m_logtag << "start creating CvDnnDetect " << m_options.dump();
     std::function<int (const CvDynaEventChangeConfThreshold &)> f =
         [this] (const CvDynaEventChangeConfThreshold & e) {return processChangeConfThreshold(e);};
     m_implEvent.registerEvent(f);

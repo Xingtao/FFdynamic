@@ -71,7 +71,6 @@ struct DavProcBuf {
             av_packet_free(&m_pkt);
         return m_pkt = packet;
     }
-
     inline AVFrame *releaseAVFrameOwner () noexcept {
         std::lock_guard<std::mutex> lock(m_mutex);
         auto frame = m_frame;

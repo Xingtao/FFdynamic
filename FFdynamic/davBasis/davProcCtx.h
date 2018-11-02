@@ -35,7 +35,7 @@ struct DavProcCtx {
     bool m_bInputFlush = false;
 
     /* may output several frames in one process. also when do flush */
-    vector<shared_ptr<DavProcBuf> > m_outBufs;
+    vector<shared_ptr<DavProcBuf>> m_outBufs;
     vector<shared_ptr<DavPeerEvent>> m_pubEvents;
     int m_outputTimes = 1; /* output frame many times, could be 0 */
     int m_curStreamIndex = 0;

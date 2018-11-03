@@ -79,7 +79,7 @@ int FFmpegVideoDecode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
     m_outputTravelStatic.insert(std::make_pair(IMPL_SINGLE_OUTPUT_STREAM_INDEX, out));
 
     m_bDynamicallyInitialized = true;
-    LOG(INFO) << m_logtag << "dynamically create VideoDecode done. in static: " << in << ", \nout: " << out;
+    LOG(INFO) << m_logtag << "dynamically create VideoDecode done. in static: " << *in << ", \nout: " << *out;
     return 0;
 }
 

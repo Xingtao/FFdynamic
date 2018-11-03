@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     DavStreamletOption outputOption;
     DavStreamletOption cvDnnBuildOption;
     // start build
-    inputOption.setInt(DavOptionBufLimitNum(), 25);
+    inputOption.setInt(DavOptionBufLimitNum(), 20);
     auto streamletInput = inputBuilder.build({demuxOption, videoDecodeOption, audioDecodeOption},
                                              DavDefaultInputStreamletTag("input"), inputOption);
     CHECK(streamletInput != nullptr);

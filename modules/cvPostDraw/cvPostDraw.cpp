@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <iostream>
 #include <fstream>
+#include "frameMat.h"
 #include "cvPostDraw.h"
 
 namespace ff_dynamic {
@@ -18,6 +20,14 @@ const DavRegisterProperties & CvPostDraw::getRegisterProperties() const noexcept
 ////////////////////////////////////
 //  [event process]
 int CvPostDraw::processDnnDetectResult(const CvDnnDetectEvent & e) {
+    LOG(INFO) << m_logtag << "got result " << e.m_framePts << ", " << e.m_detectorFrameworkTag;
+    auto & from = e.getAddress();
+    if (m_detectResults.count(from) == 0) {
+        m_detectResults.emplace(from, {e});
+        return 0;
+    }
+    auto & v = m_detectResults.at(from);
+    v.emplace_back(e);
     return 0;
 }
 
@@ -44,7 +54,6 @@ int CvPostDraw::onDestruct() {
 
 ////////////////////////////////////
 //  [dynamic initialization]
-
 int CvPostDraw::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     auto in = m_inputTravelStatic.at(ctx.m_froms[0]);
     if (!in->m_codecpar && (in->m_pixfmt == AV_PIX_FMT_NONE)) {
@@ -69,14 +78,10 @@ int CvPostDraw::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
 
 int CvPostDraw::onProcess(DavProcCtx & ctx) {
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
-    if (!ctx.m_inBuf) {
-        ERRORIT(DAV_ERROR_IMPL_UNEXPECT_EMPTY_INBUF, "CvPostDraw should always have input");
-        return DAV_ERROR_IMPL_UNEXPECT_EMPTY_INBUF;
-    }
+    if (!ctx.m_inBuf)
+        return 0;
 
     int ret = 0;
-    /* ref frame is a frame ref to original frame (data shared),
-       but timestamp is convert to current impl's timebase */
     auto inFrame = ctx.m_inRefFrame;
     if (!inFrame) {
         LOG(INFO) << m_logtag << "cv post draw reciving flush frame";
@@ -85,23 +90,46 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
         return AVERROR_EOF;
     }
 
-    // convert this frame to opencv Mat
     CHECK((enum AVPixelFormat)inFrame->format == AV_PIX_FMT_YUV420P);
-    cv::Mat yuvMat;
-    yuvMat.create(inFrame->height * 3 / 2, inFrame->width, CV_8UC1);
-    for (int k=0; k < inFrame->height; k++)
-        memcpy(yuvMat.data + k * inFrame->width, inFrame->data[0] + k * inFrame->linesize[0], inFrame->width);
-    const auto u = yuvMat.data + inFrame->width * inFrame->height;
-    const auto v = yuvMat.data + inFrame->width * inFrame->height * 5 / 4 ;
-    for (int k=0; k < inFrame->height/2; k++) {
-        memcpy(u + k * inFrame->width/2, inFrame->data[1] + k * inFrame->linesize[1], inFrame->width/2);
-        memcpy(v + k * inFrame->width/2, inFrame->data[2] + k * inFrame->linesize[2], inFrame->width/2);
-    }
+    m_cacheBufFrames.emplace_back(ctx.m_inBuf);
 
-    // draw the frame
-    cv::Mat bgrImage;
-    cv::cvtColor(yuvMat, bgrImage, CV_YUV2BGR_I420);
-    /* may cache frame in case not all detect results are present */
+    /* process detect results and draw results to frame */
+    auto outs = m_ctx.m_outBufs;
+    for (auto & in : m_cacheBufFrames) {
+        auto inFrame = ctx.m_inRefFrame;
+        /* remove 'expired' results */
+        for (auto & d : m_detectResults) {
+            d.second.erase(std::remove_if(d.second.begin(), d.second.end(),
+                                          [&inFrame](const CvDnnDetectEvent & r) {
+                                              return r.m_framePts < inFrame->pts;
+                                          }),
+                           d.second.end());
+        }
+        /* then check whether all results are ready */
+        bool bReady = false;
+        for (auto & d : m_detectResutls) {
+            if (d.second.size() == 0) /* not comming */
+                break;
+        }
+
+        /* convert this frame to opencv Mat. TODO: directly to bgr mat */
+        cv::Mat yuvMat;
+        FrameMat::frameToMatY420(inFrame, yuvMat);
+        /* draw the frame */
+        cv::Mat bgrImage;
+        cv::cvtColor(yuvMat, bgrImage, CV_YUV2BGR_I420);
+
+        /* convert to yuv again (tedious, should have a format auto convertor) */
+        auto outBuf = make_shared<DavProcBuf>();
+        auto outFrame = outBuf->mkAVFrame();
+        FrameMat::matToFrameYuv420(yuvMat, outFrame);
+        m_ctx.m_outBufs.emplace_back(outBuf);
+    }
+    return 0;
+}
+
+int CvPostDraw::drawResult(cv::Mat & image, vector<>) {
+
     return 0;
 }
 

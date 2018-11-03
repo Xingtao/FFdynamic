@@ -13,10 +13,15 @@ namespace ff_dynamic {
 /* Base class for Peer communication: Public-Subscribe event and Travel Dynamic Event */
 struct DavPeerEvent {
     DavProcFrom m_procFrom;
-    /* getSelf return different derived event (covariant return types) */
+    /* getSelf return different derived event [covariant return types] */
     virtual const DavPeerEvent & getSelf() const = 0;
     inline DavProcFrom & getAddress() noexcept {return m_procFrom;}
     inline void setAddress(const DavProcFrom & procFrom) noexcept {m_procFrom = procFrom;}
+};
+
+/* notify end for subscribers */
+struct DavStopPubEvent : public DavPeerEvent {
+    virtual const DavStopPubEvent & getSelf() const {return *this;}
 };
 
 struct DavEventVideoMixSync : public DavPeerEvent {

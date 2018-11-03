@@ -31,7 +31,6 @@ CvDnnDetectStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
     /* connections */
     streamlet->addOneInVideoRawEntry(dataRelay);
     for (auto & d : cvDnnDetectors) {
-        streamlet->addOneInVideoRawEntry(d);
         DavWave::connect(dataRelay.get(), d.get());
         // peer event subscribe: postDraw subscribe detector's result event
         DavWave::subscribe(d.get(), postDraw.get());

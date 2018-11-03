@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include "frameMat.h"
 #include "davImplTravel.h"
 #include "cvDnnDetect.h"
 
@@ -105,10 +106,8 @@ int CvDnnDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
 
 int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
-    if (!ctx.m_inBuf) {
-        ERRORIT(DAV_ERROR_IMPL_UNEXPECT_EMPTY_INBUF, "CvDnnDetect should always have input");
-        return DAV_ERROR_IMPL_UNEXPECT_EMPTY_INBUF;
-    }
+    if (!ctx.m_inBuf)
+        return 0;
 
     int ret = 0;
     /* ref frame is a frame ref to original frame (data shared),
@@ -122,24 +121,13 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     }
 
     // convert this frame to opencv Mat
-    CHECK((enum AVPixelFormat)inFrame->format == AV_PIX_FMT_YUV420P);
     cv::Mat yuvMat;
-    yuvMat.create(inFrame->height * 3 / 2, inFrame->width, CV_8UC1);
-    for (int k=0; k < inFrame->height; k++)
-        memcpy(yuvMat.data + k * inFrame->width, inFrame->data[0] + k * inFrame->linesize[0], inFrame->width);
-    const auto u = yuvMat.data + inFrame->width * inFrame->height;
-    const auto v = yuvMat.data + inFrame->width * inFrame->height * 5 / 4 ;
-    for (int k=0; k < inFrame->height/2; k++) {
-        memcpy(u + k * inFrame->width/2, inFrame->data[1] + k * inFrame->linesize[1], inFrame->width/2);
-        memcpy(v + k * inFrame->width/2, inFrame->data[2] + k * inFrame->linesize[2], inFrame->width/2);
-    }
-
+    FrameMat::frameToMatYuv420(inFrame, yuvMat);
     cv::Mat image, blob;
     if (m_dps.m_bSwapRb)
         cv::cvtColor(yuvMat, image, CV_YUV2RGB_I420);
     else
         cv::cvtColor(yuvMat, image, CV_YUV2BGR_I420);
-
     cv::Size inpSize(m_dps.m_width > 0 ? m_dps.m_width : image.cols,
                      m_dps.m_height > 0 ? m_dps.m_height : image.rows);
     cv::dnn::blobFromImage(image, blob, m_dps.m_scaleFactor, inpSize, m_dps.m_means, false, false);

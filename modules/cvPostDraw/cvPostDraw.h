@@ -35,6 +35,10 @@ private:
 
 private: // event process
     int processDnnDetectResult(const CvDnnDetectEvent & e);
+
+private:
+    map<DavProcFrom, vector<CvDnnDetectEvent>> m_detectResults;
+    vector<shared_ptr<DavProcBuf>> m_cacheBufFrames;
 };
 
 } //namespace ff_dynamic

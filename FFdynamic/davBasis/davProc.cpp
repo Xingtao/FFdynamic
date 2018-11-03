@@ -79,7 +79,7 @@ int DavProc::preProcess(shared_ptr<DavProcBuf> & inBuf) {
         }
         /* get input data */
         bGet = m_dataTransmitor->expect(inBuf, m_expectInput, (int)ETimeUs::e5ms);
-    } while(!bGet);
+    } while (!bGet);
     return 0;
 }
 
@@ -172,16 +172,20 @@ int DavProc::runDavProcThread() {
     auto flushBuf = make_shared<DavProcBuf>();
     flushBuf->setAddress(flushFrom);
     m_dataTransmitor->broadcast(flushBuf);
-
     /* will make upstream peer clear this proc as output */
     m_dataTransmitor->clear(); /* release remaining input buffers right away */
+
+    /* broadcast publish finish event to subscribers */
+    auto stopPubEvent = make_shared<DavStopPubEvent>();
+    stopPubEvent->setAddress(flushFrom); /* reuse, although streamIndex is not needed */
+    m_pubsubTransmitor->broadcast(stopPubEvent);
+    m_pubsubTransmitor->clear();
 
     /* reserve the procInfo, so set another event */
     DavMessager threadFinishMsg(DAV_INFO_END_PROCESS_THREAD,
                                 m_logtag + "thread terminated state => stop");
     s_msgCollector.addMsg(threadFinishMsg);
     LOG(INFO) << m_logtag << threadFinishMsg;
-
     m_state = EDavState::eStop;
     return m_procInfo.m_msgCode;
 }

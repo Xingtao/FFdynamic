@@ -145,8 +145,7 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     auto detectEvent = make_shared<CvDnnDetectEvent>();
     detectEvent->m_framePts = inFrame->pts;
     postprocess(image, outs, detectEvent);
-    if (detectEvent->m_results.size() > 0)
-        ctx.m_pubEvents.emplace_back(detectEvent);
+    ctx.m_pubEvents.emplace_back(detectEvent);
     /* No travel static needed for detectors, just events */
     return 0;
 }

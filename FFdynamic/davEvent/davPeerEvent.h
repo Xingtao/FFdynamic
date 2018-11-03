@@ -20,7 +20,12 @@ struct DavPeerEvent {
     inline void setAddress(const DavProcFrom & procFrom) noexcept {m_procFrom = procFrom;}
 };
 
-/* notify end for subscribers */
+/* notify start for subscribers. subscribers could ignore this */
+struct DavStartPubEvent : public DavPeerEvent {
+    virtual const DavStartPubEvent & getSelf() const {return *this;}
+};
+
+/* notify end for subscribers. subscribers could ignore this */
 struct DavStopPubEvent : public DavPeerEvent {
     virtual const DavStopPubEvent & getSelf() const {return *this;}
 };

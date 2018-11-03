@@ -68,12 +68,12 @@ int FFmpegVideoEncode::dynamicallyInitialize(const DavTravelStatic & in) {
 
     /* allow forced idr. overwrite if exist */
     m_options.set("forced-idr", "1", 0);
+    m_options.set("rc-lookahead", "4", 0);
     if ((ret = avcodec_open2(m_encCtx, enc, m_options.get())) < 0) {
         ERRORIT(ret, m_logtag + " encode open fail");
         return ret;
     }
     recordUnusedOpts();
-    INFOIT(DAV_INFO_IMPL_INSTANCE_CREATE_DONE, m_logtag + " create VideoEncode done");
     return 0;
 }
 
@@ -207,6 +207,7 @@ int FFmpegVideoEncode::receiveEncodeFrames(DavProcCtx & ctx) {
         ret = avcodec_receive_packet(m_encCtx, pkt);
         if (ret >= 0) {
             ctx.m_outBufs.push_back(outBuf);
+            m_encodeFrames++;
             // TODO: if there is dynamic travel info, should only set to one outBuf
             continue;
         }
@@ -219,7 +220,7 @@ int FFmpegVideoEncode::receiveEncodeFrames(DavProcCtx & ctx) {
         }
         break;
     } while (true);
-
+    LOG_EVERY_N(INFO, 1) << m_logtag << "encoded frames " << m_encodeFrames;
     return ret;
 }
 
@@ -278,7 +279,6 @@ int FFmpegVideoEncode::onProcess(DavProcCtx & ctx) {
         if (m_bForcedKeyFrame) /* only ok after send_frame ok*/
             m_bForcedKeyFrame = false;
     }
-
     /* receive it */
     return receiveEncodeFrames(ctx);
 }

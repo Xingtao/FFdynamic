@@ -20,7 +20,6 @@ const DavRegisterProperties & CvPostDraw::getRegisterProperties() const noexcept
 ////////////////////////////////////
 //  [event process]
 int CvPostDraw::processDnnDetectResult(const CvDnnDetectEvent & e) {
-    LOG(INFO) << m_logtag << "got result " << e;
     const auto & from = e.getAddress();
     if (m_detectResults.count(from) == 0) {
         m_detectResults.emplace(from, vector<CvDnnDetectEvent>{e});
@@ -28,6 +27,7 @@ int CvPostDraw::processDnnDetectResult(const CvDnnDetectEvent & e) {
     }
     auto & v = m_detectResults.at(from);
     v.emplace_back(e);
+    LOG(INFO) << m_logtag << "got result " << e << ", " << m_detectResults.at(from).size();
     return 0;
 }
 
@@ -87,45 +87,45 @@ int CvPostDraw::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
 //  [dynamic initialization]
 
 int CvPostDraw::onProcess(DavProcCtx & ctx) {
-    ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
-    if (!ctx.m_inBuf)
-        return 0;
-
+    /* could process without input buffer */
+    ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectNothing};
     int ret = 0;
-    auto inFrame = ctx.m_inRefFrame;
-    if (!inFrame) {
-        LOG(INFO) << m_logtag << "cv post draw reciving flush frame";
-        ctx.m_bInputFlush = true;
-        /* no flush needed, so just return EOF */
-        return AVERROR_EOF;
+    if (ctx.m_inBuf) {
+        auto inFrame = ctx.m_inRefFrame;
+        if (!inFrame) {
+            LOG(INFO) << m_logtag << "cv post draw reciving flush frame";
+            ctx.m_bInputFlush = true;
+            /* no flush needed, so just return EOF */
+            return AVERROR_EOF;
+        }
+        CHECK((enum AVPixelFormat)inFrame->format == AV_PIX_FMT_YUV420P);
+        m_cacheBufFrames.emplace_back(ctx.m_inBuf);
     }
-
-    CHECK((enum AVPixelFormat)inFrame->format == AV_PIX_FMT_YUV420P);
-    m_cacheBufFrames.emplace_back(ctx.m_inBuf);
 
     /* process detect results and draw results to frame */
     auto outs = ctx.m_outBufs;
     int usedFrameCount = 0;
     for (auto & in : m_cacheBufFrames) {
-        auto frame = ctx.m_inRefFrame;
+        auto frame = in->getAVFrame(); /* since in/out static are the same */
         /* first remove 'expired' results */
         for (auto & d : m_detectResults) {
             d.second.erase(std::remove_if(d.second.begin(), d.second.end(),
-                                          [&frame](const CvDnnDetectEvent & r) {
+                                          [frame](const CvDnnDetectEvent & r) {
                                               return r.m_framePts < frame->pts;
                                           }), d.second.end());
         }
         /* then check whether all results are ready */
-        bool bReady = true;
+        bool bReady = false;
         vector<CvDnnDetectEvent> results;
         for (auto & d : m_detectResults) {
-            if (d.second.size() == 0) /* not comming */{
+            if (d.second.size() == 0) /* not comming */ {
                 bReady = false;
                 break;
             }
             if (d.second[0].m_framePts == frame->pts) {
                 results.emplace_back(d.second[0]);
             }
+            bReady = true;
         }
         if (!bReady)
             break;
@@ -136,6 +136,7 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
         cv::Mat image;
         cv::cvtColor(yuvMat, image, CV_YUV2BGR_I420);
         drawResult(image, results);
+        cv::cvtColor(image, yuvMat, CV_BGR2YUV_I420);
         /* convert to yuv again (tedious, should have a auto format convertor) */
         auto outBuf = make_shared<DavProcBuf>();
         auto outFrame = outBuf->mkAVFrame();

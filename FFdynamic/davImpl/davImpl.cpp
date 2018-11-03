@@ -22,7 +22,6 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
     int ret = 0;
     if (!ctx.m_inBuf) // no pre-process needed
         return 0;
-
     const DavProcFrom & from = ctx.m_inBuf->getAddress();
     if (m_inputTravelStatic.count(from) == 0)
         m_inputTravelStatic.emplace(from, ctx.m_inBuf->m_travelStatic);
@@ -62,7 +61,7 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
         return ret;
     }
 
-    /* not initialized yet, check peer validity or cache data to preInitCache queue */
+    /* not initialized yet, check peer validity or cache data to 'preInitCache queue' */
     if (ctx.m_inBuf->isEmptyData()) {
         ctx.m_bInputFlush = true;
         auto & buf = ctx.m_inBuf;
@@ -79,16 +78,17 @@ int DavImpl::onPreProcess(DavProcCtx & ctx) {
         return 0;
     }
 
+    // TODO: should put this one to implementation
     if (ctx.m_froms.size() > m_inputTravelStatic.size()) {
         ctx.m_inBuf->unlimit();
         m_preInitCacheInBufs.push_back(ctx.m_inBuf);
-        LOG_IF_EVERY_N(WARNING, m_preInitCacheInBufs.size() >= 400, 50)
-            << m_logtag + "cache too many input buffers " + std::to_string(m_preInitCacheInBufs.size());
-
+        LOG_EVERY_N(WARNING, 100)
+            << m_logtag + "cache data to preInitCache queue " + std::to_string(m_preInitCacheInBufs.size());
         // if (m_preInitCacheInBufs)
         // TODO: in some case, we should discard those caches
         return ret;
     }
+
     /* collect enough infos. 'm_timestampMgr' will be filled in this call */
     ret = onDynamicallyInitializeViaTravelStatic(ctx);
     if (ret < 0) {

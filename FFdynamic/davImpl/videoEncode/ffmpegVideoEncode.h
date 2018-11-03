@@ -34,6 +34,7 @@ private:
     AVCodecContext *m_encCtx = nullptr;
     ScaleFilter *m_scaleFilter = nullptr;
     ScaleFilterParams m_sfp;
+    uint64_t m_encodeFrames = 0;
     uint64_t m_discardFrames = 0;
     bool m_bForcedKeyFrame = false;
 };

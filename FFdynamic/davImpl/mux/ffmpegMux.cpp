@@ -3,10 +3,8 @@
 #include "ffmpegMux.h"
 
 namespace ff_dynamic {
-
 //// Register ////
-static DavImplRegister s_muxReg(DavWaveClassMux(), vector<string>({"auto", "ffmpeg"}),
-                                {},
+static DavImplRegister s_muxReg(DavWaveClassMux(), vector<string>({"auto", "ffmpeg"}), {},
                                 [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
                                     unique_ptr<FFmpegMux> p(new FFmpegMux(options));
                                     return p;
@@ -17,7 +15,6 @@ const DavRegisterProperties & FFmpegMux::getRegisterProperties() const noexcept 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-
 //int FFmpegMux::interruptCallback(void *p) {
 //    return 0;
 //}
@@ -43,7 +40,7 @@ int FFmpegMux::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     m_timestampMgr.clear();
     m_muxStreamsMap.clear();
     const string outFmt = m_options.get(DavOptionContainerFmt());
-    LOG(INFO) << m_logtag << "open 'FFmpegMux' options: " << m_options.dump();
+    LOG(INFO) << m_logtag << "open Muxer options: " << m_options.dump();
     int ret = avformat_alloc_output_context2(&m_fmtCtx, nullptr,
                                              outFmt.empty() ? nullptr : outFmt.c_str(), m_outputUrl.c_str());
     if (ret < 0) {
@@ -158,10 +155,9 @@ int FFmpegMux::onProcess(DavProcCtx & ctx) {
         ret = AVERROR_EOF;
         LOG(INFO) << m_logtag << (m_logtag + m_outputUrl + " end process, write file trailer done");
     }
-
     // TODO: make audio/video separately
     m_outputCount++;
-    LOG_EVERY_N(INFO, 1000) << m_logtag << "mux frames " << m_outputCount;
+    LOG_EVERY_N(INFO, 500) << m_logtag << "mux frames " << m_outputCount;
     return ret;
 }
 

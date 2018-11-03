@@ -16,6 +16,7 @@ static DavImplRegister s_dataRelay(DavWaveClassDataRelay(), vector<string>({"aut
 const DavRegisterProperties & DataRelay::getRegisterProperties() const noexcept {
     return s_dataRelay.m_properties;
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 int DataRelay::onConstruct() {
     int ret = 0;
@@ -41,7 +42,13 @@ int DataRelay::onProcess(DavProcCtx & ctx) {
         return 0;
     }
     // relay input data
-    ctx.m_outBufs.emplace_back(ctx.m_inBuf);
+    auto frame = ctx.m_inBuf->releaseAVFrameOwner();
+    auto pkt = ctx.m_inBuf->releaseAVPacketOwner();
+    auto outBuf = make_shared<DavProcBuf>();
+    outBuf->mkAVFrame(frame);
+    outBuf->mkAVPacket(pkt);
+    outBuf->m_travelStatic = ctx.m_inBuf->m_travelStatic;
+    ctx.m_outBufs.emplace_back(outBuf);
     return 0;
 }
 

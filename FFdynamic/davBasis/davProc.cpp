@@ -115,6 +115,7 @@ int DavProc::postProcess(DavProcCtx & ctx) {
         buf->getAddress().setGroupFrom(this, m_groupId);
         for (int k=0; k < ctx.m_outputTimes; k++) {
             m_dataTransmitor->delivery(buf);
+            auto r = m_dataTransmitor->getRecipients();
         }
     }
     /* limit output buf number if needed.

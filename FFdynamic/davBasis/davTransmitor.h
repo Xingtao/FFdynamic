@@ -126,11 +126,12 @@ public: /* trivial ones */
     }
     inline void setSelfAddress(const Address & selfAddress) {m_selfAddress = selfAddress;}
     inline Address getSelfAddress() {return m_selfAddress;}
-    inline map<Address, uint64_t> & getReceiveCounts() {return m_receiveCounts;}
-    inline map<Address, uint64_t> & getSendCounts() {return m_sendCounts;}
+    inline const std::multimap<Address, shared_ptr<Transmitor>> & getRecipients() const noexcept {return m_recipients;}
+    inline const map<Address, uint64_t> & getReceiveCounts() const noexcept {return m_receiveCounts;}
+    inline const map<Address, uint64_t> & getSendCounts() const noexcept {return m_sendCounts;}
     inline std::ostringstream getSendCountStat() {return getCountStat(m_sendCounts);}
     inline std::ostringstream getReceiveCountStat() {return getCountStat(m_receiveCounts);}
-    inline const string & getLogtag() {return m_logtag;}
+    inline const string & getLogtag() const noexcept {return m_logtag;}
 
 public: /* Transmitor load and unload its load */
     int welcome(const shared_ptr<Load> & in) {

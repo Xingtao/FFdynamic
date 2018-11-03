@@ -127,12 +127,11 @@ int FFmpegVideoEncode::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) 
 
     CHECK(m_inputTravelStatic.size() == ctx.m_froms.size() && ctx.m_froms.size() == 1);
     auto in = m_inputTravelStatic.at(ctx.m_froms[0]);
-    if (!in->m_codecpar && (in->m_pixfmt == AV_PIX_FMT_NONE)) {
+    if (!in || (!in->m_codecpar && (in->m_pixfmt == AV_PIX_FMT_NONE))) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
-                m_logtag + "video encode cannot get valid codecpar or videopar");
+                m_logtag + "video encode cannot get valid travel static codecpar or videopar");
         return DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR;
     }
-
     /* this is crucial: if some fields no set via options (such as width, height, framerate, etc..),
        use values from inTravelstatic */
     in->mergeVideoDavTravelStaticToDict(m_options);

@@ -145,7 +145,8 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     auto detectEvent = make_shared<CvDnnDetectEvent>();
     detectEvent->m_framePts = inFrame->pts;
     postprocess(image, outs, detectEvent);
-    ctx.m_pubEvents.emplace_back(detectEvent);
+    if (detectEvent->m_results.size() > 0)
+        ctx.m_pubEvents.emplace_back(detectEvent);
     /* No travel static needed for detectors, just events */
     return 0;
 }
@@ -181,8 +182,8 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
                 const int classId = (int)(data[i + 1]) - 1; // classId 0 is background
                 if (classId < (int)m_classNames.size())
                     result.m_className = m_classNames[classId];
+                detectEvent->m_results.emplace_back(result);
             }
-            detectEvent->m_results.emplace_back(result);
         }
     } else if (outLayerType == "DetectionOutput") {
         // Network produces output blob with a shape 1x1xNx7 where N is a number of detections。
@@ -202,8 +203,8 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
                 const int classId = (int)(data[i + 1]) - 1; // classId 0 is background
                 if (classId < (int)m_classNames.size())
                     result.m_className = m_classNames[classId];
+                detectEvent->m_results.emplace_back(result);
             }
-            detectEvent->m_results.emplace_back(result);
         }
     } else if (outLayerType == "Region") {
         for (size_t i = 0; i < outs.size(); ++i) {
@@ -224,9 +225,9 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
                     result.m_rect.y = centerY - result.m_rect.h / 2;
                     if (classIdPoint.x < (int)m_classNames.size())
                         result.m_className = m_classNames[classIdPoint.x];
+                    detectEvent->m_results.emplace_back(result);
                 }
             }
-            detectEvent->m_results.emplace_back(result);
         }
     } else {
         LOG(ERROR) << m_logtag << "Unknown output layer type: " << outLayerType;

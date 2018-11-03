@@ -15,6 +15,7 @@ struct DavPeerEvent {
     DavProcFrom m_procFrom;
     /* getSelf return different derived event [covariant return types] */
     virtual const DavPeerEvent & getSelf() const = 0;
+    inline const DavProcFrom & getAddress() const noexcept {return m_procFrom;}
     inline DavProcFrom & getAddress() noexcept {return m_procFrom;}
     inline void setAddress(const DavProcFrom & procFrom) noexcept {m_procFrom = procFrom;}
 };

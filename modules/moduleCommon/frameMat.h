@@ -5,9 +5,8 @@
 
 namespace ff_dynamic {
 
-calss FrameMat {
-    static int frameToMatYuv420(const AVFrame *inFrame, Mat & outMat) {
-        CHECK((enum AVPixelFormat)inFrame->format == AV_PIX_FMT_YUV420P);
+struct FrameMat {
+    static int frameToMatYuv420(const AVFrame *inFrame, cv::Mat & outMat) {
         outMat.create(inFrame->height * 3 / 2, inFrame->width, CV_8UC1);
         for (int k=0; k < inFrame->height; k++)
             memcpy(outMat.data + k * inFrame->width, inFrame->data[0] + k * inFrame->linesize[0], inFrame->width);
@@ -21,14 +20,13 @@ calss FrameMat {
     }
 
     static int matToFrameYuv420(const cv::Mat & inMat, AVFrame *outFrame) {
-        auto outFrame = outBuf->mkAVFrame();
         outFrame->width = inMat.cols;
         outFrame->height = inMat.rows;
         outFrame->format = AV_PIX_FMT_YUV420P;
         av_frame_get_buffer(outFrame, 16);
         const auto y = inMat.data;
-        const auto u = y + inFrame->width * inFrame->height;
-        const auto v = u + inFrame->width * inFrame->height / 4 ;
+        const auto u = y + outFrame->width * outFrame->height;
+        const auto v = u + outFrame->width * outFrame->height / 4 ;
         for (int k=0; k < outFrame->height; k++)
             memcpy(outFrame->data[0] + k * outFrame->linesize[0], y + k * outFrame->width, outFrame->width);
         for (int k=0; k < outFrame->height/2; k++) {

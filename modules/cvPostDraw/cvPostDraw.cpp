@@ -20,10 +20,10 @@ const DavRegisterProperties & CvPostDraw::getRegisterProperties() const noexcept
 ////////////////////////////////////
 //  [event process]
 int CvPostDraw::processDnnDetectResult(const CvDnnDetectEvent & e) {
-    LOG(INFO) << m_logtag << "got result " << e.m_framePts << ", " << e.m_detectorFrameworkTag;
-    auto & from = e.getAddress();
+    LOG(INFO) << m_logtag << "got result " << e;
+    const auto & from = e.getAddress();
     if (m_detectResults.count(from) == 0) {
-        m_detectResults.emplace(from, {e});
+        m_detectResults.emplace(from, vector<CvDnnDetectEvent>{e});
         return 0;
     }
     auto & v = m_detectResults.at(from);
@@ -52,7 +52,6 @@ int CvPostDraw::onConstruct() {
 
     /* only output one video stream */
     m_outputMediaMap.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO);
-
     LOG(INFO) << m_logtag << "CvPostDraw create done";
     return 0;
 }
@@ -105,7 +104,8 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
     m_cacheBufFrames.emplace_back(ctx.m_inBuf);
 
     /* process detect results and draw results to frame */
-    auto outs = m_ctx.m_outBufs;
+    auto outs = ctx.m_outBufs;
+    int usedFrameCount = 0;
     for (auto & in : m_cacheBufFrames) {
         auto frame = ctx.m_inRefFrame;
         /* first remove 'expired' results */
@@ -118,7 +118,7 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
         /* then check whether all results are ready */
         bool bReady = true;
         vector<CvDnnDetectEvent> results;
-        for (auto & d : m_detectResutls) {
+        for (auto & d : m_detectResults) {
             if (d.second.size() == 0) /* not comming */{
                 bReady = false;
                 break;
@@ -131,23 +131,26 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
             break;
         /* convert this frame to opencv Mat. TODO: directly to bgr mat */
         cv::Mat yuvMat;
-        FrameMat::frameToMatY420(frame, yuvMat);
+        FrameMat::frameToMatYuv420(frame, yuvMat);
         /* draw the frame */
         cv::Mat image;
         cv::cvtColor(yuvMat, image, CV_YUV2BGR_I420);
-        drawResult(image, results)
+        drawResult(image, results);
         /* convert to yuv again (tedious, should have a auto format convertor) */
         auto outBuf = make_shared<DavProcBuf>();
         auto outFrame = outBuf->mkAVFrame();
         FrameMat::matToFrameYuv420(yuvMat, outFrame);
-        outFrame->pts = inFrame->pts;
-        m_ctx.m_outBufs.emplace_back(outBuf);
+        outFrame->pts = frame->pts;
+        outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+        ctx.m_outBufs.emplace_back(outBuf);
+        usedFrameCount++;
     }
+    m_cacheBufFrames.erase(m_cacheBufFrames.begin(), m_cacheBufFrames.begin() + usedFrameCount);
     return 0;
 }
 
 int CvPostDraw::drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & results) {
-    const static vector<cv::CvScalar> colors {
+    const static vector<cv::Scalar> colors {
         {255, 0, 0}, {0, 0, 255}, {0, 255, 0}, {0, 255, 255}, {255, 0, 255},
         {255, 255, 0}, {128, 128, 0},  {128, 0, 128}, {0, 128, 128},
         {128, 128, 128}, {128, 255, 255},{128, 255, 0}, {128, 0, 255}};
@@ -159,14 +162,15 @@ int CvPostDraw::drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & res
                                              cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
         // TODO: may exceed image's width and height
         putText(image, results[k].m_detectorFrameworkTag,
-                cv::Point(framework.height, framework.height + k * framework.height top),
+                cv::Point(framework.height, framework.height + k * framework.height),
                 cv::FONT_HERSHEY_SIMPLEX, 0.5, color);
-        cv::line(image, cv::Point(framework.height + framework.width + 2, k * framework.height top),
+        cv::line(image, cv::Point(framework.height + framework.width + 2, k * framework.height),
                  cv::Point(framework.height + framework.width + 4), color);
         for (const auto & r : results[k].m_results) {
-            cv::rectangle(image, cv::Point(r.x, r.y), cv::Point(r.x + r.w, r.y + r.h), color);
-            string lable = r.m_className + " - " + cv::format("%.2f", r.m_confidence);
-            putText(image, label, cv::Point(r.x, r.y), FONT_HERSHEY_SIMPLEX, 0.5, color);
+            cv::rectangle(image, cv::Point(r.m_rect.x, r.m_rect.y),
+                          cv::Point(r.m_rect.x + r.m_rect.w, r.m_rect.y + r.m_rect.h), color);
+            string label = r.m_className + " - " + cv::format("%.2f", r.m_confidence);
+            putText(image, label, cv::Point(r.m_rect.x, r.m_rect.y), cv::FONT_HERSHEY_SIMPLEX, 0.5, color);
         }
     }
     return 0;

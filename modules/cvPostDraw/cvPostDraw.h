@@ -1,6 +1,5 @@
 #pragma once
 
-#include <queue>
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -41,7 +40,7 @@ private: // event process
 private:
     map<DavProcFrom, vector<CvDnnDetectEvent>> m_detectResults;
     vector<shared_ptr<DavProcBuf>> m_cacheBufFrames;
-    int drawResult(cv::Mat & image, const std::queue<CvDnnDetectEvent> & results);
+    int drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & results);
 };
 
 } //namespace ff_dynamic

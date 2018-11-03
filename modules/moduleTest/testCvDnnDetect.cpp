@@ -17,15 +17,12 @@ int main(int argc, char **argv) {
     // 1. create demux and get stream info
     DavWaveOption demuxOption((DavWaveClassDemux()));
     demuxOption.set(DavOptionInputUrl(), argv[1]);
-    // 2. video/audio decode
+    // 2. video decode (audio will use copy)
     DavWaveOption videoDecodeOption((DavWaveClassVideoDecode()));
-    DavWaveOption audioDecodeOption((DavWaveClassAudioDecode()));
     // 3. video encode
     DavWaveOption videoEncodeOption((DavWaveClassVideoEncode()));
     videoEncodeOption.setVideoSize(1280, 720);
     videoEncodeOption.set("preset", "veryfast");
-    // 4. audio encode
-    DavWaveOption audioEncodeOption((DavWaveClassAudioEncode()));
     // 5. mux
     DavWaveOption muxOption((DavWaveClassMux()));
     muxOption.set(DavOptionOutputUrl(), "dynaDetect.flv");
@@ -76,16 +73,20 @@ int main(int argc, char **argv) {
     DavStreamletOption cvDnnBuildOption;
     // start build
     inputOption.setInt(DavOptionBufLimitNum(), 20);
-    auto streamletInput = inputBuilder.build({demuxOption, videoDecodeOption, audioDecodeOption},
+    auto streamletInput = inputBuilder.build({demuxOption, videoDecodeOption},
                                              DavDefaultInputStreamletTag("input"), inputOption);
     CHECK(streamletInput != nullptr);
-    auto streamletOutput = outputBuilder.build({videoEncodeOption, audioEncodeOption, muxOption},
+    auto streamletOutput = outputBuilder.build({videoEncodeOption, muxOption},
                                                DavDefaultOutputStreamletTag("output"));
     CHECK(streamletOutput != nullptr);
-    auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption2, cvDnnDetectOption1},
+    // cvDnnDetectOption2
+    auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption1},
                                               CvDnnDetectStreamletTag("cvDnn"), cvDnnBuildOption);
     /* connect streamlets */
-    streamletInput >> cvDnnStreamlet >> streamletOutput;
+    /* video part */
+    streamletInput >= cvDnnStreamlet >= streamletOutput;
+    /* audio bitstream */
+    // streamletInput * streamletOutput;
 
     // start
     DavRiver river({streamletInput, cvDnnStreamlet, streamletOutput});

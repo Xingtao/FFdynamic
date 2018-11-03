@@ -333,6 +333,22 @@ private:
 extern DavStreamlet &  operator>>(DavStreamlet & dst, DavStreamlet & src);
 extern shared_ptr<DavStreamlet> & operator>>(shared_ptr<DavStreamlet> & dst,
                                              shared_ptr<DavStreamlet> & src);
+// video raw or bitstream
+extern DavStreamlet &  operator>=(DavStreamlet & dst, DavStreamlet & src);
+extern shared_ptr<DavStreamlet> & operator>=(shared_ptr<DavStreamlet> & dst,
+                                             shared_ptr<DavStreamlet> & src);
+// audio raw or bitstream
+extern DavStreamlet &  operator*=(DavStreamlet & dst, DavStreamlet & src);
+extern shared_ptr<DavStreamlet> & operator*=(shared_ptr<DavStreamlet> & dst,
+                                             shared_ptr<DavStreamlet> & src);
+// video bitstream
+extern DavStreamlet &  operator>(DavStreamlet & dst, DavStreamlet & src);
+extern shared_ptr<DavStreamlet> & operator>(shared_ptr<DavStreamlet> & dst,
+                                            shared_ptr<DavStreamlet> & src);
+// audio bitstream
+extern DavStreamlet &  operator*(DavStreamlet & dst, DavStreamlet & src);
+extern shared_ptr<DavStreamlet> & operator*(shared_ptr<DavStreamlet> & dst,
+                                            shared_ptr<DavStreamlet> & src);
 
 /* a simple wrapper for a set of streamlet */
 class DavRiver {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "davPeerEvent.h"
 
 namespace ff_dynamic {
@@ -18,6 +19,14 @@ struct CvDnnDetectEvent : public DavPeerEvent {
     };
     vector<DetectResult> m_results;
 };
+
+inline std::ostream & operator<<(std::ostream & os, const CvDnnDetectEvent & e) {
+    os << "{detector " << e.m_detectorFrameworkTag << ", inferTime " << e.m_inferTime;
+    for (auto & r : e.m_results)
+        << "className " << e.m_className << ", conf " << std::setprecition(3) << e.m_confidence << e.m_rect;
+    os << "}\n"
+    return os;
+}
 
 /* external dynamic events */
 struct CvDynaEventChangeConfThreshold {

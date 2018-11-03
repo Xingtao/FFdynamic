@@ -31,6 +31,13 @@ int CvPostDraw::processDnnDetectResult(const CvDnnDetectEvent & e) {
     return 0;
 }
 
+int CvPostDraw::processStopPubEvent(const DavStopPubEvent & e) {
+    auto & from = e.getAddress();
+    LOG(INFO) << m_logtag << "stop event pub " << from;
+    m_detectResults.erase(from);
+    return 0;
+}
+
 ////////////////////////////////////
 //  [construct - destruct - process]
 int CvPostDraw::onConstruct() {
@@ -38,6 +45,10 @@ int CvPostDraw::onConstruct() {
     std::function<int (const CvDnnDetectEvent &)> f =
         [this] (const CvDnnDetectEvent & e) {return processDnnDetectResult(e);};
     m_implEvent.registerEvent(f);
+
+    std::function<int (const DavStopPubEvent &)> g =
+        [this] (const DavStopPubEvent & e) {return processStopPubEvent(e);};
+    m_implEvent.registerEvent(g);
 
     /* only output one video stream */
     m_outputMediaMap.emplace(IMPL_SINGLE_OUTPUT_STREAM_INDEX, AVMEDIA_TYPE_VIDEO);
@@ -96,40 +107,68 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
     /* process detect results and draw results to frame */
     auto outs = m_ctx.m_outBufs;
     for (auto & in : m_cacheBufFrames) {
-        auto inFrame = ctx.m_inRefFrame;
-        /* remove 'expired' results */
+        auto frame = ctx.m_inRefFrame;
+        /* first remove 'expired' results */
         for (auto & d : m_detectResults) {
             d.second.erase(std::remove_if(d.second.begin(), d.second.end(),
-                                          [&inFrame](const CvDnnDetectEvent & r) {
-                                              return r.m_framePts < inFrame->pts;
-                                          }),
-                           d.second.end());
+                                          [&frame](const CvDnnDetectEvent & r) {
+                                              return r.m_framePts < frame->pts;
+                                          }), d.second.end());
         }
         /* then check whether all results are ready */
-        bool bReady = false;
+        bool bReady = true;
+        vector<CvDnnDetectEvent> results;
         for (auto & d : m_detectResutls) {
-            if (d.second.size() == 0) /* not comming */
+            if (d.second.size() == 0) /* not comming */{
+                bReady = false;
                 break;
+            }
+            if (d.second[0].m_framePts == frame->pts) {
+                results.emplace_back(d.second[0]);
+            }
         }
-
+        if (!bReady)
+            break;
         /* convert this frame to opencv Mat. TODO: directly to bgr mat */
         cv::Mat yuvMat;
-        FrameMat::frameToMatY420(inFrame, yuvMat);
+        FrameMat::frameToMatY420(frame, yuvMat);
         /* draw the frame */
-        cv::Mat bgrImage;
-        cv::cvtColor(yuvMat, bgrImage, CV_YUV2BGR_I420);
-
-        /* convert to yuv again (tedious, should have a format auto convertor) */
+        cv::Mat image;
+        cv::cvtColor(yuvMat, image, CV_YUV2BGR_I420);
+        drawResult(image, results)
+        /* convert to yuv again (tedious, should have a auto format convertor) */
         auto outBuf = make_shared<DavProcBuf>();
         auto outFrame = outBuf->mkAVFrame();
         FrameMat::matToFrameYuv420(yuvMat, outFrame);
+        outFrame->pts = inFrame->pts;
         m_ctx.m_outBufs.emplace_back(outBuf);
     }
     return 0;
 }
 
-int CvPostDraw::drawResult(cv::Mat & image, vector<>) {
+int CvPostDraw::drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & results) {
+    const static vector<cv::CvScalar> colors {
+        {255, 0, 0}, {0, 0, 255}, {0, 255, 0}, {0, 255, 255}, {255, 0, 255},
+        {255, 255, 0}, {128, 128, 0},  {128, 0, 128}, {0, 128, 128},
+        {128, 128, 128}, {128, 255, 255},{128, 255, 0}, {128, 0, 255}};
 
+    for (size_t k=0; k < results.size(); k++) {
+        auto color = colors[k % colors.size()];
+        int baseLine;
+        cv::Size framework = cv::getTextSize(results[k].m_detectorFrameworkTag,
+                                             cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+        // TODO: may exceed image's width and height
+        putText(image, results[k].m_detectorFrameworkTag,
+                cv::Point(framework.height, framework.height + k * framework.height top),
+                cv::FONT_HERSHEY_SIMPLEX, 0.5, color);
+        cv::line(image, cv::Point(framework.height + framework.width + 2, k * framework.height top),
+                 cv::Point(framework.height + framework.width + 4), color);
+        for (const auto & r : results[k].m_results) {
+            cv::rectangle(image, cv::Point(r.x, r.y), cv::Point(r.x + r.w, r.y + r.h), color);
+            string lable = r.m_className + " - " + cv::format("%.2f", r.m_confidence);
+            putText(image, label, cv::Point(r.x, r.y), FONT_HERSHEY_SIMPLEX, 0.5, color);
+        }
+    }
     return 0;
 }
 

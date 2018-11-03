@@ -42,4 +42,9 @@ struct DavRect {
     int h = 0;
 };
 
+inline std::ostream & operator<<(std::ostream & os, const DavRect & r) {
+    os << "[x " << r.x << ", y " << r.y << ", w " << r.w << ", h " << r.h << "]";
+    return os;
+}
+
 } // namespace ff_dynamic

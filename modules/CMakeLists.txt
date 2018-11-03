@@ -39,10 +39,11 @@ add_library(cvmodule_plugin SHARED ${OpencvModuleSrc}) # Be Note: only shared li
 
 target_include_directories(ffdynamic
     PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleEvent/>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleEvent>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleStreamlet>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cvPostdraw>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cvDnnDetect>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/moduleCommon>
       $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
       $<INSTALL_INTERFACE:include>
     )

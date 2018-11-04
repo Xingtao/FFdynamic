@@ -5,9 +5,9 @@
 
 #include <glog/logging.h>
 
-#include "globalSignalHandle.h"
 #include "httpClient.h"
-#include "detectorService.h"
+#include "globalSignalHandle.h"
+#include "dynaDetectorService.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef COMPILE_TIME
@@ -26,7 +26,6 @@ using namespace detector_service;
 std::atomic<bool> g_bExit = ATOMIC_VAR_INIT(false);
 std::atomic<int> g_interruptCount = ATOMIC_VAR_INIT(0);
 static const string s_logtag = "[DetectorService] ";
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // static helpers
@@ -72,7 +71,7 @@ int main(int argc, char **argv) {
     LOG(INFO) << s_logtag << "DetectorService with config file: " << configPath;
 
     /* start detector service */
-    DetectorHttpService & detectorService = DetectorHttpService::getOnlyInstance();
+    DynaDetectorService & detectorService = DynaDetectorService::getOnlyInstance();
     if (detectorService.init(configPath) < 0) {
         LOG(ERROR) << s_logtag << "Failed create DetectorService: " << detectorService.getErr();
         return -1;

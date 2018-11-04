@@ -8,14 +8,14 @@ package DynaDnnDetect;
 // config
 message DynaDnnDetectTaskConfig {
     AppGlobalSetting.GlobalSetting app_global_setting = 1;
-    IalGlobalSetting dyna_detect_global_setting = 2;
+    DynaDetectGlobalSetting dyna_detect_global_setting = 2;
     DavStreamletSetting.InputStreamletSetting input_setting = 10;
     DavStreamletSetting.OutputStreamletSetting output_setting = 11;
-    repeated DynaDnnDetectSetting dnn_detector_settings;
+    repeated DnnDetectSetting dnn_detector_settings = 12;
 }
 
 message DynaDetectGlobalSetting {
-    int32 max_detectors = 5; /* max detectors run in parallel */
+    int32 max_detectors = 1; /* max detectors num runs in parallel */
 }
 
 message DnnDetectSetting {
@@ -26,11 +26,11 @@ message DnnDetectSetting {
     string classname_path = 5;
     int32 backend_id = 6;
     int32 target_id = 7;
-
     float scale_factor = 11;
-    repeated float means = 12; // Scalar mean (4 'double' element vector )
+    repeated float means = 12; // Scalar mean (3 'double' element vector)
     bool swap_rb = 13;
     int32 width = 14;
     int32 height = 15;
     float conf_threshold = 16;
+    bool enable = 20; // whether this detector enabled at the beginning
 }

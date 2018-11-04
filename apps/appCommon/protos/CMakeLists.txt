@@ -24,12 +24,14 @@ endif()
 
 # generate proto sources
 set(ial_proto_dir ${CMAKE_CURRENT_SOURCE_DIR}/ial)
+set(dyna_detect_proto_dir ${CMAKE_CURRENT_SOURCE_DIR}/dynaDnnDetect)
 set(ffdyna_origin_proto
   ${CMAKE_CURRENT_SOURCE_DIR}/davWaveSetting.proto
   ${CMAKE_CURRENT_SOURCE_DIR}/davStreamletSetting.proto
   ${CMAKE_CURRENT_SOURCE_DIR}/appGlobalSetting.proto
   ${ial_proto_dir}/ialConfig.proto
   ${ial_proto_dir}/ialRequest.proto
+  ${dyna_detect_proto_dir}/dynaDnnDetect.proto
   )
 
 foreach(protofile ${ffdyna_origin_proto})

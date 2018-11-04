@@ -3,8 +3,8 @@
 #include "appService.h"
 #include "httpCommon.h"
 #include "httpServer.h"
-#include "dynaDetectConfig.pb.h"
-#include "dynaDetectRequest.pb.h"
+#include "pbToDynaDetectOption.h"
+#include "dynaDnnDetect.pb.h"
 
 namespace dyna_detect_service {
 using namespace http_util;

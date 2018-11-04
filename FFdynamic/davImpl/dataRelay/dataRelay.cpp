@@ -36,10 +36,9 @@ int DataRelay::onProcess(DavProcCtx & ctx) {
         return 0;
     int ret = 0;
     if (ctx.m_inBuf->isEmptyData()) {
-        LOG(INFO) << "data source recevei flush data" << (*ctx.m_inBuf);
+        LOG(INFO) << "data relay recevei flush frame, quit. " << (*ctx.m_inBuf);
         ctx.m_bInputFlush = true;
-        /* just remove this sender and goon until no connected senders */
-        return 0;
+        return AVERROR_EOF;
     }
     // relay input data
     auto frame = ctx.m_inBuf->releaseAVFrameOwner();

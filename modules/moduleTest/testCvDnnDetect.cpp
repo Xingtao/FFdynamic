@@ -80,8 +80,7 @@ int main(int argc, char **argv) {
     auto streamletOutput = outputBuilder.build({videoEncodeOption, muxOption},
                                                DavDefaultOutputStreamletTag("output"));
     CHECK(streamletOutput != nullptr);
-    // cvDnnDetectOption2
-    auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption1},
+    auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption1, cvDnnDetectOption2},
                                               CvDnnDetectStreamletTag("cvDnn"), cvDnnBuildOption);
     /* connect streamlets */
     /* video part */

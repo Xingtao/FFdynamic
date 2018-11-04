@@ -220,7 +220,7 @@ int FFmpegVideoEncode::receiveEncodeFrames(DavProcCtx & ctx) {
         }
         break;
     } while (true);
-    LOG_EVERY_N(INFO, 1) << m_logtag << "encoded frames " << m_encodeFrames;
+    LOG_EVERY_N(INFO, 500) << m_logtag << "encoded frames " << m_encodeFrames;
     return ret;
 }
 

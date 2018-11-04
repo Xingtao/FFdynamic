@@ -134,10 +134,9 @@ int PluginDehazor::onProcess(DavProcCtx & ctx) {
     }
 
     cv::Mat bgrMat;
-    cv::cvtColor(yuvMat, bgrMat, CV_YUV2BGR_I420);
+    cv::cvtColor(yuvMat, bgrMat, CV_YUV2BGR_YV12);
     cv::Mat dehazedMat = m_dehazor->process(bgrMat); /* do dehaze */
-    cv::cvtColor(dehazedMat, yuvMat, CV_BGR2YUV_I420);
-
+    cv::cvtColor(dehazedMat, yuvMat, CV_BGR2YUV_YV12);
     /* then convert back to YUV420p (because our output travel static says so);
        if we state it is AV_PIX_FMT_BGR24, then no convertion needed here. */
     auto outBuf = make_shared<DavProcBuf>();

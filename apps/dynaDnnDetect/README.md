@@ -1,7 +1,8 @@
 ##  A play case - Change Object Detectors at run time with video streams
 ---------
 
-This little fun project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. I tested with *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (in coco dataset). Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate objects intereted.
+This little project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. Models of *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (all in coco dataset) are tested. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate objects intereted.
+![dynaDetect](../../asset/dynaDetect.gif)
 
 ### Chnage detectors at run time
 

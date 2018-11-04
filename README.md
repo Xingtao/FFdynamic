@@ -44,10 +44,8 @@ All changes are quite smooth, without any frozen or stuck.
 -----------
 ## `Another application *Dynamic Detect*`
 
-**Dynamic Detect** is a fun case for playing. It does object detection with dnn models via OpenCV api.   
-It reads live streams or local files, then do object detection and according post actions (such as drawing), and finally encodes/streams it out. During the process, one add/delete different detectors(darknet/yolo3, caffe/vgg16_ssd, or your own model).  
-
-Here is an result got from **Dynamic Detect**. At first, it runs two detectors simoutaneously, then add one and delete one. The incoming stream is decoded once and all detectors are run in parallel.
+This little project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. Models of *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (all in coco dataset) are tested. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate objects intereted.
+![dynaDetect](../../asset/dynaDetect.gif)
 
 #### For more details, please refer to [the application](apps/dynaDetect/README.md) and its according unit [test](module/moduleTest/testCvDnnDetect.cpp)
 

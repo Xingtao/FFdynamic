@@ -1,18 +1,18 @@
-##  A play case - Change Object Detectors at run time with live streams
+##  A play case - Change Object Detectors at run time with video streams
 ---------
 
-This project provides a play groud one can change object detector types at run time while reading live streams (also local files). Those detectors are opencv supported one, yolo, ssd, face detector, etc.. or your own ones, which needs write a plugin wrapper. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate objects intereted.
+This little fun project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. I tested with *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (in coco dataset). Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate objects intereted.
 
 ### Chnage detectors at run time
 
-We can *add a detector* with a curl request while program is running:
+You can test it by *add/delete detector* with curl request while program is running.
 
 ``` shell
-    Add a new detector:
-    curl -X POST http://ip:port/api1/detectors/name_of_the_detector
+    Add a new detector, yolo3 with darknet's model
+    curl -X POST http://ip:port/api1/detectors/yolo3
     
     Delete an existing detector:
-    curl -X DELETE http://ip:port/api1/detectors/name_of_the_detector
+    curl -X DELETE http://ip:port/api1/detectors/mobilenet_ssd
 ```
 
 ### Program Running pattern

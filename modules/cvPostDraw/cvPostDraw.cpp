@@ -151,15 +151,15 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
 
 int CvPostDraw::drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & results) {
     const static vector<cv::Scalar> colors {
-        {0, 0, 255}, {255, 0, 0}, {0, 255, 0}, {0, 255, 255}, {255, 0, 255},
-        {255, 255, 0}, {128, 128, 0}, {128, 0, 128}, {0, 128, 128},
+        {0, 0, 255}, {255, 255, 0}, {255, 0, 0}, {0, 255, 0}, {0, 255, 255}, {255, 0, 255},
+        {128, 128, 0}, {128, 0, 128}, {0, 128, 128},
         {128, 128, 128}, {128, 255, 255},{128, 255, 0}, {128, 0, 255}};
 
     for (size_t k=0; k < results.size(); k++) {
         auto color = colors[k % colors.size()];
         int baseLine;
         cv::Size framework = cv::getTextSize(results[k].m_detectorFrameworkTag,
-                                             cv::FONT_HERSHEY_SIMPLEX, 1.3, 1, &baseLine);
+                                             cv::FONT_HERSHEY_SIMPLEX, 1.2, 1, &baseLine);
         cv::putText(image, results[k].m_detectorFrameworkTag,
                     cv::Point(framework.height, (k+2) * framework.height),
                     cv::FONT_HERSHEY_SIMPLEX, 1, color);
@@ -167,9 +167,9 @@ int CvPostDraw::drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & res
             cv::rectangle(image, cv::Point(r.m_rect.x, r.m_rect.y),
                           cv::Point(r.m_rect.x + r.m_rect.w, r.m_rect.y + r.m_rect.h), color);
             string label = r.m_className + " - " + cv::format("%.2f", r.m_confidence);
-            cv::Size labelSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 1, 1, &baseLine);
+            cv::Size labelSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.8, 1, &baseLine);
             putText(image, label, cv::Point(r.m_rect.x, r.m_rect.y + labelSize.height),
-                    cv::FONT_HERSHEY_SIMPLEX, 1, color);
+                    cv::FONT_HERSHEY_SIMPLEX, 0.8, color);
         }
     }
     return 0;

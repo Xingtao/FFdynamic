@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
     cvDnnDetectOption1.set("model_path", "/Users/pengxingtao/practice/psn/FFdynamic/modules/moduleTest/yolov3.weights");
     cvDnnDetectOption1.set("config_path", "/Users/pengxingtao/practice/psn/FFdynamic/modules/moduleTest/yolov3.cfg");
     cvDnnDetectOption1.set("classname_path", "../moduleTest/coco.names");
-    cvDnnDetectOption1.setInt("backend_id", 3);
-    cvDnnDetectOption1.setInt("target_id", 0);
+    cvDnnDetectOption1.setInt("backend_id", 0);
+    cvDnnDetectOption1.setInt("target_id", 1);
     cvDnnDetectOption1.setDouble("scale_factor", 1.0/255.0);
     cvDnnDetectOption1.setBool("swap_rb", true);
     cvDnnDetectOption1.setInt("width", 416);
@@ -51,16 +51,16 @@ int main(int argc, char **argv) {
     DavWaveOption cvDnnDetectOption2((DavWaveClassCvDnnDetect()));
     cvDnnDetectOption2.set(DavOptionImplType(), "auto");
     cvDnnDetectOption2.set("detector_type", "detect");
-    cvDnnDetectOption2.set("detector_framework_tag", "caffemodel/vgg_ssd_512");
-    cvDnnDetectOption2.set("model_path", "../moduleTest/VGG_VOC0712Plus_SSD_512x512_ft_iter_160000.caffemodel");
-    cvDnnDetectOption2.set("config_path", "../moduleTest/vgg_ssd_512.prototxt");
-    cvDnnDetectOption2.set("classname_path", ""); // not needed
-    cvDnnDetectOption2.setInt("backend_id", 3);
-    cvDnnDetectOption2.setInt("target_id", 0);
-    cvDnnDetectOption2.setDouble("scale_factor", 1.0/255.0);
-    cvDnnDetectOption2.setBool("swap_rb", true);
-    cvDnnDetectOption2.setInt("width", 512);
-    cvDnnDetectOption2.setInt("height", 512);
+    cvDnnDetectOption2.set("detector_framework_tag", "caffemodel/vgg_ssd_300");
+    cvDnnDetectOption2.set("model_path", "../moduleTest/VGG_coco_SSD_300x300_iter_400000.caffemodel");
+    cvDnnDetectOption2.set("config_path", "../moduleTest/vgg_ssd_300_deploy.prototxt");
+    cvDnnDetectOption2.set("classname_path", "../moduleTest/coco.names");
+    cvDnnDetectOption2.setInt("backend_id", 0);
+    cvDnnDetectOption2.setInt("target_id", 1);
+    cvDnnDetectOption2.setDouble("scale_factor", 1); //1.0/255.0
+    cvDnnDetectOption2.setBool("swap_rb", false);
+    cvDnnDetectOption2.setInt("width", 300);
+    cvDnnDetectOption2.setInt("height", 300);
     cvDnnDetectOption2.setDouble("conf_threshold", 0.7);
     cvDnnDetectOption2.setDoubleArray("means", {0,0,0});
 
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     cvDnnBuildOption.setInt(DavOptionBufLimitNum(), 20);
     auto streamletOutput = outputBuilder.build({videoEncodeOption, muxOption},
                                                DavDefaultOutputStreamletTag("output"));
-    CHECK(streamletOutput != nullptr);
+    CHECK(streamletOutput != nullptr); // , cvDnnDetectOption2
     auto cvDnnStreamlet = cvDnnBuilder.build({dataRelayOption, cvPostDrawOption, cvDnnDetectOption1, cvDnnDetectOption2},
                                               CvDnnDetectStreamletTag("cvDnn"), cvDnnBuildOption);
     /* connect streamlets */

@@ -22,9 +22,10 @@ struct CvDnnDetectEvent : public DavPeerEvent {
 };
 
 inline std::ostream & operator<<(std::ostream & os, const CvDnnDetectEvent & e) {
-    os << "{detector " << e.m_detectorFrameworkTag << ", inferTime " << e.m_inferTime;
+    os << "{detector " << e.m_detectorFrameworkTag << ", inferTime " << e.m_inferTime << ", pts " << e.m_framePts;
     for (auto & r : e.m_results)
-        os << "className " << r.m_className << ", conf " << std::setprecision(3) << r.m_confidence << " " << r.m_rect;
+        os << " [className " << r.m_className << ", conf " << std::setprecision(3)
+           << r.m_confidence << " " << r.m_rect << "]";
     os << "}\n";
     return os;
 }

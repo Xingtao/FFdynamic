@@ -2,7 +2,7 @@
 
 ### FFdynamic - Extending FFmpeg's power with video/audio process composition and run time control 
 
-This project shipped with two parts: **FFdynamic** library, and **_Interactive Live_** application build on **FFdynamic**
+This project shipped with two parts: **FFdynamic** library and applications build on **FFdynamic**
 
 ------------
 ### Contents
@@ -18,14 +18,14 @@ This project shipped with two parts: **FFdynamic** library, and **_Interactive L
 -----------
 ## `An application *Interactive Live*`
 
-Here is an **Interactive Live** (Ial hereafter) application, which is based on FFdynamic and shows how to use this library to develop complicated program.    
-Ial does video and audio mixing, then streams it out. It could be run in phones or cloud servers.  
+**Interactive Live** (Ial for short) is an application based on FFdynamic.  
+Ial does multiple video and audio mixing, then streams it out. It could be run in phones or cloud servers.  
 Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream.
 
 #### **Interactive live scenario**
 ![Interactive live with two people](asset/peers-broadcast.jpg )
 
-**Interactive Live** give more flexiable control over the mixing process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
+**Interactive Live** gives flexiable control over the mixing process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
 
 #### *Layout auto change or set to certain pattern during mixing broadcast by request*
 This picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.
@@ -37,9 +37,19 @@ This picture shows backgroud picture changed by a request (the text 'FFdynamic' 
 
 ![Backgroud dynamically change via request](asset/backgroudChange.gif)
 
-Both changes are quite smooth, without any frozen or stuck.
+All changes are quite smooth, without any frozen or stuck.
 
 #### For more details, please refer to [the application](apps/interactiveLive/README.md)
+
+-----------
+## `Another application *Dynamic Detect*`
+
+**Dynamic Detect** is a fun case for playing. It does object detection with dnn models via OpenCV api.   
+It reads live streams or local files, then do object detection and according post actions (such as drawing), and finally encodes/streams it out. During the process, one add/delete different detectors(darknet/yolo3, caffe/vgg16_ssd, or your own model).  
+
+Here is an result got from **Dynamic Detect**. At first, it runs two detectors simoutaneously, then add one and delete one. The incoming stream is decoded once and all detectors are run in parallel.
+
+#### For more details, please refer to [the application](apps/dynaDetect/README.md) and its according unit [test](module/moduleTest/testCvDnnDetect.cpp)
 
 -----------------
 
@@ -256,17 +266,20 @@ sudo make install && sudo ldconfig
 ### Build after install dependencies
 
 ``` sh
-    Under FFdynamic folder: 'sh build.sh'  will build FFdynamic library (need sudo when install)
-    Under app/interactiveLive folder: 'sh build.sh'  will build FFdynamic library and Ial program.
+    Under FFdynamic folder: 
+          'sh build.sh'  will build FFdynamic library (need sudo when install)
+    Under app/interactiveLive folder: 
+          'sh build.sh'  will build FFdynamic library and Ial program.
 ```
 
-#### For Ubuntu
+#### For Ubuntu / CentOS
 Install FFmpeg as usal, then  
-apt install -y cmake libgflags-dev libgoogle-glog-dev libboost-all-dev
 
-#### For CentOS
-Install FFmpeg as usal, then  
+``` sh
+apt install -y cmake libgflags-dev libgoogle-glog-dev libboost-all-dev
+or 
 yum install -y glog-devel gflags-devel cmake boost-devel  
+```
 
 #### For Mac
 Install FFmpeg as usal, then  

@@ -8,24 +8,11 @@ This project provides a play groud one can change object detector types at run t
 We can *add a detector* with a curl request while program is running:
 
 ``` shell
-    curl -v http://ip:port/api1/detectors/add -d 
+    Add a new detector:
+    curl -X POST http://ip:port/api1/detectors/name_of_the_detector
     
-    {
-        "detector_module" : "opencv", /* only opencv for now */
-        "detector_type" : "yolo3",
-        "post_action" : ["draw_box", "draw_text"]
-    }
-```
-
-We can *add a detector* with a curl request while program is running:
-
-``` shell
-    curl -v http://ip:port/api1/detectors/delete -d 
-    
-    {
-        "detector_module" : "opencv", /* only opencv for now */
-        "detector_type" : "yolo3"
-    }
+    Delete an existing detector:
+    curl -X DELETE http://ip:port/api1/detectors/name_of_the_detector
 ```
 
 ### Program Running pattern
@@ -35,7 +22,7 @@ VideoStreamDemux |-> AudioDecode -> |-> AudioEncode ----------------------------
                  |                                                                        |
                  |                  |-> ObjDector 1 -> |    | Detector |                  |
                  |-> VideoDecode -> |-> ObjDector 2 -> | -> | Post     | -> VideoEncode ->| -> Mux stream out
-                                    |-> ObjDector 3 -> |    | Action   |                  |
+                                    |-> ObjDector 3 -> |    | Draw     |                  |
                                         ..........
 ```
 

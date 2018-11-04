@@ -151,7 +151,7 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
 
 int CvPostDraw::drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & results) {
     const static vector<cv::Scalar> colors {
-        {255, 215, 0}, {255, 69, 0}, {0, 0, 255}, {0, 255, 0}, {0, 255, 255}, {255, 0, 255},
+        {255, 215, 0}, {50, 205, 50}, {0, 0, 255}, {0, 255, 0}, {0, 255, 255}, {255, 0, 255},
         {128, 128, 0}, {128, 0, 128}, {0, 128, 128},
         {128, 128, 128}, {128, 255, 255},{128, 255, 0}, {128, 0, 255}};
 
@@ -161,7 +161,7 @@ int CvPostDraw::drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & res
         cv::Size framework = cv::getTextSize(results[k].m_detectorFrameworkTag,
                                              cv::FONT_HERSHEY_SIMPLEX, 1, 1, &baseLine);
         cv::putText(image, results[k].m_detectorFrameworkTag,
-                    cv::Point(framework.height, (k+2.5) * framework.height),
+                    cv::Point(framework.height, (k+1) * framework.height + k*2),
                     cv::FONT_HERSHEY_SIMPLEX, 1, color);
         for (const auto & r : results[k].m_results) {
             cv::rectangle(image, cv::Point(r.m_rect.x, r.m_rect.y),

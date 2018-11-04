@@ -85,8 +85,7 @@ int main(int argc, char **argv) {
     /* connect streamlets */
     /* video part */
     streamletInput >= cvDnnStreamlet >= streamletOutput;
-    /* audio bitstream */
-    // streamletInput * streamletOutput;
+    /* audio bitstream TODO:  streamletInput * streamletOutput; */
 
     // start
     DavRiver river({streamletInput, cvDnnStreamlet, streamletOutput});

@@ -14,7 +14,10 @@ using namespace ::google::protobuf;
 
 ///////////////////////////////////////////////////////////////////////////
 /* extend Error Description in DavMessager & AppMessager for DynaDetect service */
-#define DYNA_DETECT_ERROR_NO_SUCH_DETECTOR  FFERRTAG('E', 'N', 'S', 'D')
+#define DYNA_DETECT_ERROR_TASK_INIT                FFERRTAG('F', 'D', 'T', 'I')
+#define DYNA_DETECT_ERROR_NO_SUCH_DETECTOR         FFERRTAG('E', 'N', 'S', 'D')
+#define DYNA_DETECT_ERROR_DETECTOR_ALREADY_RUNNING FFERRTAG('E', 'D', 'A', 'R')
+#define DYNA_DETECT_ERROR_DETECTOR_ALREADY_STOPPED FFERRTAG('E', 'D', 'A', 'S')
 
 extern string dynaDetectServiceErr2Str(const int errNum);
 
@@ -40,11 +43,13 @@ public:
         int ret = AppService::init(configPath, m_config);
         if (ret < 0)
             return ret;
-        m_dynaDetectGlobalSetting.CopyFrom(m_dynaDetectConfig.dyna_detect_global_setting());
+        m_dynaDetectGlobalSetting.CopyFrom(m_config.dyna_detect_global_setting());
         m_inputSetting.CopyFrom(m_config.input_setting());
         m_outputSetting.CopyFrom(m_config.output_setting());
-        for (auto & s : m_config.dnn_detector_settings())
-            m_dnnDetectorSettings.empalce(s.first, s.second);
+        for (auto & s : m_config.dnn_detector_settings()) {
+            m_dnnDetectorSettings.emplace(s.first, s.second);
+            m_detectors.emplace(s.first, s.second.enable());
+        }
 
          /* log parsed app config */
         string globalSetting;
@@ -62,7 +67,7 @@ public:
             PbTree::pbToJsonString(o.second, outputSetting);
             LOG(INFO) << o.first << " -> " << outputSetting << "\n";
         }
-       return 0;
+        return createTask();
     }
 
     virtual int start() {
@@ -84,10 +89,12 @@ private:
      /* break down from dynaDetect config for convinience: add/update/delete operates on following fields */
     DavStreamletSetting::InputStreamletSetting m_inputSetting;
     DavStreamletSetting::OutputStreamletSetting m_outputSetting;
+    map<string, bool> m_detectors; /* this is loaded from configure file */
+    const string m_dnnDetectStreamletName {"dnnDetectStreamletName"};
 
 private: /* Dynamic Request Process Handlers */
-    int onRequest(shared_ptr<Request> & request, shared_ptr<Response> & response, pb::Message & pbmsg,
-                  std::function<int()> requestProcess, bool bNeedRoomIdExist = true);
+    int createTask();
+    int buildDynaDetectStreamlet();
     virtual int registerHttpRequestHandlers();
     /* add/delete detector */
     int onAddOneDetector(shared_ptr<Response> &, const string &);

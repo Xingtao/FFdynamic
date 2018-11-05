@@ -7,6 +7,9 @@ namespace dyna_detect_service {
 
 ////////////////////////////////////////////////////////////////////////////////
 static const std::map<int, const char *> dynaDetectServiceErrorCode2StrMap = {
+    {DYNA_DETECT_ERROR_TASK_INIT, " failed create task from config file"},
+    {DYNA_DETECT_ERROR_DETECTOR_ALREADY_RUNNING, " detector already enabled"},
+    {DYNA_DETECT_ERROR_DETECTOR_ALREADY_STOPPED, " detector already stopped"},
     {DYNA_DETECT_ERROR_NO_SUCH_DETECTOR, "no such dnn detector"}
 };
 
@@ -22,18 +25,81 @@ string dynaDetectServiceErr2Str(const int errCode) {
 ////////////////////////////////////////////////
 // [Http Request Return Error Code]
 static constexpr int API_ERRCODE_INVALID_MSG = 1;
-static constexpr int API_ERRCODE_DETECTOR_EXISTS = 2;
-static constexpr int API_ERRCODE_NO_SUCH_DETECTOR = 3;
+static constexpr int API_ERRCODE_DETECTOR_ALREADY_RUNNING = 2;
+static constexpr int API_ERRCODE_DETECTOR_ALREADY_STOPPED = 3;
+static constexpr int API_ERRCODE_NO_SUCH_DETECTOR = 4;
 
 ////////////////////////////////////////////////
-// [dynamic events]
-int DynaDetectService::onAddOneDetector(shared_ptr<Response> &, const string &) {
+int DynaDetectService::createTask() {
+    int ret = buildOutputStreamlet("output_dyna_detect", m_outputSetting, m_dynaDetectGlobalSetting.output_url());
+    if (ret < 0) {
+        m_river.clear();
+        ERRORIT(DYNA_DETECT_ERROR_TASK_INIT,  "fail create output streamlet " + m_appInfo.m_msgDetail);
+        return failResponse(response, API_ERRCODE_INVALID_MSG, m_appInfo.m_msgDetail);
+    }
+    LOG(INFO) << m_logtag << "craete output streamlet done";
 
+    /* 2. build dnn detect streamlet */
+    ret = buildDynaDetectStreamlet();
+    if (ret < 0) {
+        m_river.clear();
+        ERRORIT(DYNA_DETECT_ERROR_TASK_INIT,  "fail create dyna detect streamlet " + m_appInfo.m_msgDetail);
+        return failResponse(response, API_ERRCODE_INVALID_MSG, m_appInfo.m_msgDetail);
+    }
+    LOG(INFO) << m_logtag << "craete dnn streamlet done";
+
+    /* 3. async build input streamlet with callback that connect to mix streamlet */
+    auto onBuildSuccess = [this] (shared_ptr<DavStreamlet> inputStreamlet) {
+        if (!inputStreamlet)
+            return AVERROR(EINVAL);
+        auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
+        if (!detectStreamlet)
+            return AVERROR(EINVAL);
+        inputStreamlet >= detectStreamlet; /* only connect video */
+        return inputStreamlet->start(); /*start just after connect */
+    };
+
+    /* 4. river start */
+    m_river.start();
+    response->write(m_successCRJsonStrAsync);
+    LOG(INFO) << m_logtag << "dynamic dnn detect task started";
     return 0;
 }
 
-int onDeleteOneDetector(shared_ptr<Response> &, const string &) {
+/////////////////////////////////////////
+// [Event Process]
+int DynaDetectService::onAddOneDetector(shared_ptr<Response> & response, const string & detectorName) {
+    std::lock_guard<mutex> lock(m_runLock);
+    if (!m_detectors.count(detectorName)) {
+        string detail = detectorName + " is not in configure file";
+        ERRORIT(DYNA_DETECT_ERROR_NO_SUCH_DETECTOR, detail);
+        return failResponse(response, API_ERRCODE_NO_SUCH_DETECTOR, detail);
+    }
+    if (m_detectors.at(detectorName)) {
+        string detail = detectorName + " is alrady enabled";
+        ERRORIT(DYNA_DETECT_ERROR_DETECTOR_ALREADY_RUNNING, detail);
+        return failResponse(response, API_ERRCODE_DETECTOR_ALREADY_RUNNING, detail);
+    }
+    m_detectors.at(detectorName) = true;
 
+    // create new detector and start it.
+    return 0;
+}
+
+int DynaDetectService::onDeleteOneDetector(shared_ptr<Response> & response, const string & detectorName) {
+    std::lock_guard<mutex> lock(m_runLock);
+    if (!m_detectors.count(detectorName)) {
+        string detail = detectorName + " is not in configure file";
+        ERRORIT(DYNA_DETECT_ERROR_NO_SUCH_DETECTOR, detail);
+        return failResponse(response, API_ERRCODE_NO_SUCH_DETECTOR, detail);
+    }
+    if (m_detectors.at(detectorName)) {
+        string detail = detectorName + " is alrady enabled";
+        ERRORIT(DYNA_DETECT_ERROR_DETECTOR_ALREADY_STOPPED, detail);
+        return failResponse(response, API_ERRCODE_DETECTOR_ALREADY_STOPPED, detail);
+    }
+    m_detectors.at(detectorName) = false;
+    // find and delete that detector
     return 0;
 }
 
@@ -42,47 +108,29 @@ int onDeleteOneDetector(shared_ptr<Response> &, const string &) {
 int DynaDetectService::onDynaDetectStop(shared_ptr<Response> & response, shared_ptr<Request> & request) {
     LOG(INFO) << m_logtag << "receive dynaDetect stop request";
     response->write(m_successCRJsonStr);
-    m_roomId.clear();
-    m_roomOutputBaseUrl.clear();
     m_river.stop();
     m_river.clear();
     DynaDetectService::setExit();
     return 0;
 }
 
-/////////////////////////////////////////
-// [Streamlet/Wave options build helpers]
-
 ////////////////////////////////////////////////////////////////////////////////
 // [Register Http Dynamic On Handler]
-int DynaDetectService::onRequest(shared_ptr<Request> & request, shared_ptr<Response> & response, pb::Message & pbmsg,
-                          std::function<int()> requestProcess, bool bNeedRoomIdExist) {
-    std::lock_guard<mutex> lock(m_runLock);
-    if (bNeedRoomIdExist && m_roomId.empty()) {
-        ERRORIT(APP_ERROR_PROCESS_REQUEST, "There is no room exist, create it first");
-        return failResponse(response, API_ERRCODE_CREATE_ROOM_FIRST, "room not exists, create it first");
-    } else if (!bNeedRoomIdExist && !m_roomId.empty()) {
-        ERRORIT(APP_ERROR_PROCESS_REQUEST, "Room already exists");
-        return failResponse(response, API_ERRCODE_ROOM_EXISTS, "room already created");
-    }
-    int ret = requestToMessage(request, pbmsg);
-    if (ret < 0)
-        return failResponse(response, API_ERRCODE_INVALID_MSG, m_appInfo.m_msgDetail);
-
-    /* also do response in this call */
-    ret = requestProcess();
-    if (ret < 0)
-        return ret;
-    return afterHttpResponse();
-}
 
 int DynaDetectService::registerHttpRequestHandlers() {
-    m_httpServer.m_resources["^/api1/dynaDetect/add_output_setting$"]["POST"] =
+    m_httpServer.m_resources["^/api1/detectors/[a-zA-Z0-9_]+$"]["POST"] =
         [this] (shared_ptr<Response> & response, shared_ptr<Request> & request) {
-        DynaDetectRequest::AddOutputSetting addOutputSetting;
-        return onRequest(request, response, addOutputSetting,
-                         [this, &response, &addOutputSetting] () {
-                             return onAddOutputSetting(response, addOutputSetting);});
+        const string & queryPath = request->m_path;
+        std::size_t found = queryPath.find_last_of("/");
+        const string detectorName(queryPath.substr(found+1));
+        return onAddOneDetector(response, detectorName);
+    };
+    m_httpServer.m_resources["^/api1/detectors/[a-zA-Z0-9_]+$"]["DELETE"] =
+        [this] (shared_ptr<Response> & response, shared_ptr<Request> & request) {
+        const string & queryPath = request->m_path;
+        std::size_t found = queryPath.find_last_of("/");
+        const string detectorName(queryPath.substr(found+1));
+        return onDeleteDetector(response, detectorName);
     };
 
     /* stop */
@@ -97,6 +145,27 @@ int DynaDetectService::registerHttpRequestHandlers() {
     };
 
     LOG(INFO) << m_logtag << "register all request handle done";
+    return 0;
+}
+
+//////////////
+// [Build]
+int DynaDetectService::buildDynaDetectStreamlet() {
+    DavStreamletOption so;
+    so.set(DavOptionBufLimitNum(), std::to_string(m_dynaDetectGlobalSetting.max_buf_num_of_detect_streamlet()));
+    vector<DavWaveOption> waveOptions;
+    for (auto & s : m_dnnDetectorSettings) {
+        DavWaveOption o;
+        PbDnnDetectSettingToDavOption::toDnnDetectOption(s.second, o);
+        waveOptions.emplace_back(o);
+    }
+    CvDnnDetectStreamletBuilder builder;
+    auto streamletDetect = builder.build(waveOptions, CvDnnDetectStreamletTag(m_dnnDetectStreamletName), so);
+    if (!streamletDetect) {
+        ERRORIT(APP_ERROR_BUILD_STREAMLET, ("build streamletDetect fail " + toStringViaOss(builder.m_buildInfo)));
+        return APP_ERROR_BUILD_STREAMLET;
+    }
+    m_river.add(streamletDetect);
     return 0;
 }
 

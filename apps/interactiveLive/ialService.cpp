@@ -54,7 +54,7 @@ static constexpr int API_ERRCODE_MIX_UPDATE_BACKGROUD = 14;
 // [dynamic events]
 
 int IalService::onCreateRoom(shared_ptr<Response> & response, const IalRequest::CreateRoom & createRoom) {
-      int ret = sanityCheckCreateRoomMsg(createRoom);
+    int ret = sanityCheckCreateRoomMsg(createRoom);
     if (ret != 0)
         return failResponse(response, ret, "create room msg content invalid: " + m_appInfo.m_msgDetail);
 

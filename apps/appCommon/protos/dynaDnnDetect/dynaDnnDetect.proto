@@ -16,6 +16,8 @@ message DynaDnnDetectTaskConfig {
 
 message DynaDetectGlobalSetting {
     int32 max_detectors = 1; /* max detectors num runs in parallel */
+    string output_url = 2;
+    int32 max_buf_num_of_detect_streamlet = 3;
 }
 
 message DnnDetectSetting {

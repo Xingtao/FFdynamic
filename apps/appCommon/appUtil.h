@@ -18,7 +18,6 @@ namespace app_common {
 using ::std::string;
 using ::std::vector;
 using ::std::shared_ptr;
-namespace pb = google::protobuf;
 
 class AppUtil {
 public:
@@ -37,7 +36,7 @@ public:
     }
 
     template<typename T>
-    static vector<T> pbRepeatedToVector(const pb::RepeatedPtrField<T> & repeatField) {
+    static vector<T> pbRepeatedToVector(const google::protobuf::RepeatedPtrField<T> & repeatField) {
         vector<T> v;
         for (auto rf : repeatField)
             v.emplace_back(*rf);

@@ -28,7 +28,7 @@ public:
         o.setInt("height", dds.height());
         o.setDouble("conf_threshold", (double)dds.conf_threshold());
         vector<double> means;
-        for (auto & m : dss.means())
+        for (auto & m : dds.means())
             means.emplace_back((double)m);
         o.setDoubleArray("means", means);
         return 0;

@@ -11,7 +11,7 @@ message DynaDnnDetectTaskConfig {
     DynaDetectGlobalSetting dyna_detect_global_setting = 2;
     DavStreamletSetting.InputStreamletSetting input_setting = 10;
     DavStreamletSetting.OutputStreamletSetting output_setting = 11;
-    repeated DnnDetectSetting dnn_detector_settings = 12;
+    map<string, DnnDetectSetting> dnn_detector_settings = 12;
 }
 
 message DynaDetectGlobalSetting {

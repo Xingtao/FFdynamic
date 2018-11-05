@@ -27,20 +27,17 @@ static constexpr int API_ERRCODE_NO_SUCH_DETECTOR = 3;
 
 ////////////////////////////////////////////////
 // [dynamic events]
+int DynaDetectService::onAddOneDetector(shared_ptr<Response> &, const string &) {
 
-///////////////////
-// [update setting]
-int DynaDetectService::onUpdateInputSetting(shared_ptr<Response> & response,
-                                         const DynaDetectRequest::UpdateInputSetting & inputSetting) {
-    m_inputSetting.CopyFrom(inputSetting);
-    LOG(INFO) << m_logtag << "Update input setting " << PbTree::pbToJsonString(m_inputSetting);
-    response->write(m_successCRJsonStr);
+    return 0;
+}
+
+int onDeleteOneDetector(shared_ptr<Response> &, const string &) {
+
     return 0;
 }
 
 //////////////////
-// [other handler]
-
 /* dynaDetect stop */
 int DynaDetectService::onDynaDetectStop(shared_ptr<Response> & response, shared_ptr<Request> & request) {
     LOG(INFO) << m_logtag << "receive dynaDetect stop request";

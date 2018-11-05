@@ -145,7 +145,7 @@ int AppService::doLogSetting() {
 
 ////////////////////////////////////////////////////////////////////////////////
 // [http]
-int AppService::requestToMessage(shared_ptr<Request> & request, pb::Message & pbmsg) {
+int AppService::requestToMessage(shared_ptr<Request> & request, google::protobuf::Message & pbmsg) {
     int ret = 0;
     asio::streambuf::const_buffers_type cbt = request->m_request.data();
     const string jsonstr(asio::buffers_begin(cbt), asio::buffers_end(cbt));

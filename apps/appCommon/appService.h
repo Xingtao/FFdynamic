@@ -92,6 +92,7 @@ protected:
         }
         return 0;
     };
+
     template <typename T>
     int init(const string & configPath, T & configPbObj) {
         string configContent;
@@ -135,7 +136,7 @@ protected:
 protected: /* http interface */
     HttpServer m_httpServer;
     virtual int registerHttpRequestHandlers() {return 0;};
-    virtual int requestToMessage(shared_ptr<Request> & request, pb::Message & pbmsg);
+    virtual int requestToMessage(shared_ptr<Request> & request, google::protobuf::Message & pbmsg);
     virtual int failResponse(shared_ptr<Response> & response, const int errCode,
                              const string & errDetail, const bool bSync = true);
     virtual int afterHttpResponse() {m_bMonitorCheck = true; m_monitorCV.notify_one(); return 0;}

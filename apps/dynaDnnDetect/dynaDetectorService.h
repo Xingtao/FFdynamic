@@ -37,23 +37,28 @@ public:
     virtual ~DynaDetectService() = default;
     int init(const string & configPath) {
         std::lock_guard<mutex> lock(m_runLock);
-        int ret = AppService::init(configPath, m_dynaDetectConfig);
+        int ret = AppService::init(configPath, m_config);
         if (ret < 0)
             return ret;
-        m_dynaDetectGlobalSetting.CopyFrom(m_dynaDetectConfig.dynaDetect_global_setting());
+        m_dynaDetectGlobalSetting.CopyFrom(m_dynaDetectConfig.dyna_detect_global_setting());
+        m_inputSetting.CopyFrom(m_config.input_setting());
+        m_outputSetting.CopyFrom(m_config.output_setting());
+        for (auto & s : m_config.dnn_detector_settings())
+            m_dnnDetectorSettings.empalce(s.first, s.second);
+
          /* log parsed app config */
         string globalSetting;
         PbTree::pbToJsonString(m_appGlobalSetting, globalSetting);
         string inputSetting;
         PbTree::pbToJsonString(m_inputSetting, inputSetting);
-        string mixSetting;
-        PbTree::pbToJsonString(m_mixSetting, mixSetting);
+        string outputSetting;
+        PbTree::pbToJsonString(m_outputSetting, outputSetting);
         LOG(INFO) << m_logtag << "AppConfig - \n";
         LOG(INFO) << globalSetting << "\n";
         LOG(INFO) << inputSetting << "\n";
-        LOG(INFO) << mixSetting << "\n";
-        for (const auto & o : m_outputSettings) {
-            string outputSetting;
+        LOG(INFO) << outputSetting << "\n";
+        for (const auto & o : m_dnnDetectorSettings) {
+            string dnnDetectorSettings;
             PbTree::pbToJsonString(o.second, outputSetting);
             LOG(INFO) << o.first << " -> " << outputSetting << "\n";
         }
@@ -73,29 +78,22 @@ private:
 
 private:
     /* DynaDetect */
-    DynaDetectConfig::DynaDetectTaskConfig m_dynaDetectConfig; /* original configuration, load from config file */
+    DynaDnnDetect::DynaDnnDetectTaskConfig m_config; /* original configuration, load from config file */
+    DynaDnnDetect::DynaDetectGlobalSetting m_dynaDetectGlobalSetting;
+    map<string, DynaDnnDetect::DnnDetectSetting> m_dnnDetectorSettings;
      /* break down from dynaDetect config for convinience: add/update/delete operates on following fields */
     DavStreamletSetting::InputStreamletSetting m_inputSetting;
-    DynaDetectConfig::DynaDetectGlobalSetting m_dynaDetectGlobalSetting;
+    DavStreamletSetting::OutputStreamletSetting m_outputSetting;
 
 private: /* Dynamic Request Process Handlers */
     int onRequest(shared_ptr<Request> & request, shared_ptr<Response> & response, pb::Message & pbmsg,
                   std::function<int()> requestProcess, bool bNeedRoomIdExist = true);
     virtual int registerHttpRequestHandlers();
-    /* setting */
-    int onUpdateInputSetting(shared_ptr<Response> &, const DynaDetectRequest::UpdateInputSetting &);
+    /* add/delete detector */
+    int onAddOneDetector(shared_ptr<Response> &, const string &);
+    int onDeleteOneDetector(shared_ptr<Response> &, const string &);
     /* dynaDetect stop */
     int onDynaDetectStop(shared_ptr<Response> &, shared_ptr<Request> &);
-
-private: /* build streamlets */
-    int buildInputStreamlet(const string & inputUrl,
-                            const DavStreamletSetting::InputStreamletSetting & inputSetting);
-    int asyncBuildInputStreamlet(const string & inputUrl,
-                                 const DavStreamletSetting::InputStreamletSetting & inputSetting);
-    int buildMixStreamlet(const string & mixStreamletId);
-    int buildOutputStreamlet(const string & outputId,
-                             const DavStreamletSetting::OutputStreamletSetting & outStreamletSetting,
-                             const vector<string> & fullOutputUrls);
 };
 
 } // namespace dyna_detect_service

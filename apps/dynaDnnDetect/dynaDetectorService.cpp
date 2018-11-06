@@ -89,7 +89,7 @@ int DynaDetectService::onAddOneDetector(shared_ptr<Response> & response, const s
     auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
     CHECK(detectStreamlet != nullptr);
     DavWaveOption o;
-    PbDnnDetectSettingToDavOption::toDnnDetectOption(m_dnnDetectorSettings.at(detectorName), o);
+    PbDnnDetectSettingToDavOption::toDnnDetectOption(m_dnnDetectorSettings.at(detectorName), o, detectorName);
     CvDnnDetectStreamletBuilder builder;
     int ret = builder.addDetector(detectStreamlet, o);
     if (ret < 0) {

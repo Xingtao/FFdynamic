@@ -108,8 +108,8 @@ int DynaDetectService::onDeleteOneDetector(shared_ptr<Response> & response, cons
         ERRORIT(DYNA_DETECT_ERROR_NO_SUCH_DETECTOR, detail);
         return failResponse(response, API_ERRCODE_NO_SUCH_DETECTOR, detail);
     }
-    if (m_detectors.at(detectorName)) {
-        string detail = detectorName + " is alrady enabled";
+    if (!m_detectors.at(detectorName)) {
+        string detail = detectorName + " is alrady stopped";
         ERRORIT(DYNA_DETECT_ERROR_DETECTOR_ALREADY_STOPPED, detail);
         return failResponse(response, API_ERRCODE_DETECTOR_ALREADY_STOPPED, detail);
     }
@@ -178,9 +178,11 @@ int DynaDetectService::buildDynaDetectStreamlet() {
     so.set(DavOptionBufLimitNum(), std::to_string(m_dynaDetectGlobalSetting.max_buf_num_of_detect_streamlet()));
     vector<DavWaveOption> waveOptions;
     for (auto & s : m_dnnDetectorSettings) {
-        DavWaveOption o;
-        PbDnnDetectSettingToDavOption::toDnnDetectOption(s.second, o, s.first);
-        waveOptions.emplace_back(o);
+        if (m_detectors.at(s.first)) {
+            DavWaveOption o;
+            PbDnnDetectSettingToDavOption::toDnnDetectOption(s.second, o, s.first);
+            waveOptions.emplace_back(o);
+        }
     }
     DavWaveOption dataRelay((DavWaveClassDataRelay()));
     waveOptions.emplace_back(dataRelay);

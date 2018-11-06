@@ -41,7 +41,7 @@
         "codec_name": "libx264",
         "fps_num" : 25,
         "fps_den" : 1,
-        "avdict_encode_option": {"video_size" : "1280x720", "b" : "2000000",
+        "avdict_encode_option": {"video_size" : "1280x720", "bufsize" : "2000k", "maxrate" : "2000k",
                                  "preset" : "fast", "g" : "60", "rc-lookahead" : "30"}
       },
       "audio_encode" : {
@@ -64,7 +64,7 @@
         "encode_type": "ffmpeg",
         "codec_name": "libx264",
         "framerate": 25,
-        "avdict_encode_option":  {"width" : "1280", "height" : "720", "b" : "2000000",
+        "avdict_encode_option":  {"width" : "1280", "height" : "720", "bufsize" : "2000k", "maxrate" : "2000k",
                                   "preset" : "fast", "profile" : "high", "aq-strength" : "1"}
       },
       "audio_encode" : {
@@ -85,7 +85,7 @@
         "encode_type": "ffmpeg",
         "codec_name": "libx264",
         "framerate": 25,
-        "avdict_encode_option":  {"width" : "1920", "height" : "1080", "b" : "4000000",
+        "avdict_encode_option":  {"width" : "1920", "height" : "1080", "bufsize" : "4000k", "maxrate" : "4000k",
                                   "preset" : "fast", "profile" : "high", "rc-lookahead" : "30",
                                   "aq-strength" : "1"}
       },

@@ -42,13 +42,13 @@ public: /* state transition */
     inline bool isPaused() noexcept {return m_state == EDavState::ePause;}
     inline bool isStopped() noexcept {return m_state == EDavState::eStop;}
 
-public: /* properties set & get */
+public: /* properties set & get*/
     // by default, max proc buffer is -1, unlmited */
     inline void setMaxNumOfProcBuf(int limitNum) noexcept {m_outbufLimiter->setMaxNumOfProcBuf(limitNum);}
     inline shared_ptr<DavTransmitor<DavProcBuf, DavProcFrom>> getDataTransmitor() {return m_dataTransmitor;}
     inline shared_ptr<DavTransmitor<DavPeerEvent, DavProcFrom>> getPubsubTransmitor() {return m_pubsubTransmitor;}
     inline const string & getClassName() const noexcept {return m_className;}
-    inline const string & getClassTag() const noexcept {return m_logtag;}
+    inline const string & getLogTag() const noexcept {return m_logtag;}
     inline const DavWaveClassCategory & getDavWaveCategory() const noexcept {return m_waveCategory;}
     inline const DavRegisterProperties & getDavRegisterProperties() const noexcept {
         return m_impl->getRegisterProperties();

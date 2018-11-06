@@ -9,8 +9,8 @@ using namespace dehaze;
 
 /* create dehaze component category */
 struct DavWaveClassDehaze : public DavWaveClassCategory {
-    DavWaveClassDehaze () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "Dehaze") {}
+    DavWaveClassDehaze (const string & nameTag = "Dehaze") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 
 /* define dehaze options to illustrate how to use option passing */

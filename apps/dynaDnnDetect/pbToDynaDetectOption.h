@@ -11,8 +11,11 @@ using namespace DynaDnnDetect;
 
 class PbDnnDetectSettingToDavOption {
 public:
-    static int toDnnDetectOption(const DnnDetectSetting & dds, DavWaveOption & o) {
-        o.setCategory(DavOptionClassCategory(), DavWaveClassCvDnnDetect());
+    static int toDnnDetectOption(const DnnDetectSetting & dds, DavWaveOption & o, const string & detectorName = "") {
+        if (detectorName.empty())
+            o.setCategory(DavOptionClassCategory(), DavWaveClassCvDnnDetect());
+        else
+            o.setCategory(DavOptionClassCategory(), DavWaveClassCvDnnDetect(detectorName));
         o.set(DavOptionImplType(), "auto");
         // TODO: wiil be good to use 'field descriptor'
         o.set("detector_type", dds.detector_type());

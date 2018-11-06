@@ -37,7 +37,7 @@ public:
             createErr.setInfo(DAV_ERROR_FACTORY_NO_CLASS_TYPE, " impl's class category not known");
             return davImpl; // call its move constructor. if no-elide-copy set, will call its copy constructor
         }
-        const string classCategoryDesc = classCategory.name();
+        const string classCategoryDesc = classCategory.category().name();
         const string implType = options.get(DavOptionImplType());
         if (implType.empty()) {
             createErr.setInfo(DAV_ERROR_FACTORY_NO_IMPL_TYPE, "impl type of " + classCategoryDesc + " empty");
@@ -135,7 +135,7 @@ private:
     static std::mutex s_mutex;
     static string addOneImplType(const DavWaveClassCategory & classCategory,
                           const string & implType, DavImplCreateFunc & func) {
-        string registerKey = mkClassImplKey(classCategory.name(), implType);
+        string registerKey = mkClassImplKey(classCategory.category().name(), implType);
         s_classImplMap.emplace(registerKey, func);
         return registerKey;
     }

@@ -44,7 +44,7 @@ std::ostream & operator<<(std::ostream & os, const DavProcBuf & buf) {
 }
 
 DavProcFrom::DavProcFrom(DavProc *from, const int fromIndex) noexcept
-    : m_from(from), m_fromStreamIndex(fromIndex), m_descFrom(from->getClassTag()) {
+    : m_from(from), m_fromStreamIndex(fromIndex), m_descFrom(from->getLogTag()) {
 }
 
 DavProcFrom::DavProcFrom(DavProc *from, size_t groupId, const int fromIndex) noexcept {
@@ -55,7 +55,7 @@ DavProcFrom::DavProcFrom(DavProc *from, size_t groupId, const int fromIndex) noe
 void DavProcFrom::setGroupFrom(DavProc *thisProc, size_t groupId) noexcept {
     m_groupId = groupId;
     m_from = thisProc;
-    m_descFrom = thisProc->getClassTag();
+    m_descFrom = thisProc->getLogTag();
 }
 
 /////////////////////////////////////////

@@ -11,8 +11,8 @@ namespace ff_dynamic {
 
 /* create CvDnnDetect class category */
 struct DavWaveClassCvDnnDetect : public DavWaveClassCategory {
-    DavWaveClassCvDnnDetect () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "CvDnnDetect") {}
+    DavWaveClassCvDnnDetect (const string & nameTag = "CvDnnDetect") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 
 /* options passing use AVDictionary */

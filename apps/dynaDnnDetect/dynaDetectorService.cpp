@@ -1,16 +1,15 @@
-#include "davStreamlet.h"
-#include "davStreamletBuilder.h"
-#include "cvStreamlet.h"
 #include "dynaDetectorService.h"
 
 namespace dyna_detect_service {
 
 ////////////////////////////////////////////////////////////////////////////////
 static const std::map<int, const char *> dynaDetectServiceErrorCode2StrMap = {
-    {DYNA_DETECT_ERROR_TASK_INIT, " failed create task from config file"},
-    {DYNA_DETECT_ERROR_DETECTOR_ALREADY_RUNNING, " detector already enabled"},
-    {DYNA_DETECT_ERROR_DETECTOR_ALREADY_STOPPED, " detector already stopped"},
-    {DYNA_DETECT_ERROR_NO_SUCH_DETECTOR, "no such dnn detector"}
+    {DYNA_DETECT_ERROR_TASK_INIT,                "failed create task from config file"},
+    {DYNA_DETECT_ERROR_DETECTOR_ALREADY_RUNNING, "detector already enabled"},
+    {DYNA_DETECT_ERROR_DETECTOR_ALREADY_STOPPED, "detector already stopped"},
+    {DYNA_DETECT_ERROR_DETECTOR_ADD,             "add detector failed"},
+    {DYNA_DETECT_ERROR_DETECTOR_DELETE,          "delete detector failed"},
+    {DYNA_DETECT_ERROR_NO_SUCH_DETECTOR,         "no such dnn detector"}
 };
 
 string dynaDetectServiceErr2Str(const int errCode) {
@@ -22,20 +21,22 @@ string dynaDetectServiceErr2Str(const int errCode) {
     return appServiceErr2Str(errCode);
 }
 
-////////////////////////////////////////////////
+///////////////////////////////////
 // [Http Request Return Error Code]
 static constexpr int API_ERRCODE_INVALID_MSG = 1;
 static constexpr int API_ERRCODE_DETECTOR_ALREADY_RUNNING = 2;
 static constexpr int API_ERRCODE_DETECTOR_ALREADY_STOPPED = 3;
 static constexpr int API_ERRCODE_NO_SUCH_DETECTOR = 4;
+static constexpr int API_ERRCODE_ADD_DETECTOR = 4;
 
 ////////////////////////////////////////////////
 int DynaDetectService::createTask() {
-    int ret = buildOutputStreamlet("output_dyna_detect", m_outputSetting, m_dynaDetectGlobalSetting.output_url());
+    int ret = buildOutputStreamlet("output_dyna_detect", m_outputSetting,
+                                   {m_dynaDetectGlobalSetting.output_url()});
     if (ret < 0) {
         m_river.clear();
         ERRORIT(DYNA_DETECT_ERROR_TASK_INIT,  "fail create output streamlet " + m_appInfo.m_msgDetail);
-        return failResponse(response, API_ERRCODE_INVALID_MSG, m_appInfo.m_msgDetail);
+        return DYNA_DETECT_ERROR_TASK_INIT;
     }
     LOG(INFO) << m_logtag << "craete output streamlet done";
 
@@ -44,9 +45,13 @@ int DynaDetectService::createTask() {
     if (ret < 0) {
         m_river.clear();
         ERRORIT(DYNA_DETECT_ERROR_TASK_INIT,  "fail create dyna detect streamlet " + m_appInfo.m_msgDetail);
-        return failResponse(response, API_ERRCODE_INVALID_MSG, m_appInfo.m_msgDetail);
+        return DYNA_DETECT_ERROR_TASK_INIT;
     }
     LOG(INFO) << m_logtag << "craete dnn streamlet done";
+    auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
+    auto outputStreamlets = m_river.getStreamletsByCategory(DavDefaultOutputStreamletTag());
+    for (auto & o : outputStreamlets)
+        detectStreamlet >= o;
 
     /* 3. async build input streamlet with callback that connect to mix streamlet */
     auto onBuildSuccess = [this] (shared_ptr<DavStreamlet> inputStreamlet) {
@@ -58,10 +63,10 @@ int DynaDetectService::createTask() {
         inputStreamlet >= detectStreamlet; /* only connect video */
         return inputStreamlet->start(); /*start just after connect */
     };
+    asyncBuildInputStreamlet(m_dynaDetectGlobalSetting.input_url(), m_inputSetting, onBuildSuccess);
 
     /* 4. river start */
     m_river.start();
-    response->write(m_successCRJsonStrAsync);
     LOG(INFO) << m_logtag << "dynamic dnn detect task started";
     return 0;
 }
@@ -81,8 +86,18 @@ int DynaDetectService::onAddOneDetector(shared_ptr<Response> & response, const s
         return failResponse(response, API_ERRCODE_DETECTOR_ALREADY_RUNNING, detail);
     }
     m_detectors.at(detectorName) = true;
-
-    // create new detector and start it.
+    auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
+    CHECK(detectStreamlet != nullptr);
+    DavWaveOption o;
+    PbDnnDetectSettingToDavOption::toDnnDetectOption(m_dnnDetectorSettings.at(detectorName), o);
+    CvDnnDetectStreamletBuilder builder;
+    int ret = builder.addDetector(detectStreamlet, o);
+    if (ret < 0) {
+        string detail = detectorName + " adding failed";
+        ERRORIT(DYNA_DETECT_ERROR_DETECTOR_ADD, detail);
+        return failResponse(response, API_ERRCODE_ADD_DETECTOR, detail);
+    }
+    response->write(m_successCRJsonStr);
     return 0;
 }
 
@@ -99,7 +114,13 @@ int DynaDetectService::onDeleteOneDetector(shared_ptr<Response> & response, cons
         return failResponse(response, API_ERRCODE_DETECTOR_ALREADY_STOPPED, detail);
     }
     m_detectors.at(detectorName) = false;
+    auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
+    auto wave = detectStreamlet->getWave(DavWaveClassCvDnnDetect(detectorName));
+    CHECK(detectStreamlet != nullptr && wave != nullptr);
+    detectStreamlet->deleteOneWave(wave);
+    LOG(INFO) << m_logtag << "delete one detector " << detectorName;
     // find and delete that detector
+    response->write(m_successCRJsonStr);
     return 0;
 }
 
@@ -118,23 +139,25 @@ int DynaDetectService::onDynaDetectStop(shared_ptr<Response> & response, shared_
 // [Register Http Dynamic On Handler]
 
 int DynaDetectService::registerHttpRequestHandlers() {
-    m_httpServer.m_resources["^/api1/detectors/[a-zA-Z0-9_]+$"]["POST"] =
+    m_httpServer.m_resources["^/api1/detector/[a-zA-Z0-9_]+"]["POST"] =
         [this] (shared_ptr<Response> & response, shared_ptr<Request> & request) {
         const string & queryPath = request->m_path;
         std::size_t found = queryPath.find_last_of("/");
         const string detectorName(queryPath.substr(found+1));
+        LOG(INFO) << m_logtag << "will add " << queryPath << " " << detectorName;
         return onAddOneDetector(response, detectorName);
     };
-    m_httpServer.m_resources["^/api1/detectors/[a-zA-Z0-9_]+$"]["DELETE"] =
+    m_httpServer.m_resources["^/api1/detector/[a-zA-Z0-9_]+"]["DELETE"] =
         [this] (shared_ptr<Response> & response, shared_ptr<Request> & request) {
         const string & queryPath = request->m_path;
         std::size_t found = queryPath.find_last_of("/");
         const string detectorName(queryPath.substr(found+1));
-        return onDeleteDetector(response, detectorName);
+        LOG(INFO) << m_logtag << "will delete " << queryPath << " " << detectorName;
+        return onDeleteOneDetector(response, detectorName);
     };
 
     /* stop */
-    m_httpServer.m_resources["^/api1/dynaDetect/stop$"]["POST"] =
+    m_httpServer.m_resources["^/api1/stop$"]["POST"] =
         [this](shared_ptr<Response> & response, shared_ptr<Request> & request) {
         return onDynaDetectStop(response, request);
     };
@@ -156,9 +179,14 @@ int DynaDetectService::buildDynaDetectStreamlet() {
     vector<DavWaveOption> waveOptions;
     for (auto & s : m_dnnDetectorSettings) {
         DavWaveOption o;
-        PbDnnDetectSettingToDavOption::toDnnDetectOption(s.second, o);
+        PbDnnDetectSettingToDavOption::toDnnDetectOption(s.second, o, s.first);
         waveOptions.emplace_back(o);
     }
+    DavWaveOption dataRelay((DavWaveClassDataRelay()));
+    waveOptions.emplace_back(dataRelay);
+    DavWaveOption postDraw((DavWaveClassCvPostDraw()));
+    waveOptions.emplace_back(postDraw);
+
     CvDnnDetectStreamletBuilder builder;
     auto streamletDetect = builder.build(waveOptions, CvDnnDetectStreamletTag(m_dnnDetectStreamletName), so);
     if (!streamletDetect) {

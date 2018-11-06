@@ -22,8 +22,7 @@ createStreamlet(const vector<DavWaveOption> & waveOptions,
         CHECK(wave != nullptr);
         if (wave->hasErr()) {
             m_buildInfo = wave->getErr();
-            LOG(ERROR) << m_logtag << "fail to create wave: "
-                       << o.dump() << ", " << m_buildInfo;
+            LOG(ERROR) << m_logtag << "fail to create wave: " << o.dump() << ", " << m_buildInfo;
             streamlet.reset();
             break;
         }

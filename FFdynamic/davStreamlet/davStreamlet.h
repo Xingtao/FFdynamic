@@ -176,6 +176,18 @@ public:
         m_davWaves.emplace_back(one);
         return 0;
     }
+    int deleteOneWave(shared_ptr<DavWave> one) noexcept {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        one->stop();
+        return 0;
+    }
+    shared_ptr<DavWave> getWave(const DavWaveClassCategory & categoryWithUniqueName) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for (auto & w : m_davWaves)
+            if (w->getDavWaveCategory().uniqueEqual(categoryWithUniqueName))
+                return w;
+        return {};
+    }
     vector<shared_ptr<DavWave>> & getWaves() {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_davWaves;

@@ -17,8 +17,8 @@ public: /* DavWave connection and disconnection */
         std::lock_guard<std::mutex> lock(s_linkMutex);
         DavProcFrom fromSender(from, from->getGroupId(), fromStreamIndex);
         link(from->getDataTransmitor(), to->getDataTransmitor(), fromSender);
-        string detail = "from stream " + std::to_string(fromStreamIndex) + " of " + from->getClassTag() +
-            " => to stream of " + to->getClassTag();
+        string detail = "from stream " + std::to_string(fromStreamIndex) + " of " + from->getLogTag() +
+            " => to stream of " + to->getLogTag();
         DavMessager e(DAV_INFO_DYNAMIC_CONNECT, detail);
         s_msgCollector.addMsg(e);
         LOG(INFO) << e;
@@ -29,8 +29,8 @@ public: /* DavWave connection and disconnection */
         std::lock_guard<std::mutex> lock(s_linkMutex);
         DavProcFrom sender(from, from->getGroupId(), fromStreamIndex);
         unlink(from->getDataTransmitor(), to->getDataTransmitor(), sender);
-        string detail = "from stream " + std::to_string(fromStreamIndex) + " of " + from->getClassTag() +
-            " <= disconnect => " +  to->getClassTag();
+        string detail = "from stream " + std::to_string(fromStreamIndex) + " of " + from->getLogTag() +
+            " <= disconnect => " +  to->getLogTag();
         DavMessager e(DAV_INFO_DYNAMIC_DISCONNECT, detail);
         s_msgCollector.addMsg(e);
         LOG(INFO) << e;
@@ -41,8 +41,8 @@ public: /* DavWave connection and disconnection */
         std::lock_guard<std::mutex> lock(s_linkMutex);
         DavProcFrom fromSender(from, from->getGroupId(), fromStreamIndex);
         link(from->getPubsubTransmitor(), to->getPubsubTransmitor(), fromSender);
-        string detail = to->getClassTag() + " subcribe event => from stream " +
-            std::to_string(fromStreamIndex) + " of " + from->getClassTag();
+        string detail = to->getLogTag() + " subcribe event => from stream " +
+            std::to_string(fromStreamIndex) + " of " + from->getLogTag();
         DavMessager e(DAV_INFO_DYNAMIC_SUBSCRIBE, detail);
         s_msgCollector.addMsg(e);
         LOG(INFO) << e;
@@ -53,8 +53,8 @@ public: /* DavWave connection and disconnection */
         std::lock_guard<std::mutex> lock(s_linkMutex);
         DavProcFrom fromSender(from, from->getGroupId(), fromStreamIndex);
         unlink(from->getPubsubTransmitor(), to->getPubsubTransmitor(), fromSender);
-        string detail = to->getClassTag() + " un-subcribe event => from stream " +
-            std::to_string(fromStreamIndex) + " of " + from->getClassTag();
+        string detail = to->getLogTag() + " un-subcribe event => from stream " +
+            std::to_string(fromStreamIndex) + " of " + from->getLogTag();
         DavMessager e(DAV_INFO_DYNAMIC_UNSUBSCRIBE, detail);
         s_msgCollector.addMsg(e);
         LOG(INFO) << e;

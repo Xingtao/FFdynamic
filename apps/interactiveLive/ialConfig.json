@@ -41,10 +41,8 @@
         "codec_name": "libx264",
         "fps_num" : 25,
         "fps_den" : 1,
-        "avdict_encode_option":  {"video_size" : "1280x720", "b" : "2000k",
-                                  "preset" : "fast", "profile" : "high", "g" : "60",
-                                  "rc-lookahead" : "30", "aq-strength" : "1",
-                                  "x264-params" : ""}
+        "avdict_encode_option": {"video_size" : "1280x720", "b" : "2000000",
+                                 "preset" : "fast", "g" : "60", "rc-lookahead" : "30"}
       },
       "audio_encode" : {
         "encode_type" : "ffmpeg",
@@ -57,7 +55,7 @@
                                    "filter_arg" : "acrossfade=d=10:o=0:c1=exp:c2=exp"},
 
       "mux_outputs" : [
-        {"mux_type" : "ffmpeg", "mux_fmt" : "flv", "avdict_mux_option" : {}}
+        {"mux_type" : "ffmpeg", "mux_fmt" : "mpegts", "avdict_mux_option" : {}}
       ]
     },
 
@@ -66,10 +64,8 @@
         "encode_type": "ffmpeg",
         "codec_name": "libx264",
         "framerate": 25,
-        "avdict_encode_option":  {"width" : "1280", "height" : "720", "b" : "2000k",
-                                  "preset" : "fast", "profile" : "high",
-                                  "rc-lookahead" : "30", "aq-strength" : "1",
-                                  "x264-params" : ""}
+        "avdict_encode_option":  {"width" : "1280", "height" : "720", "b" : "2000000",
+                                  "preset" : "fast", "profile" : "high", "aq-strength" : "1"}
       },
       "audio_encode" : {
         "encode_type" : "ffmpeg",
@@ -89,10 +85,9 @@
         "encode_type": "ffmpeg",
         "codec_name": "libx264",
         "framerate": 25,
-        "avdict_encode_option":  {"width" : "1920", "height" : "1080", "b" : "4000k",
-                                  "preset" : "fast", "profile" : "high",
-                                  "rc-lookahead" : "30", "aq-strength" : "1",
-                                  "x264-params" : ""}
+        "avdict_encode_option":  {"width" : "1920", "height" : "1080", "b" : "4000000",
+                                  "preset" : "fast", "profile" : "high", "rc-lookahead" : "30",
+                                  "aq-strength" : "1"}
       },
       "audio_encode" : {
         "encode_type" : "ffmpeg",

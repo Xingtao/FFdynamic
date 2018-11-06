@@ -143,6 +143,7 @@ int IalService::onAddNewInputStream(shared_ptr<Response> & response,
         ERRORIT(IAL_ERROR_OUTSTREAM_ADD_CLOSE, detail);
         return failResponse(response, API_ERRCODE_ADD_EXIST_OUTPUT, detail);
     }
+
     /* check max participants */
     vector<shared_ptr<DavStreamlet>> inputStreamlets =
         m_river.getStreamletsByCategory(DavDefaultInputStreamletTag());

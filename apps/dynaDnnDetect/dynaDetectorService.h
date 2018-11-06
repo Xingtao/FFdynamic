@@ -1,15 +1,17 @@
 #pragma once
 
-#include "appService.h"
 #include "httpCommon.h"
 #include "httpServer.h"
+#include "davStreamlet.h"
+#include "cvStreamlet.h"
 #include "pbToDynaDetectOption.h"
 #include "dynaDnnDetect.pb.h"
+#include "appService.h"
 
 namespace dyna_detect_service {
+using namespace ff_dynamic;
 using namespace http_util;
 using namespace app_common;
-using namespace ff_dynamic;
 using namespace ::google::protobuf;
 
 ///////////////////////////////////////////////////////////////////////////
@@ -18,6 +20,8 @@ using namespace ::google::protobuf;
 #define DYNA_DETECT_ERROR_NO_SUCH_DETECTOR         FFERRTAG('E', 'N', 'S', 'D')
 #define DYNA_DETECT_ERROR_DETECTOR_ALREADY_RUNNING FFERRTAG('E', 'D', 'A', 'R')
 #define DYNA_DETECT_ERROR_DETECTOR_ALREADY_STOPPED FFERRTAG('E', 'D', 'A', 'S')
+#define DYNA_DETECT_ERROR_DETECTOR_ADD             FFERRTAG('E', 'D', 'A', 'D')
+#define DYNA_DETECT_ERROR_DETECTOR_DELETE          FFERRTAG('E', 'D', 'D', 'L')
 
 extern string dynaDetectServiceErr2Str(const int errNum);
 
@@ -58,7 +62,7 @@ public:
         PbTree::pbToJsonString(m_inputSetting, inputSetting);
         string outputSetting;
         PbTree::pbToJsonString(m_outputSetting, outputSetting);
-        LOG(INFO) << m_logtag << "AppConfig - \n";
+        LOG(INFO) << m_logtag << "DynaDetectConfig - \n";
         LOG(INFO) << globalSetting << "\n";
         LOG(INFO) << inputSetting << "\n";
         LOG(INFO) << outputSetting << "\n";

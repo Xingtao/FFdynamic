@@ -2,6 +2,8 @@
 
 #include <string>
 #include <glog/logging.h>
+#include "cvPostDraw.h"
+#include "cvDnnDetect.h"
 #include "davStreamlet.h"
 #include "davStreamletBuilder.h"
 
@@ -21,6 +23,9 @@ public:
     virtual shared_ptr<DavStreamlet> build(const vector<DavWaveOption> & waveOptions,
                                            const DavStreamletTag & streamletTag,
                                            const DavStreamletOption & streamletOptions = DavStreamletOption());
+    /* additional one put here */
+    int addDetector(shared_ptr<DavStreamlet> & streamlet, const DavWaveOption & detectorOption);
+    int deleteDetector(shared_ptr<DavStreamlet> & streamlet, const string & detectorName);
 };
 
 /* follow other cv streamlet builders */

@@ -6,14 +6,17 @@ This little project is a playgroud one can change object detector types at run t
 
 ### Chnage detectors at run time
 
-You can test it by *add/delete detector* with curl request while program is running.
+You can test it by *add/delete/stop detector* with curl request while program is running.
 
 ``` shell
     Add a new detector, yolo3 with darknet's model
-    curl -X POST http://ip:port/api1/detectors/yolo3
+    curl -X POST http://ip:port/api1/detector/darknet_yolo3
     
     Delete an existing detector:
-    curl -X DELETE http://ip:port/api1/detectors/mobilenet_ssd
+    curl -X DELETE http://ip:port/api1/detector/caffe_vgg_ssd_300
+    
+    Stop program:
+    curl -X POST http://ip:port/api1/stop
 ```
 
 ### Program Running pattern
@@ -30,8 +33,14 @@ VideoStreamDemux |-> AudioDecode -> |-> AudioEncode ----------------------------
 ### Run the program
 
 ``` 
-    under build folder:  ./dynaObjDetect dynaObjDetect.json inputStream outputStream
+    under build folder:  ./dynaObjDetect dynaObjDetect.json
 ```
+The input and output video stream are specified in json configure file.   
+Also customized detect models are added in configure file. The detector model name in configure file is used as part of add/delete url name. For instance, if one add a detect model named "check_tiger_only", then following request will enable it.
+``` shell
+    curl -X POST http://ip:port/api1/detector/check_tiger_only
+```
+
 
 ### Build the program
 

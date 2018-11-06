@@ -11,8 +11,8 @@ namespace ff_dynamic {
 
 /* create CvPostDraw class category */
 struct DavWaveClassCvPostDraw : public DavWaveClassCategory {
-    DavWaveClassCvPostDraw () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "CvPostDraw") {}
+    DavWaveClassCvPostDraw (const string & nameTag = "CvPostDraw") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 
 /* options passing use AVDictionary */

@@ -10,36 +10,18 @@
 #include "dynaDetectorService.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef COMPILE_TIME
-#define COMPILE_TIME ("unknown")
-#endif
-
-#ifndef COMPILE_VERSION
-#define COMPILE_VERSION ("unknown")
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
 using ::std::string;
-using namespace detector_service;
+using namespace dyna_detect_service;
 
 ////////////////////////////////////////////////////////////////////////////////
 std::atomic<bool> g_bExit = ATOMIC_VAR_INIT(false);
 std::atomic<int> g_interruptCount = ATOMIC_VAR_INIT(0);
 static const string s_logtag = "[DetectorService] ";
 
-////////////////////////////////////////////////////////////////////////////////
-// static helpers
-static void logVersion()
-{
-    LOG(INFO) << s_logtag << "NEW SESSION OF LOG";
-    LOG(INFO) << s_logtag << "Compile Time " << COMPILE_TIME << ", Version " << COMPILE_VERSION;
-    return;
-}
-
 int sendStopToDetectorService() {
-    auto client = std::make_shared<http_util::HttpClient>("127.0.0.1", 8080);
+    auto client = std::make_shared<http_util::HttpClient>("127.0.0.1", 8081);
     try { // Synchronous request
-        client->request("POST", "/api1/detector/stop");
+        client->request("POST", "/api1/stop");
     }
     catch(const std::exception & e) {
         LOG(WARNING) << s_logtag << "sendStopToDetectorService request exception: " << e.what();
@@ -64,6 +46,7 @@ int main(int argc, char **argv) {
         LOG(ERROR) << "Usage: detectorService configPath";
         return -1;
     }
+
     auto & sigHandle = global_sighandle::GlobalSignalHandle::getInstance();
     sigHandle.registe(SIGINT, sigIntHandle);
 
@@ -71,13 +54,11 @@ int main(int argc, char **argv) {
     LOG(INFO) << s_logtag << "DetectorService with config file: " << configPath;
 
     /* start detector service */
-    DynaDetectorService & detectorService = DynaDetectorService::getOnlyInstance();
+    DynaDetectService & detectorService = DynaDetectService::getOnlyInstance();
     if (detectorService.init(configPath) < 0) {
         LOG(ERROR) << s_logtag << "Failed create DetectorService: " << detectorService.getErr();
         return -1;
     }
-
-    logVersion();
     detectorService.start();
     LOG(INFO) << s_logtag << "DetectorService Stopped. Exit program.";
     google::ShutdownGoogleLogging();

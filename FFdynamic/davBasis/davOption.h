@@ -16,6 +16,9 @@ struct DavOption {
     /* two identical ones, used for different scenario */
     inline const type_index key() const noexcept {return m_key;}
     inline const type_index category() const noexcept {return m_key;}
+    inline bool uniqueEqual(const DavOption & o) const {
+        return ((m_key == o.key()) && (m_valueType == o.valueType()) && (m_name == o.name()));
+    }
 private:
     type_index m_key;
     type_index m_valueType;
@@ -23,7 +26,7 @@ private:
 };
 
 inline bool operator==(const DavOption & l, const DavOption & r) {
-    return ((l.key() == r.key()) && (l.valueType() == l.valueType()) && (l.name() == r.name()));
+    return ((l.key() == r.key()) && (l.valueType() == l.valueType()));
 }
 
 inline bool operator<(const DavOption & l, const DavOption & r) {
@@ -123,48 +126,48 @@ struct DavWaveClassNotACategory : public DavWaveClassCategory {
         DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "NotAClass") {}
 };
 struct DavWaveClassDataRelay : public DavWaveClassCategory {
-    DavWaveClassDataRelay() :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "DataRelay") {}
+    DavWaveClassDataRelay(const string & nameTag = "DataRelay") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassDemux : public DavWaveClassCategory {
-    DavWaveClassDemux () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "Demux") {}
+    DavWaveClassDemux (const string & nameTag = "Demux") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassMux : public DavWaveClassCategory {
-    DavWaveClassMux () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "Mux") {}
+    DavWaveClassMux (const string & nameTag = "Mux") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassVideoDecode : public DavWaveClassCategory {
-    DavWaveClassVideoDecode () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoDecode") {}
+    DavWaveClassVideoDecode (const string & nameTag = "VideoDecode") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassVideoEncode : public DavWaveClassCategory {
-    DavWaveClassVideoEncode () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoEncode") {}
+    DavWaveClassVideoEncode (const string & nameTag = "VideoEncode") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassAudioDecode : public DavWaveClassCategory {
-    DavWaveClassAudioDecode () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioDecode") {}
+    DavWaveClassAudioDecode (const string & nameTag = "AudioDecode") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassAudioEncode : public DavWaveClassCategory {
-    DavWaveClassAudioEncode () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioEncode") {}
+    DavWaveClassAudioEncode (const string & nameTag = "AudioEncode") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassVideoFilter : public DavWaveClassCategory {
-    DavWaveClassVideoFilter () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoFilter") {}
+    DavWaveClassVideoFilter (const string & nameTag = "VideoFilter") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassAudioFilter : public DavWaveClassCategory {
-    DavWaveClassAudioFilter () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioFilter") {}
+    DavWaveClassAudioFilter (const string & nameTag = "AudioFilter") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassVideoMix : public DavWaveClassCategory {
-    DavWaveClassVideoMix () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "VideoMix") {}
+    DavWaveClassVideoMix (const string & nameTag = "VideoMix") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 struct DavWaveClassAudioMix : public DavWaveClassCategory {
-    DavWaveClassAudioMix () :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), "AudioMix") {}
+    DavWaveClassAudioMix (const string & nameTag = "AudioMix") :
+        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
 };
 
 ///////////////////////////////////////////////////////////////////

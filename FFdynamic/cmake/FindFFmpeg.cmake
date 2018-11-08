@@ -14,7 +14,8 @@
 #    2. pkgconfig if exist
 #    3. default searching pathes if 1 & 2 not set
 #
-# Author: peng.pxt
+# Author: pxt
+# Project: https://github.com/Xingtao/FFdynamic
 
 include(FindPackageHandleStandardArgs)
 

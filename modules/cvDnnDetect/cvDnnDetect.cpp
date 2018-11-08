@@ -138,13 +138,34 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
         m_net.setInput(imInfo, "im_info");
     }
 
-    std::vector<cv::Mat> outs;
-    m_net.forward(outs, getOutputsNames());
-
     /* prepare output events*/
     auto detectEvent = make_shared<CvDnnDetectEvent>();
+    if (m_dps.m_detectorType == "classify") {
+        cv::Mat prob = m_net.forward();
+        cv::Point classIdPoint;
+        double confidence;
+        cv::minMaxLoc(prob.reshape(1, 1), 0, &confidence, 0, &classIdPoint);
+        int classId = classIdPoint.x;
+        CvDnnDetectEvent::DetectResult result;
+        result.m_confidence = confidence;
+        result.m_className = m_classNames[classId];
+        detectEvent->m_results.emplace_back(result);
+        LOG(INFO) << m_logtag << "classification with confidence "
+                  <<  confidence << ", classId " << classId << ", name " << m_classNames[classId];
+    } else if (m_dps.m_detectorType == "detect") {
+        std::vector<cv::Mat> outs;
+        m_net.forward(outs, getOutputsNames());
+        postprocess(image, outs, detectEvent);
+    } else {
+        LOG(ERROR) << m_logtag << "unknown detector type " + m_dps.m_detectorType;
+        return AVERROR(EINVAL);
+    }
+    const double freq = cv::getTickFrequency() / 1000;
+    vector<double> layersTimes;
+    detectEvent->m_inferTime = m_net.getPerfProfile(layersTimes) / freq;
+    detectEvent->m_detectorType = m_dps.m_detectorType;
+    detectEvent->m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
     detectEvent->m_framePts = inFrame->pts;
-    postprocess(image, outs, detectEvent);
     ctx.m_pubEvents.emplace_back(detectEvent);
     /* No travel static needed for detectors, just events */
     return 0;
@@ -154,12 +175,6 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
 // [helpers]
 int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs,
                              shared_ptr<CvDnnDetectEvent> & detectEvent) {
-    vector<double> layersTimes;
-    const double freq = cv::getTickFrequency() / 1000;
-    detectEvent->m_inferTime = m_net.getPerfProfile(layersTimes) / freq;
-    detectEvent->m_detectorType = m_dps.m_detectorType;
-    detectEvent->m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
-
     /* result assign */
     vector<int> outLayers = m_net.getUnconnectedOutLayers();
     string outLayerType = m_net.getLayer(outLayers[0])->type;

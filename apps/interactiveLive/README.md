@@ -419,6 +419,11 @@ Change one room's layout, after this request done, all outputs' streams will use
 |             | \[participants number - cells number\] won't be displayed. Voice still |
 |             | activated if not muted.                                                |
 
+#### *Backgroud dynamically change during mixing broadcast by request*
+This picture shows backgroud picture changed by a request (the text 'FFdynamic' in backgroud changes font and size)  
+
+![Backgroud dynamically change via request](../../asset/backgroudChange.gif)
+
 #### Message Body
 
 ```

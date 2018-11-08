@@ -24,17 +24,9 @@ Here is an image got from an mobile app show its using scenario. Two streams are
 **Interactive Live** gives flexiable control over the mixing process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
 
 #### *Layout auto change or set to certain pattern during mixing broadcast by request*
-This picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells.  
+This picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells. Changes are quite smooth, without any frozen or stuck.
 
 ![Layout auto change or set as request](asset/layoutChange.gif)
-
-
-#### *Backgroud dynamically change during mixing broadcast by request*
-This picture shows backgroud picture changed by a request (the text 'FFdynamic' in backgroud changes font and size)  
-
-![Backgroud dynamically change via request](asset/backgroudChange.gif)
-
-All changes are quite smooth, without any frozen or stuck.
 
 #### For more details, please refer to [the application](apps/interactiveLive/README.md)
 
@@ -42,7 +34,6 @@ All changes are quite smooth, without any frozen or stuck.
 ## Another application *Dynamic Detect*
 
 This little project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. Models of *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (all in coco dataset) are tested. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate objects intereted.
-![dynaDetect](asset/dynaDetect.gif)
 
 #### For more details, please refer to [the application](apps/dynaDnnDetect/README.md) and its according unit [test](modules/moduleTest/testCvDnnDetect.cpp)
 
@@ -84,7 +75,7 @@ It is suitable for two kind of applications:
 
 -----------
 ## [Getting start with simple application Transcoding](#getting-start-with-simple-application-transcoding)
-![see here](asset/transcode.md)
+[see here](asset/transcode.md)
 
 -----------
 ## [Write a plugin component](#write-a-plugin-component)

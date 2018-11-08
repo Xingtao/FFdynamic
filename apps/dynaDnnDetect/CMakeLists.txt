@@ -8,7 +8,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # opencv 3.4.0 or newer
-find_package(opencv 3.4.0 REQUIRED)
+find_package(OpenCV 3.4.0 REQUIRED)
 ## find Boost::system
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Glog REQUIRED)

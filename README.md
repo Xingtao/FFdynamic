@@ -80,9 +80,7 @@ It is suitable for two kind of applications:
 -----------
 ## [Write a plugin component](#write-a-plugin-component)
 
-Here we introduce how to write a plugin. We develop a dehaze algorithm and make it as a FFdynamic's component. Then we could compose it with other components freely. the following image shows the diagram we mentioned in the 'Overview' part, mix original and dehazed image together to check the result visually.
-
-![dehazed mix image](asset/dehaze.gif)
+Here is how to write a plugin. We develop a dehaze algorithm and make it as a FFdynamic's component. Then we could compose it with other components. the following image shows the diagram we mentioned in the 'Overview' part, mix original and dehazed image together to check the result visually.
 
 Refer to [here](examplePlugin/README.md) for plugin source files.
 

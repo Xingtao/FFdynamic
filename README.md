@@ -33,9 +33,11 @@ This picture shows auto layout change when a new stream joined in (from 2 cells 
 -----------
 ## Another application *Dynamic Detect*
 
-This little project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. Models of *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (all in coco dataset) are tested. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate objects intereted.
+This little project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. Models of *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (all in coco dataset) are tested. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate interested objects.
 
-#### For more details, please refer to [the application](apps/dynaDnnDetect/README.md) and its according unit [test](modules/moduleTest/testCvDnnDetect.cpp)
+![draw_detection](asset/dynaDetect.gif)
+
+#### For more details, please refer to [the application](apps/dynaDnnDetect/README.md) and its unit [test](modules/moduleTest/testCvDnnDetect.cpp)
 
 -----------------
 

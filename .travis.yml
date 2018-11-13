@@ -47,8 +47,8 @@ install:
         ./configure --enable-nonfree --enable-gpl --disable-debug --disable-doc --enable-version3 --enable-shared --enable-postproc && make && sudo make install
         # protobuf
         DIR=$(mktemp -d) && cd ${DIR}
-        git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf
-        git submodule update --init --recursive
+        wget https://github.com/protocolbuffers/protobuf/releases/download/v3.6.0/protobuf-all-3.6.0.tar.gz
+        tar -jx --strip-components=1 -f protobuf-all-3.6.0.tar.gz
         ./autogen.sh
         ./configure CXXFLAGS=-Wno-unused-variable && make && make check && sudo make install
         sudo ldconfig

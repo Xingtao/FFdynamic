@@ -56,12 +56,11 @@ RUN  \
         curl -sLO https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.bz2 && \
         tar -jx --strip-components=1 -f ffmpeg-${FFMPEG_VERSION}.tar.bz2 && \
         ./configure \
-        --enable-nonfree --enable-gpl --disable-debug --disable-doc \
-        --enable-version3 --enable-shared --enable-postproc \
+        --enable-nonfree --enable-gpl --enable-version3 \
+        --disable-doc --enable-shared --enable-postproc \
         --enable-libx264 --enable-libx265 \
-        --enable-libnpp --enable-nvenc --enable-cuvid --enable-cuda \
+         --enable-cuda --enable-libnpp --enable-nvenc --enable-cuvid \
         --extra-cflags="-I/usr/local/cuda/include -I${PREFIX}/include -I/usr/local/ -I/usr/local/include" \
-        --extra-cxxflags='-std=c++11' \
         --extra-ldflags="-L${PREFIX}/lib -L/usr/local/cuda/lib64"\
         --extra-libs=-ldl \
         --prefix="${PREFIX}" && \

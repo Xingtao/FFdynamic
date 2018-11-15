@@ -118,9 +118,9 @@ sudo make install && sudo ldconfig
 Install FFmpeg as usal, then  
 
 ``` sh
-apt install -y cmake libgflags-dev libgoogle-glog-dev libboost-all-dev
+apt install -y cmake3 libgflags-dev libgoogle-glog-dev libboost-all-dev
 or 
-yum install -y glog-devel gflags-devel cmake boost-devel  
+yum install -y glog-devel gflags-devel cmake3 boost-devel  
 ```
 
 #### For Mac

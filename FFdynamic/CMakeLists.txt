@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+## This file is part of project FFdynamic - 'https://github.com/Xingtao/FFdynamic'
+## It could be used as a standalone library build file.
 
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(ffdynamic VERSION 1.1.3 LANGUAGES CXX)
 
 # Search cmake folder for dependencies
@@ -9,7 +11,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 # require a c++14
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

@@ -145,9 +145,14 @@ int VideoMix::onConstruct() {
     m_implEvent.registerEvent(f);
     m_implEvent.registerEvent(g);
 
-    m_cellMixer.initMixer({m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX),
-                m_layout, m_adornment, m_bReGeneratePts, m_bStartAfterAllJoin,
-                trimStr(m_logtag) + "-CellMixer "});
+    CellMixerParams cmp;
+    cmp.m_outStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
+    cmp.m_initLayout = m_layout;
+    cmp.m_adornment = m_adornment;
+    cmp.m_bReGeneratePts = m_bReGeneratePts;
+    cmp.m_bStartAfterAllJoin = m_bStartAfterAllJoin;
+    cmp.m_logtag = trimStr(m_logtag) + "-CellMixer ";
+    m_cellMixer.initMixer(cmp);
     /* TODO: bug here. could remove to onConstruct.
        if dynamic change backgroud request is coming before init done. then it is lost */
     if (!m_backgroudPath.empty()) {

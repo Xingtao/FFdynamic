@@ -1,3 +1,8 @@
+#
+# This file is part of FFdynamic - https://github.com/Xingtao/FFdynamic.git
+# Initially, it aims to do translation between: Protobuf2 <--> Json. And . . . no time.
+# So, only Protobuf3 <---> Json right now.
+#
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(libpbtree VERSION 1.0 LANGUAGES CXX)
 

@@ -1,3 +1,8 @@
+#
+#   1. This project is forked and modified from 'https://github.com/eidheim/Simple-Web-Server'
+#   2. For asynchronized read/write, be aware our buffer/socket outlives the operation.
+#
+
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 project(libhttputil VERSION 1.0 LANGUAGES CXX)

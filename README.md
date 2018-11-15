@@ -7,7 +7,7 @@ This project shipped with two parts: **FFdynamic** library and applications buil
 ------------
 ### Contents
 - [An application *Interactive Live*](#an-application-interactive-live)
-- [Another application *Dynamic Detect*](#another-application-dynamic-detect)
+- [*Dynamic Detect* example](#dynamic-detect-example)
 - [FFdynamic library Overview](#ffdynamic-library-overview)
 - [Getting start with simple application Transcoding](#getting-start-with-simple-application-transcoding)
 - [Write a plugin component](#write-a-plugin-component)
@@ -31,7 +31,7 @@ This picture shows auto layout change when a new stream joined in (from 2 cells 
 #### For more details, please refer to [the application](apps/interactiveLive/README.md)
 
 -----------
-## Another application *Dynamic Detect*
+## *Dynamic Detect* example
 
 This little project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. Models of *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (all in coco dataset) are tested. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate interested objects.
 

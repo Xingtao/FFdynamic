@@ -9,7 +9,7 @@ using ::std::shared_ptr;
 //// Register ////
 static DavImplRegister s_dataRelay(DavWaveClassDataRelay(), vector<string>({"auto", "dataRelay"}), {},
                                    [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                       unique_ptr<DataRelay> p(new DataRelay(options));
+                                       unique_ptr<DavImpl> p(new DataRelay(options));
                                        return p;
                                    });
 
@@ -19,7 +19,6 @@ const DavRegisterProperties & DataRelay::getRegisterProperties() const noexcept 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 int DataRelay::onConstruct() {
-    int ret = 0;
     LOG(INFO) << "DataRelay just do data relay " << m_options.dump();
     m_bDataRelay = true;
     m_bDynamicallyInitialized = true;
@@ -34,7 +33,6 @@ int DataRelay::onProcess(DavProcCtx & ctx) {
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
     if (!ctx.m_inBuf)
         return 0;
-    int ret = 0;
     if (ctx.m_inBuf->isEmptyData()) {
         LOG(INFO) << "data relay recevei flush frame, quit. " << (*ctx.m_inBuf);
         ctx.m_bInputFlush = true;

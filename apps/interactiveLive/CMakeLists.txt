@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 project(interactive-live VERSION 1.0 LANGUAGES CXX)
-# require a c++14
-set(CMAKE_CXX_STANDARD 14)
+# try not use  c++14
+# set(CMAKE_CXX_STANDARD 14)
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

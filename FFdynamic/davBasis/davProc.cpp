@@ -48,11 +48,10 @@ DavProc::DavProc (const DavWaveOption & options) noexcept
 DavProc::~DavProc() {
     if (m_processThread)
         m_processThread->join();
-    auto inputStat = m_dataTransmitor->getReceiveCountStat();
-    auto outputStat = m_dataTransmitor->getSendCountStat();
+    const auto inputStat = m_dataTransmitor->getReceiveCountStat();
+    const auto outputStat = m_dataTransmitor->getSendCountStat();
     INFO(DAV_INFO_BASE_DESTRUCT_DONE,
-           "Base destruct done. Total in stat: " + inputStat.str() +
-           "\nout stat: " + outputStat.str());
+         "Base destruct done. Total in stat: " + inputStat + "\nout stat: " + outputStat);
     m_dataTransmitor->clear();
     m_pubsubTransmitor->clear();
     m_bAlive = false;

@@ -7,7 +7,7 @@ namespace ff_dynamic {
 //// Register ////
 static DavImplRegister s_auidoEncodeReg(DavWaveClassAudioEncode(), vector<string>({"auto", "ffmpeg"}), {},
                                         [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                            unique_ptr<FFmpegAudioEncode> p(new FFmpegAudioEncode(options));
+                                            unique_ptr<DavImpl> p(new FFmpegAudioEncode(options));
                                             return p;
                                         });
 

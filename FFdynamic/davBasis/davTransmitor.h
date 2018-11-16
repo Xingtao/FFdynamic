@@ -129,8 +129,8 @@ public: /* trivial ones */
     inline const std::multimap<Address, shared_ptr<Transmitor>> & getRecipients() const noexcept {return m_recipients;}
     inline const map<Address, uint64_t> & getReceiveCounts() const noexcept {return m_receiveCounts;}
     inline const map<Address, uint64_t> & getSendCounts() const noexcept {return m_sendCounts;}
-    inline std::ostringstream getSendCountStat() {return getCountStat(m_sendCounts);}
-    inline std::ostringstream getReceiveCountStat() {return getCountStat(m_receiveCounts);}
+    inline string getSendCountStat() {return getCountStat(m_sendCounts);}
+    inline string getReceiveCountStat() {return getCountStat(m_receiveCounts);}
     inline const string & getLogtag() const noexcept {return m_logtag;}
 
 public: /* Transmitor load and unload its load */
@@ -237,13 +237,13 @@ public: /* expecting an load */
     }
 
 private:
-    std::ostringstream getCountStat(const map<Address, uint64_t> & counts) {
+    string getCountStat(const map<Address, uint64_t> & counts) {
         std::ostringstream oss;
         oss << "{";
         for (auto & m : counts)
             oss << "<" << m.first << " = " << m.second << "> ";
         oss << "}";
-        return oss;
+        return oss.str();
     }
 
 private:

@@ -6,14 +6,15 @@ namespace ff_dynamic {
 //// Register ////
 static DavImplRegister s_audioFitlerReg(DavWaveClassAudioFilter(), vector<string>({"auto", "ffmpeg"}), {},
                                         [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                            unique_ptr<FFmpegFilter> p(new FFmpegFilter(options));
+                                            unique_ptr<DavImpl> p(new FFmpegFilter(options));
                                             return p;
                                         });
 static DavImplRegister s_videoFilterReg(DavWaveClassVideoFilter(), vector<string>({"auto", "ffmpeg"}), {},
                                         [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                                unique_ptr<FFmpegFilter> p(new FFmpegFilter(options));
+                                                unique_ptr<DavImpl> p(new FFmpegFilter(options));
                                                 return p;
                                         });
+
 const DavRegisterProperties & FFmpegFilter::getRegisterProperties() const noexcept {
     DavWaveClassCategory classCategory((DavWaveClassNotACategory()));
     m_options.getCategory(DavOptionClassCategory(), classCategory);

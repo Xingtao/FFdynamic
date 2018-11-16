@@ -6,7 +6,7 @@ namespace ff_dynamic {
 //// Register ////
 static DavImplRegister s_audioDecodeReg(DavWaveClassAudioDecode(), vector<string>({"auto", "ffmpeg"}), {},
                                         [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                            unique_ptr<FFmpegAudioDecode> p(new FFmpegAudioDecode(options));
+                                            unique_ptr<DavImpl> p(new FFmpegAudioDecode(options));
                                             return p;
                                         });
 

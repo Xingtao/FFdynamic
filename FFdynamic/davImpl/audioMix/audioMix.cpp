@@ -4,7 +4,7 @@ namespace ff_dynamic {
 //// [Register] ////
 static DavImplRegister s_audioMixReg(DavWaveClassAudioMix(), vector<string>({"auto", "AudioMix"}), {},
                                      [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                         unique_ptr<AudioMix> p(new AudioMix(options));
+                                         unique_ptr<DavImpl> p(new AudioMix(options));
                                          return p;
                                      });
 

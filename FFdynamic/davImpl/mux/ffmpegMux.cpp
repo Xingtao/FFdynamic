@@ -6,7 +6,7 @@ namespace ff_dynamic {
 //// Register ////
 static DavImplRegister s_muxReg(DavWaveClassMux(), vector<string>({"auto", "ffmpeg"}), {},
                                 [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                    unique_ptr<FFmpegMux> p(new FFmpegMux(options));
+                                    unique_ptr<DavImpl> p(new FFmpegMux(options));
                                     return p;
                                 });
 

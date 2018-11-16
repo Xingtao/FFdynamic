@@ -49,7 +49,7 @@ private:
     enum AVPixelFormat m_pixfmt = AV_PIX_FMT_YUV420P; /* also could be AV_PIX_FMT_CUDA */
     AVRational m_framerate {25, 1};
     static constexpr AVRational s_sar{1, 1};
-    static constexpr AVRational s_timebase {AV_TIME_BASE_Q}; /* will use this one as output timebase */
+    static constexpr AVRational s_timebase {1, AV_TIME_BASE}; /* will use this one as output timebase */
 };
 
 } //namespace ff_dynamic

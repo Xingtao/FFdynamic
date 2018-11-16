@@ -101,7 +101,6 @@ private:
     AVPacket *m_pkt = nullptr;
     AVFrame *m_frame = nullptr;
     shared_ptr<DavProcBufLimiter> m_limiter;
-    friend std::ostream & operator<<(std::ostream &, const DavProcBuf &);
 };
 
 extern std::ostream & operator<<(std::ostream &, const DavProcBuf &);

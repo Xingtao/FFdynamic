@@ -13,7 +13,7 @@ namespace ff_dynamic {
 static DavImplRegister s_demuxReg(DavWaveClassDemux(), vector<string>({"auto", "ffmpeg"}),
                                   {}, /* static properties */
                                   [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                      unique_ptr<FFmpegDemux> p(new FFmpegDemux(options));
+                                      unique_ptr<DavImpl> p(new FFmpegDemux(options));
                                       return p;
                                   });
 

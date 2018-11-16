@@ -117,7 +117,7 @@ int FilterGeneral::prepareBufferSrc() {
                  m_fgp.m_bufsrcParams->sample_aspect_ratio.den);
     } else {
         snprintf(srcArgs, sizeof(srcArgs),
-                 "time_base=%d/%d:sample_fmt=%s:sample_rate=%d:channel_layout=0x%" PRIx64,
+                 "time_base=%d/%d:sample_fmt=%s:sample_rate=%d:channel_layout=%llu",
                  m_fgp.m_bufsrcParams->time_base.num, m_fgp.m_bufsrcParams->time_base.den,
                  av_get_sample_fmt_name((enum AVSampleFormat)m_fgp.m_bufsrcParams->format),
                  m_fgp.m_bufsrcParams->sample_rate, m_fgp.m_bufsrcParams->channel_layout);

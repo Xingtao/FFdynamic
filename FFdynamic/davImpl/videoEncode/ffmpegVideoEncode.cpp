@@ -5,7 +5,7 @@ namespace ff_dynamic {
 // [Register - auto, ffmpegVideoEncode]
 static DavImplRegister s_videoEncodeReg(DavWaveClassVideoEncode(), vector<string>({"auto", "ffmpeg"}), {},
                                         [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                            unique_ptr<FFmpegVideoEncode> p(new FFmpegVideoEncode(options));
+                                            unique_ptr<DavImpl> p(new FFmpegVideoEncode(options));
                                             return p;
                                         });
 

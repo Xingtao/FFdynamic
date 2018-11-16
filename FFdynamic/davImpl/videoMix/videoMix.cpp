@@ -6,7 +6,7 @@ namespace ff_dynamic {
 //// Register ////
 static DavImplRegister s_videoMixReg(DavWaveClassVideoMix(), vector<string>({"auto", "VideoMix"}), {},
                                      [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                         unique_ptr<VideoMix> p(new VideoMix(options));
+                                         unique_ptr<DavImpl> p(new VideoMix(options));
                                          return p;
                                      });
 

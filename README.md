@@ -142,7 +142,6 @@ To alleviate the build process, there is a [docker](tools/dockerlize/README.md) 
 All contributions are welcome. Some TODOs:
 
 - A webui that can easily operate on Interactive Live application;
-* Nvidia codec supports (it is ongoing, will do it via ffmpeg);
-- 'Interactive live' set video cell's border line, border color;
-* Statistics for each component, process time, latency time, detailed info, etc..;
-- An auto data format negotiate module between components;
+* 'Interactive live' set video cell's border line, border color;
+- Statistics for each component, process time, latency time, detailed info, etc..;
+* An auto data format negotiate module between components;

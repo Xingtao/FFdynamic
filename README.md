@@ -9,7 +9,7 @@ This project shipped with two parts: **FFdynamic** library and applications buil
 - [An application *Interactive Live*](#an-application-interactive-live)
 - [*Dynamic Detect* example](#dynamic-detect-example)
 - [FFdynamic library Overview](#ffdynamic-library-overview)
-- [Getting start with simple application Transcoding](#getting-start-with-simple-application-transcoding)
+- [Getting start with a simple application *Transcoding*](#getting-start-with-a-simple-application-transcoding)
 - [Write a plugin component](#write-a-plugin-component)
 - [Installation](#installation)
 - [Contribution](#contribution)
@@ -76,8 +76,8 @@ It is suitable for two kind of applications:
 * develop new video/audio process algorithm which needs video clips as inputs and video clips as outputs, and communication or coorperation needed between video and audio streams;
 
 -----------
-## [Getting start with simple application Transcoding](#getting-start-with-simple-application-transcoding)
-[see here](asset/transcode.md)
+## [Getting start with a simple application *Transcoding*](#getting-start-with-a-simple-application-transcoding)
+Do transcoding in a dozen lines of code, [see here](asset/transcode.md)
 
 -----------
 ## [Write a plugin component](#write-a-plugin-component)

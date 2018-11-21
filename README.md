@@ -1,8 +1,8 @@
 [![Build Status](https://www.travis-ci.org/Xingtao/FFdynamic.svg?branch=master)](https://travis-ci.org/Xingtao/FFdynamic)
 
-### FFdynamic - Extend FFmpeg with run time control and audio/video process composition.
+### FFdynamic - Extend FFmpeg with run time control and audio/video process dynamic composition
 
-This project shipped with two parts: **FFdynamic** library and applications build on **FFdynamic**
+This project shipped with two parts: **FFdynamic** library (Multimedia process framework) and applications build on **FFdynamic**
 
 ------------
 ### Contents

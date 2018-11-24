@@ -91,7 +91,7 @@ Refer to [here](examplePlugin/README.md) for plugin source files.
 
 ### Dependency Required
 * FFMpeg, glog, cmake (minimal version 3.2)
-- compiler supports at least c++14 (GCC version 5 or above, Clang 3.4 or above, MSVC 19.0 or above)
+- compiler supports at least c++11
 * boost, protobuf3 (optional, only for the application 'Interactive Live')
 - opencv (optional, if you would like to run plugin example)
 
@@ -145,3 +145,4 @@ All contributions are welcome. Some TODOs:
 * 'Interactive live' set video cell's border line, border color;
 - Statistics for each component, process time, latency time, detailed info, etc..;
 * An auto data format negotiate module between components;
+- Expose event register to user for easily event/data callback process;

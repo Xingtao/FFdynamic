@@ -2,7 +2,7 @@
 
 ### FFdynamic - Extend FFmpeg with run time control and dynamic audio/video composition
 
-This project shipped with two parts: **FFdynamic** library (Multimedia process framework) and applications build on **FFdynamic**
+This project shipped with two parts: **FFdynamic** library and applications build on **FFdynamic**
 
 ------------
 ### Contents

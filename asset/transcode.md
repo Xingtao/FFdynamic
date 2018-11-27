@@ -32,7 +32,7 @@ We start with a simple scenario, transcoding, to take a flavor of FFdynamic.
     CHECK(streamletInput != nullptr && streamletOutput != nullptr);
 
     /* connect streamlets and start */
-    streamletInput << streamletOutput;
+    streamletInput >> streamletOutput;
     DavRiver river({streamletInput, streamletOutput});
     river.start();
     ......
@@ -143,4 +143,4 @@ static int reap_filters(int flush)
                 break;
 ```
 
-As shown, if we have 5 outputs (which is normal in live broadcast field, output 1080p60, 1080p30, 720p, 540p, 320p for diffrent devices), FFmpeg will do encode one by one (takes more time, cpu not fully used). Of cause, this is because FFmpeg not targeting this scenario.
+As shown, if we have 4 outputs (which is normal in live broadcast field, output 1080p30, 720p, 540p, 320p for diffrent devices), FFmpeg will do encode one by one (takes more time, cpu not fully used). Of cause, this is because FFmpeg not targeting this scenario.

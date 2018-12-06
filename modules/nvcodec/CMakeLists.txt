@@ -1,7 +1,7 @@
 #
 # Be Note: this is not a standalone CMakeList. it works only under FFdynamic project
 #
-# Files under this folder from Video_Codec_SDK_8.1.24. And only decoder. Encoder also use FFmpeg's nvenc interface.
+# Files under this folder from Video_Codec_SDK_8.1.24. And only decoder used. Encoder still use FFmpeg's nvenc interface.
 
 # set(CUDA_INSTALL_DIR /usr/local/cuda)
 set(CUDA_INSTALL_DIR /home/web_server/cuda-9.0)

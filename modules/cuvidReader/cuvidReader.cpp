@@ -160,7 +160,6 @@ int CuvidReader::initNvDecoderInterface() {
     }
     // Rect cropRect = {};
     Dim resizeDim = {m_ndp.m_targetWidth, m_ndp.m_targetHeight};
-
     ck(cuDeviceGet(&m_cuDevice, ndp.m_deviceIdx));
     char szDeviceName[80];
     ck(cuDeviceGetName(szDeviceName, sizeof(szDeviceName), m_cuDevice));
@@ -176,7 +175,8 @@ int CuvidReader::initNvDecoderInterface() {
     return 0;
 }
 
-int CuvidReader::init(const string & streamUrl, const NvDecoderParams & ndp, AVDictionary *demuxOptions, AVDictionary *decodeOptions) {
+int CuvidReader::init(const string & streamUrl, const NvDecoderParams & ndp,
+                      AVDictionary *demuxOptions, AVDictionary *decodeOptions) {
     int ret = initDemux(streamUrl, demuxOptions);
     if (ret < 0)
         return ret;
@@ -198,19 +198,6 @@ int CuvidReader::close() {
         m_nvDecoder = nullptr;
     }
     return 0;
-}
-
-/////////////////////////////////////
-//// Directly call cuda sdk's decoder
-void DecodeMediaFile(CUcontext cuContext, const char *szInFilePath, const char *szOutFilePath, bool bOutPlanar,
-    const Rect &cropRect, const Dim &resizeDim)
-{
-    NvDecoder dec(cuContext, demuxer.GetWidth(), demuxer.GetHeight(), false, FFmpeg2NvCodecId(demuxer.GetVideoCodec()), NULL, false, false, &cropRect, &resizeDim);
-
-    int nVideoBytes = 0, nFrameReturned = 0, nFrame = 0;
-    uint8_t *pVideo = NULL, **ppFrame;
-    do {
-    fpOut.close();
 }
 
 } // namespace cuvid_reader

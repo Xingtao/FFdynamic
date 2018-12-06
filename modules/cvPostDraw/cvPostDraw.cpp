@@ -107,19 +107,31 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
     int usedFrameCount = 0;
     for (auto & in : m_cacheBufFrames) {
         auto frame = in->getAVFrame(); /* since in/out static are the same */
-        /* first remove 'expired' results */
+        /* first remove 'expired' results, also check
+           whether this frame is useless (not detected, for detect with interval now) */
+        int skipThisFrameCount = 0;
         for (auto & d : m_detectResults) {
             d.second.erase(std::remove_if(d.second.begin(), d.second.end(),
                                           [frame](const CvDnnDetectEvent & r) {
                                               return r.m_framePts < frame->pts;
                                           }), d.second.end());
+            if (d.second.size() && d.second[0].m_framePts > frame->pts) {
+                skipThisFrameCount++;
+            }
         }
+
+        if (skipThisFrameCount && skipThisFrameCount == m_detectResults.size()) {
+            usedFrameCount++;
+            continue;
+        }
+
         /* then check whether all results are ready */
         bool bReady = false;
         vector<CvDnnDetectEvent> results;
         for (auto & d : m_detectResults) {
             if (d.second.size() == 0) /* not comming */ {
                 bReady = false;
+                usleep(1000);
                 break;
             }
             if (d.second[0].m_framePts == frame->pts) {

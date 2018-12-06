@@ -30,6 +30,8 @@ public:
         o.setInt("width", dds.width());
         o.setInt("height", dds.height());
         o.setDouble("conf_threshold", (double)dds.conf_threshold());
+        const int detect_interval = dds.detect_interval() <= 0 ? 1 : dds.detect_interval();
+        o.setInt("detect_interval", detect_interval);
         vector<double> means;
         for (auto & m : dds.means())
             means.emplace_back((double)m);

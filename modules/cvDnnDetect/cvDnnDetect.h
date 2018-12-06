@@ -56,6 +56,7 @@ public:
         int m_width = -1;
         int m_height = -1;
         double m_confThreshold = 0.7;
+        int m_detectInterval = 1;
     };
 
 private:
@@ -63,6 +64,7 @@ private:
     DetectParams m_dps;
     vector<cv::String> m_outBlobNames;
     vector<string> m_classNames;
+    unsigned long m_inputCount = 0;
 };
 
 extern std::ostream & operator<<(std::ostream & os, const CvDnnDetect::DetectParams & p);

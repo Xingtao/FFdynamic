@@ -45,6 +45,7 @@ int CvDnnDetect::onConstruct() {
     m_options.getInt("height", m_dps.m_height);
     m_options.getDouble("conf_threshold", m_dps.m_confThreshold);
     m_options.getDouble("conf_threshold", m_dps.m_confThreshold);
+    m_options.getInt("detect_interval", m_dps.m_detectInterval);
     vector<double> means;
     m_options.getDoubleArray("means", means);
     if (means.size() == 3) {
@@ -102,11 +103,16 @@ int CvDnnDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
 }
 
 ////////////////////////////
-//  [dynamic initialization]
 
 int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
     if (!ctx.m_inBuf)
+        return 0;
+
+    /* detect with interval (frame skip) */
+    m_inputCount++;
+    const bool bSkipDetect = (m_inputCount % m_dps.m_detectInterval) == 0 ? false : true;
+    if (bSkipDetect)
         return 0;
 
     int ret = 0;
@@ -267,7 +273,8 @@ std::ostream & operator<<(std::ostream & os, const CvDnnDetect::DetectParams & p
        << ", classnamePath " << p.m_classnamePath << ", backendId " << p.m_backendId
        << ", targetId " << p.m_targetId << ", scaleFactor " << p.m_scaleFactor
        << ", means " << p.m_means << ", bSwapRb " << p.m_bSwapRb << ", width " << p.m_width
-       << ", height " << p.m_height << ", confThreshold " << p.m_confThreshold;
+       << ", height " << p.m_height << ", confThreshold " << p.m_confThreshold
+       << ", detectInterval" << p.m_detectInterval;
     return os;
 }
 

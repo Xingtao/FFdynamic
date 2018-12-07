@@ -31,7 +31,7 @@
       "backgroud_image_path": "../../../asset/ffdynamic-bg1.jpg",
       "layout_info" : {"layout": "eLayoutAuto", "cells": []}
     },
-    "audio_mix" : {"frame_size" : 1024}
+    "audio_mix" : {"frame_size" : 1024, "b_mute_at_start" : false}
   },
 
   "output_settings" : {

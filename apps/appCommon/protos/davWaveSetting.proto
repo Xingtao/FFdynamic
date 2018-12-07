@@ -53,6 +53,7 @@ message VideoMixSetting {
 
 message AudioMixSetting {
     int32 frame_size = 1; /* output how may pcm samples one time */
+    bool b_mute_at_start = 2; /* whether mute when new stream joined. could be unmute later via rest api */
     /* sampel format, channel, samplerate are fixed for audio mix */
 }
 

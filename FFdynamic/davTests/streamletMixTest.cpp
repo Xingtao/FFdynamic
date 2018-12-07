@@ -60,6 +60,7 @@ int main(int argc, char **argv) {
     muxOption2.set(DavOptionOutputUrl(), "mix.mp4");
     // 7. audio mix
     DavWaveOption audioMixOption((DavWaveClassAudioMix()));
+    audioMixOption.setBool("b_mute_at_start", false);
     // audio mix has default settings: fltp, 44100, 2 channels
     // 8. video mix
     DavWaveOption videoMixOption((DavWaveClassVideoMix()));

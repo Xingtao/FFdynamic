@@ -83,6 +83,7 @@ public:
         o.setCategory(DavOptionClassCategory(), DavWaveClassAudioMix());
         o.set(DavOptionImplType(), "auto");
         o.setInt("frame_size", ams.frame_size(), 0);
+        o.setBool("b_mute_at_start", ams.b_mute_at_start());
         return 0;
     }
 

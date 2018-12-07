@@ -38,7 +38,7 @@ private:
 private:
     map<DavProcFrom, unique_ptr<AudioSyncer>> m_syncers;
     vector<size_t> m_muteGroups;
-
+    bool m_bMuteAtStart = false;
     int m_frameSize = 1024;
     enum AVSampleFormat m_dstFmt = AV_SAMPLE_FMT_FLTP;
     int m_dstSamplerate = 44100;

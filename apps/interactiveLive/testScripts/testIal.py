@@ -36,9 +36,10 @@ out_setting_id_720p = "720p_2000kb"
 out_setting_id_1080p = "1080p_4000kb"
 out_setting_id_udp_720p = "udp_720p"
 
-input1 = "http://118.89.196.57/bigbunny_360.mp4"
-input2 = "http://118.89.196.57/soccer_adidas_ad.mp4"
-input3 = "http://118.89.196.57/nba_ad.mp4"
+# chnage to your files
+input1 = "bunny.avi"
+input2 = "soccer_adidas_ad.mp4"
+input3 = "nba_ad.mp4"
 
 output_dir = "./" #"../testScripts"
 fullurl_output_720 = "output_720p.flv"

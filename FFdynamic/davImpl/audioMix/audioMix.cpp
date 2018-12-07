@@ -88,7 +88,10 @@ int AudioMix::addOneSyncerStream(DavProcCtx & ctx) {
         return ret;
     }
     m_syncers.emplace(from, std::move(syncer));
-    LOG(INFO) << m_logtag << "add new audio syncer " << from;
+    if (m_bMuteAtStart) {
+        m_muteGroups.emplace_back(from.m_groupId);
+    }
+    LOG(INFO) << m_logtag << "add new audio syncer " << from << (m_bMuteAtStart ? "muted at starting" : "");
     return 0;
 }
 
@@ -97,6 +100,7 @@ int AudioMix::addOneSyncerStream(DavProcCtx & ctx) {
 int AudioMix::onConstruct() {
     /* how many samples that we would like to output as a whole frame */
     m_options.getInt("frame_size", m_frameSize);
+    m_options.getBool("b_mute_at_start", m_bMuteAtStart);
 
     /* register event */
     std::function<int (const DavEventVideoMixSync &)> f =
@@ -211,6 +215,7 @@ int AudioMix::mixFrameByFramePts(DavProcCtx & ctx) {
             continue;
         toMixFrame(mixFrame, frame.get());
     }
+    mixFrame->pts = m_curMixPts;
     m_outputMixFrames++;
     outBuf->m_travelStatic = m_outputTravelStatic.at(IMPL_SINGLE_OUTPUT_STREAM_INDEX);
     ctx.m_outBufs.push_back(outBuf);
@@ -226,10 +231,10 @@ int AudioMix::toMixFrame(AVFrame *mixFrame, const AVFrame *frame) {
     for (int k=0; k < channels; k++) {
         float *dataDst = (float *)mixFrame->data[k] + offset;
         float *dataSrc = (float *)frame->data[k];
-        for (int j=0; j < frame->nb_samples; j++)
-            *dataDst++ += *dataSrc++;
+        for (int j=0; j < frame->nb_samples; j++) {
+            dataDst[j] = (dataDst[j] + dataSrc[j]) / 2;
+        }
     }
-    mixFrame->pts = m_curMixPts;
     return 0;
 }
 

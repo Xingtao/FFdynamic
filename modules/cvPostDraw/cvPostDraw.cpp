@@ -19,10 +19,10 @@ const DavRegisterProperties & CvPostDraw::getRegisterProperties() const noexcept
 
 ////////////////////////////////////
 //  [event process]
-int CvPostDraw::processDnnDetectResult(const CvDnnDetectEvent & e) {
+int CvPostDraw::processObjDetectResult(const ObjDetectEvent & e) {
     const auto & from = e.getAddress();
     if (m_detectResults.count(from) == 0) {
-        m_detectResults.emplace(from, vector<CvDnnDetectEvent>{e});
+        m_detectResults.emplace(from, vector<ObjDetectEvent>{e});
         return 0;
     }
     auto & v = m_detectResults.at(from);
@@ -42,8 +42,8 @@ int CvPostDraw::processStopPubEvent(const DavStopPubEvent & e) {
 //  [construct - destruct - process]
 int CvPostDraw::onConstruct() {
     LOG(INFO) << m_logtag << "Creating CvPostDraw " << m_options.dump();
-    std::function<int (const CvDnnDetectEvent &)> f =
-        [this] (const CvDnnDetectEvent & e) {return processDnnDetectResult(e);};
+    std::function<int (const ObjDetectEvent &)> f =
+        [this] (const ObjDetectEvent & e) {return processObjDetectResult(e);};
     m_implEvent.registerEvent(f);
 
     std::function<int (const DavStopPubEvent &)> g =
@@ -112,7 +112,7 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
         int skipThisFrameCount = 0;
         for (auto & d : m_detectResults) {
             d.second.erase(std::remove_if(d.second.begin(), d.second.end(),
-                                          [frame](const CvDnnDetectEvent & r) {
+                                          [frame](const ObjDetectEvent & r) {
                                               return r.m_framePts < frame->pts;
                                           }), d.second.end());
             if (d.second.size() && d.second[0].m_framePts > frame->pts) {
@@ -127,7 +127,7 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
 
         /* then check whether all results are ready */
         bool bReady = false;
-        vector<CvDnnDetectEvent> results;
+        vector<ObjDetectEvent> results;
         for (auto & d : m_detectResults) {
             if (d.second.size() == 0) /* not comming */ {
                 bReady = false;
@@ -161,7 +161,7 @@ int CvPostDraw::onProcess(DavProcCtx & ctx) {
     return 0;
 }
 
-int CvPostDraw::drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & results) {
+int CvPostDraw::drawResult(cv::Mat & image, const vector<ObjDetectEvent> & results) {
     const static vector<cv::Scalar> colors {
         {255, 215, 0}, {50, 205, 50}, {0, 0, 255}, {0, 255, 0}, {0, 255, 255}, {255, 0, 255},
         {128, 128, 0}, {128, 0, 128}, {0, 128, 128},

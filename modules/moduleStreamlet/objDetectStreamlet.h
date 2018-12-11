@@ -2,23 +2,24 @@
 
 #include <string>
 #include <glog/logging.h>
-#include "cvPostDraw.h"
-#include "cvDnnDetect.h"
 #include "davStreamlet.h"
 #include "davStreamletBuilder.h"
+
+#include "objDetect.h"
+#include "cvPostDraw.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace ff_dynamic {
 
-struct CvDnnDetectStreamletTag : public DavStreamletTag {
-    CvDnnDetectStreamletTag() :
-        DavStreamletTag("CvDnnDetectStreamlet", type_index(typeid(CvDnnDetectStreamletTag))) {}
-    explicit CvDnnDetectStreamletTag(const string & streamletName)
-        : DavStreamletTag(streamletName, type_index(typeid(CvDnnDetectStreamletTag))) {}
+struct ObjDetectStreamletTag : public DavStreamletTag {
+    ObjDetectStreamletTag() :
+        DavStreamletTag("ObjDetectStreamletTag", type_index(typeid(ObjDetectStreamletTag))) {}
+    explicit ObjDetectStreamletTag(const string & streamletName)
+        : DavStreamletTag(streamletName, type_index(typeid(ObjDetectStreamletTag))) {}
 };
 
 /* Customize cv streamlet builders */
-class CvDnnDetectStreamletBuilder : public DavStreamletBuilder {
+class ObjDetectStreamletBuilder : public DavStreamletBuilder {
 public:
     virtual shared_ptr<DavStreamlet> build(const vector<DavWaveOption> & waveOptions,
                                            const DavStreamletTag & streamletTag,

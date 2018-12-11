@@ -6,28 +6,28 @@
 
 namespace ff_dynamic {
 /////////////////////////////////
-// [Register - auto, cvDnnDetect] There is no data output but only peer events
-static DavImplRegister s_cvDnnDetectReg(DavWaveClassCvDnnDetect(), vector<string>({"auto", "cvDnnDetect"}), {},
+// [Register - auto, darknetDetect] There is no data output but only peer events
+static DavImplRegister s_darknetDetectReg(DavWaveClassObjDetect(), vector<string>({"d1arknetDetect"}), {},
                                         [](const DavWaveOption & options) -> unique_ptr<DavImpl> {
-                                            unique_ptr<CvDnnDetect> p(new CvDnnDetect(options));
+                                            unique_ptr<DarknetDetect> p(new DarknetDetect(options));
                                             return p;
                                         });
 
-const DavRegisterProperties & CvDnnDetect::getRegisterProperties() const noexcept {
-    return s_cvDnnDetectReg.m_properties;
+const DavRegisterProperties & DarknetDetect::getRegisterProperties() const noexcept {
+    return s_darknetDetectReg.m_properties;
 }
 
 ////////////////////////////////////
 //  [event process]
-int CvDnnDetect::processChangeConfThreshold(const CvDynaEventChangeConfThreshold & e) {
+int DarknetDetect::processChangeConfThreshold(const DynaEventChangeConfThreshold & e) {
     m_dps.m_confThreshold = e.m_confThreshold;
     return 0;
 }
 
 ////////////////////////////////////
 //  [construct - destruct - process]
-int CvDnnDetect::onConstruct() {
-    LOG(INFO) << m_logtag << "start creating CvDnnDetect " << m_options.dump();
+int DarknetDetect::onConstruct() {
+    LOG(INFO) << m_logtag << "start creating DarknetDetect " << m_options.dump();
     std::function<int (const CvDynaEventChangeConfThreshold &)> f =
         [this] (const CvDynaEventChangeConfThreshold & e) {return processChangeConfThreshold(e);};
     m_implEvent.registerEvent(f);
@@ -74,19 +74,19 @@ int CvDnnDetect::onConstruct() {
             m_classNames.emplace_back(line);
         }
     }
-    LOG(INFO) << m_logtag << "CvDnnDetect create done: " << m_dps;
+    LOG(INFO) << m_logtag << "DarknetDetect create done: " << m_dps;
     return 0;
 }
 
-int CvDnnDetect::onDestruct() {
-    LOG(INFO) << m_logtag << "CvDnnDetect Destruct";
+int DarknetDetect::onDestruct() {
+    LOG(INFO) << m_logtag << "DarknetDetect Destruct";
     return 0;
 }
 
 ////////////////////////////////////
 //  [dynamic initialization]
 
-int CvDnnDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
+int DarknetDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
     auto in = m_inputTravelStatic.at(ctx.m_froms[0]);
     if (!in->m_codecpar && (in->m_pixfmt == AV_PIX_FMT_NONE)) {
         ERRORIT(DAV_ERROR_TRAVEL_STATIC_INVALID_CODECPAR,
@@ -104,7 +104,7 @@ int CvDnnDetect::onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx) {
 
 ////////////////////////////
 
-int CvDnnDetect::onProcess(DavProcCtx & ctx) {
+int DarknetDetect::onProcess(DavProcCtx & ctx) {
     ctx.m_expect.m_expectOrder = {EDavExpect::eDavExpectAnyOne};
     if (!ctx.m_inBuf)
         return 0;
@@ -145,14 +145,14 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
     }
 
     /* prepare output events*/
-    auto detectEvent = make_shared<CvDnnDetectEvent>();
+    auto detectEvent = make_shared<DarknetDetectEvent>();
     if (m_dps.m_detectorType == "classify") {
         cv::Mat prob = m_net.forward();
         cv::Point classIdPoint;
         double confidence;
         cv::minMaxLoc(prob.reshape(1, 1), 0, &confidence, 0, &classIdPoint);
         int classId = classIdPoint.x;
-        CvDnnDetectEvent::DetectResult result;
+        DarknetDetectEvent::DetectResult result;
         result.m_confidence = confidence;
         result.m_className = m_classNames[classId];
         detectEvent->m_results.emplace_back(result);
@@ -179,8 +179,8 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
 
 ////////////
 // [helpers]
-int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs,
-                             shared_ptr<CvDnnDetectEvent> & detectEvent) {
+int DarknetDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs,
+                             shared_ptr<DarknetDetectEvent> & detectEvent) {
     /* result assign */
     vector<int> outLayers = m_net.getUnconnectedOutLayers();
     string outLayerType = m_net.getLayer(outLayers[0])->type;
@@ -190,7 +190,7 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
         CHECK(outs.size() == 1) << "Faster-Rcnn or R-FCN output should have size 1";
         const float* data = (float*)outs[0].data;
         for (size_t i=0; i < outs[0].total(); i+=7) {
-            CvDnnDetectEvent::DetectResult result;
+            DarknetDetectEvent::DetectResult result;
             result.m_confidence = data[i + 2];
             if (result.m_confidence > m_dps.m_confThreshold) {
                 result.m_rect.x = (int)data[i + 3];
@@ -211,7 +211,7 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
         CHECK(outs.size() == 1) << "DetectionOutput should have size one";
         const float* data = (float*)outs[0].data;
         for (size_t i=0; i < outs[0].total(); i+=7) {
-            CvDnnDetectEvent::DetectResult result;
+            DarknetDetectEvent::DetectResult result;
             result.m_confidence = data[i + 2];
             if (result.m_confidence > m_dps.m_confThreshold) {
                 result.m_rect.x = (int)(data[i + 3] * image.cols);
@@ -230,7 +230,7 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
         for (size_t i = 0; i < outs.size(); ++i) {
             // Network produces output blob with a shape NxC where N is a number of detected objects
             // and C is a number of classes + 4; 4 numbers are [center_x, center_y, width, height]
-            CvDnnDetectEvent::DetectResult result;
+            DarknetDetectEvent::DetectResult result;
             float* data = (float*)outs[i].data;
             for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols) {
                 cv::Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
@@ -256,7 +256,7 @@ int CvDnnDetect::postprocess(const cv::Mat & image, const vector<cv::Mat> & outs
     return 0;
 }
 
-const vector<cv::String> & CvDnnDetect::getOutputsNames() {
+const vector<cv::String> & DarknetDetect::getOutputsNames() {
     if (m_outBlobNames.empty()) {
         vector<int> outLayers = m_net.getUnconnectedOutLayers();
         vector<cv::String> layersNames = m_net.getLayerNames();
@@ -267,7 +267,7 @@ const vector<cv::String> & CvDnnDetect::getOutputsNames() {
     return m_outBlobNames;
 }
 
-std::ostream & operator<<(std::ostream & os, const CvDnnDetect::DetectParams & p) {
+std::ostream & operator<<(std::ostream & os, const DarknetDetect::DetectParams & p) {
     os << "[dectorType " << p.m_detectorType << ", detectorFrameworkTag " << p.m_detectorFrameworkTag
        << ", modelPath " << p.m_modelPath << ", configPath " << p.m_configPath
        << ", classnamePath " << p.m_classnamePath << ", backendId " << p.m_backendId

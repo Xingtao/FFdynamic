@@ -14,11 +14,11 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(Glog REQUIRED)
 
 ## cv module plugin
-find_package(cvmodule_plugin)
-if (TARGET cvmodule_plugin::cvmodule_plugin)
-  message("[use installed cvmodule_plugin library]")
-else (TARGET cvmodule_plugin::cvmodule_plugin)
-  message("[build cvmodule_plugin inside dynaDnnDetector service -->]")
+find_package(module_plugin)
+if (TARGET module_plugin::module_plugin)
+  message("[use installed module_plugin library]")
+else (TARGET module_plugin::module_plugin)
+  message("[build module_plugin inside dynaDnnDetector service -->]")
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_BINARY_DIR}/modules)
 endif()
 
@@ -27,7 +27,7 @@ find_package(FFdynamic)
 if (TARGET ffdynamic::ffdynamic)
   message("[use installed ffdynamic library]")
 else (TARGET ffdynamic::ffdynamic)
-  message("[build ffdynamic inside dynaCvDnnDetect service -->]")
+  message("[build ffdynamic inside dynaObjDetect service -->]")
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../FFdynamic ${CMAKE_CURRENT_BINARY_DIR}/FFdynamic)
 endif()
 
@@ -88,6 +88,6 @@ target_compile_options(dynaDetector
   )
 
 target_link_libraries(dynaDetector
-  PUBLIC cvmodule_plugin::cvmodule_plugin ffdynamic::ffdynamic ffdynaProto::ffdynaProto protobuf::libprotobuf
+  PUBLIC module_plugin::module_plugin ffdynamic::ffdynamic ffdynaProto::ffdynaProto protobuf::libprotobuf
   PUBLIC httputil::httputil pbtree::pbtree boost_system Threads::Threads
   )

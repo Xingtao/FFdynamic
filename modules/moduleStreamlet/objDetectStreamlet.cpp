@@ -1,14 +1,14 @@
 #include <algorithm>
 #include <limits>
-#include "cvStreamlet.h"
+#include "objDetectStreamlet.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace ff_dynamic {
 ////////////////////////////////////////////////////////////////////////////////
 shared_ptr<DavStreamlet>
-CvDnnDetectStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
-                                   const DavStreamletTag & streamletTag,
-                                   const DavStreamletOption & streamletOptions) {
+ObjDetectStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
+                                 const DavStreamletTag & streamletTag,
+                                 const DavStreamletOption & streamletOptions) {
     auto streamlet = createStreamlet(waveOptions, streamletTag, streamletOptions);
     if (!streamlet)
         return streamlet;
@@ -22,13 +22,13 @@ CvDnnDetectStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
     auto dataRelay = dataRelaies[0];
     auto postDraw = postDraws[0];
 
-    auto cvDnnDetectors = streamlet->getWavesByCategory(DavWaveClassCvDnnDetect());
-    CHECK(cvDnnDetectors.size() > 0)
+    auto objDetectors = streamlet->getWavesByCategory(DavWaveClassObjDetect());
+    CHECK(objDetectors.size() > 0)
         << m_logtag << "at lease one detector enabled at the beginning";
 
     /* connections */
     streamlet->addOneInVideoRawEntry(dataRelay);
-    for (auto & d : cvDnnDetectors) {
+    for (auto & d : objDetectors) {
         DavWave::connect(dataRelay.get(), d.get());
         // peer event subscribe: postDraw subscribe detector's result event
         DavWave::subscribe(d.get(), postDraw.get());
@@ -39,7 +39,7 @@ CvDnnDetectStreamletBuilder::build(const vector<DavWaveOption> & waveOptions,
     return streamlet;
 }
 
-int CvDnnDetectStreamletBuilder::
+int ObjDetectStreamletBuilder::
 addDetector(shared_ptr<DavStreamlet> & streamlet, const DavWaveOption & detectorOption) {
     auto newDetector = make_shared<DavWave>(detectorOption);
     CHECK(newDetector != nullptr);
@@ -56,6 +56,7 @@ addDetector(shared_ptr<DavStreamlet> & streamlet, const DavWaveOption & detector
     auto dataRelay = dataRelaies[0];
     auto postDraw = postDraws[0];
     DavWave::connect(dataRelay.get(), newDetector.get());
+
     // peer event subscribe: postDraw subscribe detector's result event
     DavWave::subscribe(newDetector.get(), postDraw.get());
     streamlet->addOneWave(newDetector);
@@ -63,7 +64,7 @@ addDetector(shared_ptr<DavStreamlet> & streamlet, const DavWaveOption & detector
     return 0;
 }
 
-int CvDnnDetectStreamletBuilder::
+int ObjDetectStreamletBuilder::
 deleteDetector(shared_ptr<DavStreamlet> & streamlet, const string & detectorName) {
     return 0;
 }

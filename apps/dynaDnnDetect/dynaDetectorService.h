@@ -3,7 +3,7 @@
 #include "httpCommon.h"
 #include "httpServer.h"
 #include "davStreamlet.h"
-#include "cvStreamlet.h"
+#include "objDetectStreamlet.h"
 #include "pbToDynaDetectOption.h"
 #include "dynaDnnDetect.pb.h"
 #include "appService.h"

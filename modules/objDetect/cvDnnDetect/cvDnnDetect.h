@@ -5,15 +5,11 @@
 #include <opencv2/highgui.hpp>
 #include "davWave.h"
 #include "davImpl.h"
-#include "cvPeerDynaEvent.h"
+
+#include "objDetect.h"
+#include "objDetectPeerDynaEvent.h"
 
 namespace ff_dynamic {
-
-/* create CvDnnDetect class category */
-struct DavWaveClassCvDnnDetect : public DavWaveClassCategory {
-    DavWaveClassCvDnnDetect (const string & nameTag = "CvDnnDetect") :
-        DavWaveClassCategory(type_index(typeid(*this)), type_index(typeid(std::string)), nameTag) {}
-};
 
 /* options passing use AVDictionary */
 class CvDnnDetect : public DavImpl {
@@ -34,39 +30,20 @@ private:
     virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
 
 private: // event process
-    int processChangeConfThreshold(const CvDynaEventChangeConfThreshold & e);
+    int processChangeConfThreshold(const DynaEventChangeConfThreshold & e);
 
 private: /* helpers */
     const vector<cv::String> & getOutputsNames();
     int postprocess(const cv::Mat & image, const vector<cv::Mat> & outs,
-                    shared_ptr<CvDnnDetectEvent> & detectEvent);
-
-public:
-    struct DetectParams { /* internal use, for clearity */
-        string m_detectorType;
-        string m_detectorFrameworkTag;
-        string m_modelPath;
-        string m_configPath;
-        string m_classnamePath;
-        int m_backendId = 3;
-        int m_targetId = 0;
-        double m_scaleFactor;
-        cv::Scalar m_means; // Scalar mean, BGR order
-        bool m_bSwapRb = false;
-        int m_width = -1;
-        int m_height = -1;
-        double m_confThreshold = 0.7;
-        int m_detectInterval = 1;
-    };
+                    shared_ptr<ObjDetectEvent> & detectEvent);
 
 private:
     cv::dnn::Net m_net;
-    DetectParams m_dps;
+    cv::Scalar m_means;
+    ObjDetectParams m_dps;
     vector<cv::String> m_outBlobNames;
     vector<string> m_classNames;
     unsigned long m_inputCount = 0;
 };
-
-extern std::ostream & operator<<(std::ostream & os, const CvDnnDetect::DetectParams & p);
 
 } //namespace ff_dynamic

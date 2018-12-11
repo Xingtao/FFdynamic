@@ -48,7 +48,7 @@ int DynaDetectService::createTask() {
         return DYNA_DETECT_ERROR_TASK_INIT;
     }
     LOG(INFO) << m_logtag << "craete dnn streamlet done";
-    auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
+    auto detectStreamlet = m_river.get(ObjDetectStreamletTag(m_dnnDetectStreamletName));
     auto outputStreamlets = m_river.getStreamletsByCategory(DavDefaultOutputStreamletTag());
     for (auto & o : outputStreamlets)
         detectStreamlet >= o;
@@ -57,7 +57,7 @@ int DynaDetectService::createTask() {
     auto onBuildSuccess = [this] (shared_ptr<DavStreamlet> inputStreamlet) {
         if (!inputStreamlet)
             return AVERROR(EINVAL);
-        auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
+        auto detectStreamlet = m_river.get(ObjDetectStreamletTag(m_dnnDetectStreamletName));
         if (!detectStreamlet)
             return AVERROR(EINVAL);
         inputStreamlet >= detectStreamlet; /* only connect video */
@@ -86,11 +86,11 @@ int DynaDetectService::onAddOneDetector(shared_ptr<Response> & response, const s
         return failResponse(response, API_ERRCODE_DETECTOR_ALREADY_RUNNING, detail);
     }
     m_detectors.at(detectorName) = true;
-    auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
+    auto detectStreamlet = m_river.get(ObjDetectStreamletTag(m_dnnDetectStreamletName));
     CHECK(detectStreamlet != nullptr);
     DavWaveOption o;
     PbDnnDetectSettingToDavOption::toDnnDetectOption(m_dnnDetectorSettings.at(detectorName), o, detectorName);
-    CvDnnDetectStreamletBuilder builder;
+    ObjDetectStreamletBuilder builder;
     int ret = builder.addDetector(detectStreamlet, o);
     if (ret < 0) {
         string detail = detectorName + " adding failed";
@@ -114,8 +114,8 @@ int DynaDetectService::onDeleteOneDetector(shared_ptr<Response> & response, cons
         return failResponse(response, API_ERRCODE_DETECTOR_ALREADY_STOPPED, detail);
     }
     m_detectors.at(detectorName) = false;
-    auto detectStreamlet = m_river.get(CvDnnDetectStreamletTag(m_dnnDetectStreamletName));
-    auto wave = detectStreamlet->getWave(DavWaveClassCvDnnDetect(detectorName));
+    auto detectStreamlet = m_river.get(ObjDetectStreamletTag(m_dnnDetectStreamletName));
+    auto wave = detectStreamlet->getWave(DavWaveClassObjDetect(detectorName));
     CHECK(detectStreamlet != nullptr && wave != nullptr);
     detectStreamlet->deleteOneWave(wave);
     LOG(INFO) << m_logtag << "delete one detector " << detectorName;
@@ -189,8 +189,8 @@ int DynaDetectService::buildDynaDetectStreamlet() {
     DavWaveOption postDraw((DavWaveClassCvPostDraw()));
     waveOptions.emplace_back(postDraw);
 
-    CvDnnDetectStreamletBuilder builder;
-    auto streamletDetect = builder.build(waveOptions, CvDnnDetectStreamletTag(m_dnnDetectStreamletName), so);
+    ObjDetectStreamletBuilder builder;
+    auto streamletDetect = builder.build(waveOptions, ObjDetectStreamletTag(m_dnnDetectStreamletName), so);
     if (!streamletDetect) {
         ERRORIT(APP_ERROR_BUILD_STREAMLET, ("build streamletDetect fail " + toStringViaOss(builder.m_buildInfo)));
         return APP_ERROR_BUILD_STREAMLET;

@@ -3,8 +3,8 @@
 #include <glog/logging.h>
 #include "davDict.h"
 #include "dynaDnnDetect.pb.h"
-/* should avoid this header exposed */
-#include "cvDnnDetect.h"
+
+#include "objDetect.h"
 
 namespace ff_dynamic {
 using namespace DynaDnnDetect;
@@ -13,10 +13,10 @@ class PbDnnDetectSettingToDavOption {
 public:
     static int toDnnDetectOption(const DnnDetectSetting & dds, DavWaveOption & o, const string & detectorName = "") {
         if (detectorName.empty())
-            o.setCategory(DavOptionClassCategory(), DavWaveClassCvDnnDetect());
+            o.setCategory(DavOptionClassCategory(), DavWaveClassObjDetect());
         else
-            o.setCategory(DavOptionClassCategory(), DavWaveClassCvDnnDetect(detectorName));
-        o.set(DavOptionImplType(), "auto");
+            o.setCategory(DavOptionClassCategory(), DavWaveClassObjDetect(detectorName));
+        o.set(DavOptionImplType(), "auto"); // TODO: change this
         // TODO: wiil be good to use 'field descriptor'
         o.set("detector_type", dds.detector_type());
         o.set("detector_framework_tag", dds.detector_framework_tag());

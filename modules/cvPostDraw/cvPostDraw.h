@@ -5,7 +5,7 @@
 #include <opencv2/highgui.hpp>
 #include "davWave.h"
 #include "davImpl.h"
-#include "cvPeerDynaEvent.h"
+#include "objDetectPeerDynaEvent.h"
 
 namespace ff_dynamic {
 
@@ -34,13 +34,13 @@ private:
     virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
 
 private: // event process
-    int processDnnDetectResult(const CvDnnDetectEvent & e);
+    int processObjDetectResult(const ObjDetectEvent & e);
     int processStopPubEvent(const DavStopPubEvent & e);
 
 private:
-    map<DavProcFrom, vector<CvDnnDetectEvent>> m_detectResults;
+    map<DavProcFrom, vector<ObjDetectEvent>> m_detectResults;
     vector<shared_ptr<DavProcBuf>> m_cacheBufFrames;
-    int drawResult(cv::Mat & image, const vector<CvDnnDetectEvent> & results);
+    int drawResult(cv::Mat & image, const vector<ObjDetectEvent> & results);
 };
 
 } //namespace ff_dynamic

@@ -53,7 +53,6 @@
       "pre_encode_video_filter" : {},
       "pre_encode_audio_filter" : {"filter_type" : "ffmpeg",
                                    "filter_arg" : "acrossfade=d=10:o=0:c1=exp:c2=exp"},
-
       "mux_outputs" : [
         {"mux_type" : "ffmpeg", "mux_fmt" : "mpegts", "avdict_mux_option" : {}}
       ]

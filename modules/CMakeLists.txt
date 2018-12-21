@@ -49,10 +49,11 @@ endif()
 if (DARKNET)
   # require cuda/cudnn if darknet compiled with CUDA/CUDNN option on
   if (NOT DARKNET_LIB OR NOT DARKNET_INC_DIR)
-    message(FATAL_ERROR, "Should provide 'darknet' library and include path")
+    message(FATAL_ERROR, " ERROR ==> Should provide 'darknet' library and include path")
   endif ()
-  set(DarknetModuleSrc objDetect/darknetDetect/darknetDetect.cpp)
+  set(darknetModuleSrc objDetect/darknetDetect/darknetDetect.cpp)
   set(DEPEND_LIBS ${DEPEND_LIBS} ${DARKNET_LIB})
+  set(DEPEND_INCS ${DEPEND_INCS} ${DARKNET_INC_DIR})
 endif()
 
 ########################################################################

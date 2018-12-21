@@ -6,7 +6,7 @@
 // project
 #include "objDetect.h"
 #include "objDetectPeerDynaEvent.h"
-
+// darknet
 #include "darknet.h"
 
 namespace ff_dynamic {
@@ -30,39 +30,14 @@ private:
     virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
 
 private: // event process
-    int processChangeConfThreshold(const CvDynaEventChangeConfThreshold & e);
-
-private: /* helpers */
-    const vector<cv::String> & getOutputsNames();
-    int postprocess(const cv::Mat & image, const vector<cv::Mat> & outs,
-                    shared_ptr<DarknetDetectEvent> & detectEvent);
-
-public:
-    struct DetectParams { /* internal use, for clearity */
-        string m_detectorType;
-        string m_detectorFrameworkTag;
-        string m_modelPath;
-        string m_configPath;
-        string m_classnamePath;
-        int m_backendId = 3;
-        int m_targetId = 0;
-        double m_scaleFactor;
-        cv::Scalar m_means; // Scalar mean, BGR order
-        bool m_bSwapRb = false;
-        int m_width = -1;
-        int m_height = -1;
-        double m_confThreshold = 0.7;
-        int m_detectInterval = 1;
-    };
+    int processChangeConfThreshold(const DynaEventChangeConfThreshold & e);
 
 private:
-    cv::dnn::Net m_net;
-    DetectParams m_dps;
-    vector<cv::String> m_outBlobNames;
+    network *m_net = nullptr;
+    ObjDetectParams m_dps;
+    cv::Scalar m_means;
     vector<string> m_classNames;
     unsigned long m_inputCount = 0;
 };
-
-extern std::ostream & operator<<(std::ostream & os, const DarknetDetect::DetectParams & p);
 
 } //namespace ff_dynamic

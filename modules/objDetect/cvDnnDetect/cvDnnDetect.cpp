@@ -45,14 +45,13 @@ int CvDnnDetect::onConstruct() {
     m_options.getInt("width", m_dps.m_width);
     m_options.getInt("height", m_dps.m_height);
     m_options.getDouble("conf_threshold", m_dps.m_confThreshold);
-    m_options.getDouble("conf_threshold", m_dps.m_confThreshold);
     m_options.getInt("detect_interval", m_dps.m_detectInterval);
     vector<double> means;
     m_options.getDoubleArray("means", means);
     if (means.size() == 3) {
         m_means = cv::Scalar{means[0], means[1], means[2]};
     }
-    // what about fail ?
+
     try {
         m_net = cv::dnn::readNet(m_dps.m_modelPath, m_dps.m_configPath, m_dps.m_detectorFrameworkTag);
     } catch (const std::exception & e) {

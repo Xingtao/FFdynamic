@@ -33,7 +33,7 @@ int CvDnnDetect::onConstruct() {
         [this] (const DynaEventChangeConfThreshold & e) {return processChangeConfThreshold(e);};
     m_implEvent.registerEvent(f);
 
-    m_dps.m_detectorType = m_options.get("detector_type");
+    m_dps.m_detectOrClassify = m_options.get("detect_or_classify");
     m_dps.m_detectorFrameworkTag = m_options.get("detector_framework_tag");
     m_dps.m_modelPath = m_options.get("model_path");
     m_dps.m_configPath = m_options.get("config_path");
@@ -146,7 +146,7 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
 
     /* prepare output events*/
     auto detectEvent = make_shared<ObjDetectEvent>();
-    if (m_dps.m_detectorType == "classify") {
+    if (m_dps.m_detectOrClassify == "classify") {
         cv::Mat prob = m_net.forward();
         cv::Point classIdPoint;
         double confidence;
@@ -158,18 +158,18 @@ int CvDnnDetect::onProcess(DavProcCtx & ctx) {
         detectEvent->m_results.emplace_back(result);
         LOG(INFO) << m_logtag << "classification with confidence "
                   <<  confidence << ", classId " << classId << ", name " << m_classNames[classId];
-    } else if (m_dps.m_detectorType == "detect") {
+    } else if (m_dps.m_detectOrClassify == "detect") {
         std::vector<cv::Mat> outs;
         m_net.forward(outs, getOutputsNames());
         postprocess(image, outs, detectEvent);
     } else {
-        LOG(ERROR) << m_logtag << "unknown detector type " + m_dps.m_detectorType;
+        LOG(ERROR) << m_logtag << "Fail: not detect or classify " + m_dps.m_detectOrClassify;
         return AVERROR(EINVAL);
     }
     const double freq = cv::getTickFrequency() / 1000;
     vector<double> layersTimes;
     detectEvent->m_inferTime = m_net.getPerfProfile(layersTimes) / freq;
-    detectEvent->m_detectorType = m_dps.m_detectorType;
+    detectEvent->m_detectOrClassify = m_dps.m_detectOrClassify;
     detectEvent->m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
     detectEvent->m_framePts = inFrame->pts;
     ctx.m_pubEvents.emplace_back(detectEvent);

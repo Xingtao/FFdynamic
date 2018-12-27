@@ -69,7 +69,12 @@ int DarknetDetect::onConstruct() {
         [this] (const DynaEventChangeConfThreshold & e) {return processChangeConfThreshold(e);};
     m_implEvent.registerEvent(f);
 
-    m_dps.m_detectorType = m_options.get("detector_type");
+    m_dps.m_detectOrClassify = m_options.get("detect_or_classify");
+    if (m_dps.m_detectOrClassify != "detect") {
+        ERRORIT(DAV_ERROR_IMPL_ON_CONSTRUCT,
+                "darknet integration only do detection for now " + m_dps.m_detectOrClassify);
+        return DAV_ERROR_IMPL_ON_CONSTRUCT;
+    }
     m_dps.m_detectorFrameworkTag = m_options.get("detector_framework_tag");
     m_dps.m_modelPath = m_options.get("model_path");
     m_dps.m_configPath = m_options.get("config_path");
@@ -88,7 +93,7 @@ int DarknetDetect::onConstruct() {
         m_means = cv::Scalar{means[0], means[1], means[2]};
     }
 
-    m_net = load_network(m_dps.m_configPath.c_str(), m_dps.m_modelPath.c_str(), 0);
+    m_net = load_network((char *)m_dps.m_configPath.c_str(), (char *)m_dps.m_modelPath.c_str(), 0);
     if (!m_net) {
         string detail = "Fail load darknet detect model. model path " + m_dps.m_modelPath +
             ", confit path " +  m_dps.m_configPath;
@@ -171,7 +176,7 @@ int DarknetDetect::onProcess(DavProcCtx & ctx) {
        but timestamp is convert to current impl's timebase */
     auto inFrame = ctx.m_inRefFrame;
     if (!inFrame) {
-        LOG(INFO) << m_logtag << "cv dnn detector reciving flush frame";
+        LOG(INFO) << m_logtag << "darknet detector reciving flush frame";
         ctx.m_bInputFlush = true;
         /* no flush needed, so just return EOF */
         return AVERROR_EOF;
@@ -201,10 +206,10 @@ int DarknetDetect::onProcess(DavProcCtx & ctx) {
     detection *dets = get_network_boxes(m_net, 1, 1, m_dps.m_confThreshold, 0, nullptr, 0, &nboxes);
     const int num = l.side * l.side * l.n;
 
-    auto detectEvent = make_shared<DarknetDetectEvent>();
+    auto detectEvent = make_shared<ObjDetectEvent>();
     for (int i = 0; i < num; ++i) {
         for (int j = 0; j < (int)m_classNames.size(); ++j) {
-            DarknetDetectEvent::DetectResult result;
+            ObjDetectEvent::DetectResult result;
             if (dets[i].prob[j] > m_dps.m_confThreshold) {
                 result.m_confidence = dets[i].prob[j];
                 result.m_className = m_classNames[j];
@@ -225,7 +230,7 @@ int DarknetDetect::onProcess(DavProcCtx & ctx) {
     free_image(inImage);
 
     detectEvent->m_inferTime = inferTime;
-    detectEvent->m_detectorType = m_dps.m_detectorType;
+    detectEvent->m_detectOrClassify = m_dps.m_detectOrClassify;
     detectEvent->m_detectorFrameworkTag = m_dps.m_detectorFrameworkTag;
     detectEvent->m_framePts = inFrame->pts;
     ctx.m_pubEvents.emplace_back(detectEvent);

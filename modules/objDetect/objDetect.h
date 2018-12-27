@@ -12,7 +12,7 @@ struct DavWaveClassObjDetect : public DavWaveClassCategory {
 };
 
 struct ObjDetectParams {
-    string m_detectorType;
+    string m_detectOrClassify;
     string m_detectorFrameworkTag;
     string m_modelPath;
     string m_configPath;
@@ -31,7 +31,7 @@ struct ObjDetectParams {
 };
 
 inline std::ostream & operator<<(std::ostream & os, const ObjDetectParams & p) {
-    os << "[dectorType " << p.m_detectorType << ", detectorFrameworkTag " << p.m_detectorFrameworkTag
+    os << "[dectorOrClassify " << p.m_detectOrClassify << ", detectorFrameworkTag " << p.m_detectorFrameworkTag
        << ", modelPath " << p.m_modelPath << ", configPath " << p.m_configPath
        << ", classnamePath " << p.m_classnamePath << ", backendId " << p.m_backendId
        << ", targetId " << p.m_targetId << ", scaleFactor " << p.m_scaleFactor

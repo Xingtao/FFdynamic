@@ -16,9 +16,9 @@ public:
             o.setCategory(DavOptionClassCategory(), DavWaveClassObjDetect());
         else
             o.setCategory(DavOptionClassCategory(), DavWaveClassObjDetect(detectorName));
-        o.set(DavOptionImplType(), "auto"); // TODO: change this
+        o.set(DavOptionImplType(), dds.detector_type());
         // TODO: wiil be good to use 'field descriptor'
-        o.set("detector_type", dds.detector_type());
+        o.set("detect_or_classify", dds.detect_or_classify());
         o.set("detector_framework_tag", dds.detector_framework_tag());
         o.set("model_path", dds.model_path());
         o.set("config_path", dds.config_path());

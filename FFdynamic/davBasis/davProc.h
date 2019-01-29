@@ -25,6 +25,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 namespace ff_dynamic {
 
+using DavProcFilter = std::function<shared_ptr<DavProcBuf>(shared_ptr<DavProcBuf> & dataBuf)>;
+
 /* DavProc: the basic structure for audio/video process. */
 class DavProc {
 public:
@@ -53,6 +55,9 @@ public: /* properties set & get*/
     inline const DavRegisterProperties & getDavRegisterProperties() const noexcept {
         return m_impl->getRegisterProperties();
     }
+    /* for pre/post data filter process */
+    inline void setPrefilters(const vector<DavProcFilter> & prefilters) {m_prefilters = prefilters;}
+    inline void setPostfilters(const vector<DavProcFilter> & postfilters) {m_postfilters = postfilters;}
 
 protected: /* process */
     int runDavProcThread();
@@ -105,13 +110,16 @@ private:
     std::atomic<bool> m_bAlive = ATOMIC_VAR_INIT(true);
     std::atomic<bool> m_bOnFire = ATOMIC_VAR_INIT(false);
 
-    DavMsgError m_procInfo;
+private:
+    vector<DavProcFilter> m_prefilters;
+    vector<DavProcFilter> m_postfilters;
     /* input/output buffer flow: receive & deliver  */
     shared_ptr<DavTransmitor<DavProcBuf, DavProcFrom>> m_dataTransmitor;
     shared_ptr<DavTransmitor<DavPeerEvent, DavProcFrom>> m_pubsubTransmitor;
     DavExpect<DavProcFrom> m_expectInput;
     /* extending its scope, for limitor will travel with ProcBuf */
     shared_ptr<DavProcBufLimiter> m_outbufLimiter;
+    DavMsgError m_procInfo;
 
 private: /* trvial */
     struct timeval m_processStart;

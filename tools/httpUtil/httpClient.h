@@ -87,7 +87,7 @@ private:
     }
 
     shared_ptr<asio::streambuf> createRequest(const string & method, const string & uri, const string & content,
-                                                    const CaseInsensitiveMultimap &headers) const {
+                                              const CaseInsensitiveMultimap &headers) const {
         auto streambuf = make_shared<asio::streambuf>();
         std::ostream query_stream(streambuf.get());
         query_stream << method << " " << uri << " HTTP/1.0" << g_newLine;

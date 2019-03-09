@@ -20,7 +20,7 @@ This project shipped with two parts: **FFdynamic** library and applications buil
 **Interactive Live** (ial for short) is an application based on FFdynamic.  
 Ial does multiple video and audio input mixing, then streams it out. It could be run on phones or cloud servers.  
 
-**Interactive Live** gives flexiable control over the mixing process (dynamical layout change, backgroup picture change, mute/unmute, etc..), shown in the Following gifs:
+**ial** gives flexiable control over the mixing process (dynamical layout change, backgroup picture change, mute/unmute, etc..), shown in the following gif:
 
 ![Layout auto change or set as request](asset/layoutChange.gif)
 #### *Layout auto change or set to certain pattern during mixing by request*

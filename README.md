@@ -17,23 +17,21 @@ This project shipped with two parts: **FFdynamic** library and applications buil
 -----------
 ## An application *Interactive Live*
 
-**Interactive Live** (Ial for short) is an application based on FFdynamic.  
-Ial does multiple video and audio mixing, then streams it out. It could be run in phones or cloud servers.  
-Here is an image got from an mobile app show its using scenario. Two streams are decoded, then mixed together and broadcast to audiences as one stream.
+**Interactive Live** (ial for short) is an application based on FFdynamic.  
+Ial does multiple video and audio input mixing, then streams it out. It could be run on phones or cloud servers.  
 
-**Interactive Live** gives flexiable control over the mixing process (dynamical layout change, backgroup change, mute/unmute, etc..), shown in the Following gifs:
-
-#### *Layout auto change or set to certain pattern during mixing broadcast by request*
-This picture shows auto layout change when a new stream joined in (from 2 cells to 3 cells); then manually set the layout to 4 and 9 cells. Changes are quite smooth, without any frozen or stuck.
+**Interactive Live** gives flexiable control over the mixing process (dynamical layout change, backgroup picture change, mute/unmute, etc..), shown in the Following gifs:
 
 ![Layout auto change or set as request](asset/layoutChange.gif)
+#### *Layout auto change or set to certain pattern during mixing by request*
+This picture shows, 1. auto layout change when a new stream joining in (from 2 cells to 3 cells); 2. layout changes to 4 and 9 cells by http requeset. Changes are quite smooth, without any frozen or stuck, due to audio/video sync message communication mechnism.
 
-#### For more details, please refer to [the application](apps/interactiveLive/README.md)
+#### For more details(capacities, http apis, etc..), please refer to [the application](apps/interactiveLive/README.md)
 
 -----------
 ## *Dynamic Detect* example
 
-This little project is a playgroud one can change object detector types at run time while reading video streams. Those detectors are loaded via OpenCV api. Models of *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (all in coco dataset) are tested. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate interested objects.
+**Dynamic Detect** is a playgroud one can change object detector types at run time while reading online video streams or local files. Those detectors are loaded via OpenCV api. Models of *darknet* yolo3, *caffe* vgg-ssd, and *tensorflow* mobilenet-ssd (all in coco dataset) are tested. Here is an output stream gif, which run 2 detecors in parallle, draw boxes and texts when they locate interested objects.
 
 ![draw_detection](asset/dynaDetect.gif)
 
@@ -95,7 +93,7 @@ Refer to [here](examplePlugin/README.md) for plugin source files.
 * boost, protobuf3 (optional, only for the application 'Interactive Live')
 - opencv (optional, if you would like to run plugin example)
 
-protobuf3 is not well supports by some linux distributions' package manager, here is how to manually compile it(sudo required):
+protobuf3 is not well supports by some linux distributions' package manager, here is a manually compiling script (sudo required):
 ```
 DIR=$(mktemp -d) && cd ${DIR} && \
 git clone https://github.com/protocolbuffers/protobuf.git && cd protobuf && \
@@ -103,15 +101,6 @@ git submodule update --init --recursive && \
 ./autogen.sh && ./configure && \
 make && make check && \
 sudo make install && sudo ldconfig
-```
-
-### Build after install dependencies
-
-``` sh
-    Under FFdynamic folder: 
-          'sh build.sh'  will build FFdynamic library (need sudo when install)
-    Under app/interactiveLive folder: 
-          'sh build.sh'  will build FFdynamic library and Ial program.
 ```
 
 #### For Ubuntu / CentOS
@@ -127,14 +116,20 @@ yum install -y glog-devel gflags-devel cmake3 boost-devel
 Install FFmpeg as usal, then  
 brew install cmake glog gflags protobuf boost 
 
-#### Others 
-iOS and Android build is not implemented, pull request is welcome.
-
-#### Optional Installation - TODO
-* nvidia driver, cuda tookit, if you prefer using nvidia codec
-
-### `A docker build`
+### `Docker build`
 To alleviate the build process, there is a [docker](tools/dockerlize/README.md) with all dependencies installed that you can play with.
+
+### Build library and apps
+
+``` sh
+    Under FFdynamic folder: 
+          'sh build.sh'  will build FFdynamic library (need sudo if make install)
+    Under app/interactiveLive folder: 
+          'sh build.sh'  will build FFdynamic library and ial program.
+```
+
+#### Optional Dependencies - TODO
+* nvidia driver, cuda tookit, if you prefer using nvidia codec
 
 -----------------
 ## `Contribution`

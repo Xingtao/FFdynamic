@@ -64,8 +64,10 @@ Demux |-> Audio Decode -> |-> Audio Encode -------------------------------------
 - **customization**
    One can define their own components, for instance
    - a RTP demuxer with private fields
-   - a object detection module
+   - an object detection module
    - a packet sending control module
+   
+   
    Those components are plugins. Once they are done, they can be composed with other components. 
 
 In short, *FFdynamic* is a scaffold allows develop complex audio/video application in a higher and flexiable manner.   

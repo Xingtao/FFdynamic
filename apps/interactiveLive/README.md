@@ -1,6 +1,6 @@
 ## Interactive Live (Ial)
 
-Interactive live is an full feature application based on FFdynamic:
+Interactive live is an full features application based on FFdynamic:
 * dynamically join new streams (participant);
 * dynamically add new output streams (different video resolution & bitrate);
 * dynamically change mix video's layout and backgroud picture;
@@ -39,7 +39,7 @@ Currently, the requests include:
 So:
 1. run the program: ./ialService ialConfig.json
 2. run the test script: python testIal.py
-3. send requests: create room, change layout, add new inputs/outputs, etc..
+3. send requests: create room, add new inputs/outputs, change layout, etc..
 4. check the output files or output rtmp/udp streams, to see the real time changing just made
 
 ----

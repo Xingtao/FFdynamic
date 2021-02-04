@@ -1,0 +1,6 @@
+[submodule "thirds/cpp-httplib"]
+	path = thirds/cpp-httplib
+	url = https://github.com/yhirose/cpp-httplib.git
+[submodule "thirds/json"]
+	path = thirds/json
+	url = https://github.com/nlohmann/json.git

@@ -57,5 +57,3 @@ target_compile_features(ffdynaProto INTERFACE cxx_auto_type cxx_lambdas)
 target_compile_options(ffdynaProto INTERFACE $<$<CXX_COMPILER_ID:GNU>: -Wall -Wpedantic>
   INTERFACE $<$<CXX_COMPILER_ID:Clang>: -Wall -Wpedantic>)
 target_link_libraries(ffdynaProto PUBLIC protobuf::libprotobuf)
-
-# TODO: install part

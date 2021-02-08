@@ -1,6 +1,8 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <algorithm>
+#include <boost/filesystem.hpp>
+
 #include "appService.h"
 
 namespace app_common {
@@ -102,8 +104,9 @@ int AppService::doLogSetting() {
     /* setup glog first */
     const auto & glogdir = m_appGlobalSetting.glog_save_path();
     LOG(INFO) << m_logtag << "Glog Config with log dir " << glogdir;
-    const string mkdirCmd = "mkdir -p " + glogdir;
-    system(mkdirCmd.c_str());
+    boost::filesystem::create_directories(glogdir);
+    // const string mkdirCmd = "mkdir -p " + glogdir;
+    // system(mkdirCmd.c_str());
     const string & glogLevel = m_appGlobalSetting.glog_save_level();
 
     google::InstallFailureSignalHandler();

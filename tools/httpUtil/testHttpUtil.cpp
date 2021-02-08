@@ -30,12 +30,6 @@ int main() {
     HttpServer server(g_serverAddr, g_serverPort);
     server.m_resources["^/string$"]["POST"] =
         [](std::shared_ptr<Response> & response, std::shared_ptr<Request> & request) {
-        // Retrieve string:
-        cout << "it is here" << endl;
-        auto & content = request->m_request;
-        // request->content.string() is a convenience function for:
-        // stringstream ss;
-        // ss << request->content.rdbuf();
         string responseContent = "test ok";
         *response << "HTTP/1.1 200 OK\r\nContent-Length: " << responseContent.length() << "\r\n\r\n";
         // Alternatively, use one of the convenience functions, for instance:

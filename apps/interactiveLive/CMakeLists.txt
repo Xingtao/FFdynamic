@@ -89,4 +89,4 @@ target_compile_options(ialService
 
 target_link_libraries(ialService
   PUBLIC ffdynamic::ffdynamic httputil::httputil pbtree::pbtree ffdynaProto::ffdynaProto protobuf::libprotobuf
-  PUBLIC boost_system Threads::Threads)
+  PUBLIC boost_system boost_filesystem Threads::Threads)

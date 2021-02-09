@@ -86,11 +86,11 @@ int DavProc::process(DavProcCtx& ctx) {
     if (m_impl) {
         /* do data prefilter here */
         int ret = 0;
-        for (auto& prefilter : m_prefilters) {
-            // TODO: preserve data from and other bookkeepings
-            // shared_ptr<DavProcBuf> inBuf = ;
-            // auto filterrdInBuf = prefilter(ctx.m_inBuf);
-        }
+        // for (auto& prefilter : m_prefilters) {
+        // TODO: preserve data from and other bookkeepings
+        // shared_ptr<DavProcBuf> inBuf = ;
+        // auto filterrdInBuf = prefilter(ctx.m_inBuf);
+        //}
         ret = m_impl->process(ctx);
         if (ret < 0) m_procInfo = m_impl->getImplErr();
         return ret;
@@ -119,11 +119,11 @@ int DavProc::postProcess(DavProcCtx& ctx) {
 
     /* post process for output */
     for (auto& buf : ctx.m_outBufs) {
-        for (auto& prefilter : m_postfilters) {
-            // TODO: preserve data from and other bookkeepings
-            // shared_ptr<DavProcBuf> inBuf = ;
-            // auto filterrdInBuf = prefilter(ctx.m_inBuf);
-        }
+        // for (auto& prefilter : m_postfilters) {
+        // TODO: preserve data from and other bookkeepings
+        // shared_ptr<DavProcBuf> inBuf = ;
+        // auto filterrdInBuf = prefilter(ctx.m_inBuf);
+        //}
         buf->getAddress().setGroupFrom(this, m_groupId);
         for (int k = 0; k < ctx.m_outputTimes; k++) {
             m_dataTransmitor->delivery(buf);

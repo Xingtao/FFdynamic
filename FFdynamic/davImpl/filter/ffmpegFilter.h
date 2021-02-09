@@ -36,6 +36,8 @@ class FFmpegFilter : public DavImpl {
     AVFilterContext *m_sinkCtx = nullptr;
     AVFilterInOut *m_inputs = nullptr;
     AVFilterInOut *m_outputs = nullptr;
+    AVFilter *m_src = nullptr;
+    AVFilter *m_sink = nullptr;
 };
 
 }  // namespace ff_dynamic

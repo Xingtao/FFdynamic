@@ -99,6 +99,39 @@ int FFmpegFilter::onDestruct() {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 int FFmpegFilter::prepareBufferSrc() {
+    // m_bufsrcParams
+    /*
+    char srcArgs[512] = {0};
+    if (m_fgp.m_inMediaType == AVMEDIA_TYPE_VIDEO) {
+        snprintf(srcArgs, sizeof(srcArgs),
+                 "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
+                 m_fgp.m_bufsrcParams->width, m_fgp.m_bufsrcParams->height,
+                 m_fgp.m_bufsrcParams->format, m_fgp.m_bufsrcParams->time_base.num,
+                 m_fgp.m_bufsrcParams->time_base.den,
+                 m_fgp.m_bufsrcParams->sample_aspect_ratio.num,
+                 m_fgp.m_bufsrcParams->sample_aspect_ratio.den);
+    } else {
+        snprintf(
+            srcArgs, sizeof(srcArgs),
+            "time_base=%d/%d:sample_fmt=%s:sample_rate=%d:channel_layout=%lu",
+            m_fgp.m_bufsrcParams->time_base.num, m_fgp.m_bufsrcParams->time_base.den,
+            av_get_sample_fmt_name((enum AVSampleFormat)m_fgp.m_bufsrcParams->format),
+            m_fgp.m_bufsrcParams->sample_rate, m_fgp.m_bufsrcParams->channel_layout);
+    }
+
+    LOG(INFO) << m_logtag << "filter in args: " << srcArgs;
+    const char *bufsrcName =
+        m_fgp.m_inMediaType == AVMEDIA_TYPE_VIDEO ? "buffer" : "abuffer";
+    const AVFilter *bufsrc = avfilter_get_by_name(bufsrcName);
+    CHECK(bufsrc != nullptr) << m_logtag << " cannot find buffersrc filter of name "
+                             << bufsrcName;
+    int ret = avfilter_graph_create_filter(&m_srcCtx, bufsrc, "in", srcArgs, nullptr,
+                                           m_filterGraph);
+    if (ret < 0) return ret;
+
+    av_buffersrc_parameters_set(m_srcCtx, m_fgp.m_bufsrcParams.get());
+    return 0;
+    */
     char args[512];
     const AVFilter *buffersrc = avfilter_get_by_name("buffer");  // abuffersrc, buffersrc,
     // snprintf(args, sizeof(args),
@@ -106,7 +139,6 @@ int FFmpegFilter::prepareBufferSrc() {
     //        dec_ctx->width, dec_ctx->height, dec_ctx->pix_fmt,
     //        time_base.num, time_base.den,
     //        dec_ctx->sample_aspect_ratio.num, dec_ctx->sample_aspect_ratio.den);
-
     int ret = avfilter_graph_create_filter(&m_srcCtx, buffersrc, "in", args, NULL,
                                            m_filterGraph);
     if (ret < 0) av_log(NULL, AV_LOG_ERROR, "Cannot create buffer source\n");
@@ -122,7 +154,6 @@ int FFmpegFilter::prepareBufferSink() {
         av_log(NULL, AV_LOG_ERROR, "Cannot create buffer sink");
         return ret;
     }
-
     // ret = av_opt_set_int_list(buffersink_ctx, "pix_fmts", pix_fmts,
     //                          AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN);
     // if (ret < 0) {

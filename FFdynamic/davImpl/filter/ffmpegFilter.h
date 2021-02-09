@@ -1,35 +1,35 @@
 #pragma once
 
 #include "davDict.h"
-#include "ffmpegHeaders.h"
 #include "davImpl.h"
+#include "ffmpegHeaders.h"
 
 namespace ff_dynamic {
 
 class FFmpegFilter : public DavImpl {
-public:
-    FFmpegFilter(const DavWaveOption & filterOptions) : DavImpl(filterOptions) {
+   public:
+    FFmpegFilter(const DavWaveOption &filterOptions) : DavImpl(filterOptions) {
         implDefaultInstantiate();
     }
-    virtual ~FFmpegFilter() {onDestruct();}
+    virtual ~FFmpegFilter() { onDestruct(); }
 
-private:
+   private:
     FFmpegFilter(FFmpegFilter const &) = delete;
-    FFmpegFilter & operator= (const FFmpegFilter &) = delete;
+    FFmpegFilter &operator=(const FFmpegFilter &) = delete;
     virtual int onConstruct();
     virtual int onDestruct();
-    virtual int onProcess(DavProcCtx & ctx);
-    virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx & ctx);
-    virtual int onProcessTravelDynamic(DavProcCtx & ctx) {return 0;}
-    virtual const DavRegisterProperties & getRegisterProperties() const noexcept;
+    virtual int onProcess(DavProcCtx &ctx);
+    virtual int onDynamicallyInitializeViaTravelStatic(DavProcCtx &ctx);
+    virtual int onProcessTravelDynamic(DavProcCtx &ctx) { return 0; }
+    virtual const DavRegisterProperties &getRegisterProperties() const noexcept;
     int dynamicallyInitialize();
 
-private:
+   private:
     int prepareBufferSrc();
     int prepareBufferSink();
     int prepareFilter();
 
-private:
+   private:
     string m_graphDesc;
     AVFilterGraph *m_filterGraph = nullptr;
     AVFilterContext *m_srcCtx = nullptr;
@@ -38,4 +38,4 @@ private:
     AVFilterInOut *m_outputs = nullptr;
 };
 
-} // namespace ff_dynamic
+}  // namespace ff_dynamic

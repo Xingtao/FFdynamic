@@ -16,14 +16,14 @@ void sigIntHandle(int sig) {
     }
 }
 
-int testInit(const string & logtag) {
+int testInit(const string& logtag) {
     google::InitGoogleLogging(logtag.c_str());
     google::InstallFailureSignalHandler();
     FLAGS_stderrthreshold = 0;
     FLAGS_logtostderr = 1;
-    auto & sigHandle = GlobalSignalHandle::getInstance();
+    auto& sigHandle = GlobalSignalHandle::getInstance();
     sigHandle.registe(SIGINT, sigIntHandle);
     return 0;
 }
 
-} // namespace test_common
+}  // namespace test_common

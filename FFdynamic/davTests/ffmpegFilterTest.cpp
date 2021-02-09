@@ -1,24 +1,24 @@
+#include <glog/logging.h>
 #include <unistd.h>
 
-#include <string>
-#include <vector>
-#include <memory>
 #include <atomic>
 #include <iostream>
-#include <typeinfo>
+#include <memory>
+#include <string>
 #include <typeindex>
+#include <typeinfo>
+#include <vector>
 
-#include <glog/logging.h>
+#include "davStreamlet.h"
 #include "davWave.h"
 #include "ffmpegHeaders.h"
 #include "globalSignalHandle.h"
-#include "davStreamlet.h"
 #include "testCommon.h"
 
 using std::string;
-using std::vector;
-using std::unique_ptr;
 using std::type_index;
+using std::unique_ptr;
+using std::vector;
 using namespace test_common;
 using namespace ff_dynamic;
 using namespace global_sighandle;
@@ -27,8 +27,7 @@ int main(int argc, char **argv) {
     testInit(argv[0]);
 
     string inUrl = "rtmp://live.hkstv.hk.lxdns.com/live/hks";
-    if (argc >= 2)
-        inUrl = argv[1];
+    if (argc >= 2) inUrl = argv[1];
 
     // 1. create demux and get stream info
     DavWaveOption demuxOption((DavWaveClassDemux()));
@@ -56,19 +55,22 @@ int main(int argc, char **argv) {
     }
 
     // 4. video filter
-    //DavWaveOption videoFilterOption((DavWaveClassVideoFilter()));
-    //videoFilterOption.set(DavOptionFilterDesc, "scale=%dx%d");
-    //shared_ptr<DavWave> videoFilter(new DavWave(videoFilterOption));
-    //if (videoFilter->hasErr()) {
-    //    LOG(INFO) << videoFilter->getErr();
-    //    return -1;
-    //}
+    string filterChainStr{
+        "crop=in_w/2:in_h/2:(in_w-out_w)/2+((in_w-out_w)/2)*sin(t*10):(in_h-out_h)/2 "
+        "+((in_h-out_h)/2)*sin(t*13)"};
+    DavWaveOption videoFilterOption((DavWaveClassVideoFilter()));
+    videoFilterOption.set(DavOptionFilterDesc(), filterChainStr);
+    shared_ptr<DavWave> videoFilter(new DavWave(videoFilterOption));
+    if (videoFilter->hasErr()) {
+        LOG(INFO) << videoFilter->getErr();
+        return -1;
+    }
 
     //// 5. audio filter
-    //DavWaveOption audioFilterOption((DavWaveClassAudioFilter()));
-    //audioFilterOption.set(DavOptionFilterDesc, "null");
-    //shared_ptr<DavWave> audioFilter(new DavWave(audioFilterOption));
-    //if (audioFilter->hasErr()) {
+    // DavWaveOption audioFilterOption((DavWaveClassAudioFilter()));
+    // audioFilterOption.set(DavOptionFilterDesc, "null");
+    // shared_ptr<DavWave> audioFilter(new DavWave(audioFilterOption));
+    // if (audioFilter->hasErr()) {
     //    LOG(INFO) << audioFilter->getErr();
     //    return -1;
     //}
@@ -87,7 +89,7 @@ int main(int argc, char **argv) {
     // 7. audio encode
     DavWaveOption audioEncodeOption((DavWaveClassAudioEncode()));
     audioEncodeOption.set("ar", "22050");
-    audioEncodeOption.set(DavOptionCodecName(), "aac"); // others just use default
+    audioEncodeOption.set(DavOptionCodecName(), "aac");  // others just use default
     auto audioEncode = std::make_shared<DavWave>(audioEncodeOption);
     if (audioEncode->hasErr()) {
         LOG(INFO) << audioEncode->getErr();
@@ -117,18 +119,17 @@ int main(int argc, char **argv) {
     // connect the first video stream to video decode
     bool bConnVideo = false;
     bool bConnAudio = false;
-    for (auto & os : demuxOutStreams) {
+    for (auto &os : demuxOutStreams) {
         if (os.second == AVMEDIA_TYPE_VIDEO && !bConnVideo) {
             DavWave::connect(demux.get(), videoDecode.get(), os.first);
             bConnVideo = true;
         }
         if (os.second == AVMEDIA_TYPE_AUDIO && !bConnAudio) {
-             DavWave::connect(demux.get(), audioDecode.get(), os.first);
-             //DavWave::connect(demux.get(), mux.get(), AVMEDIA_TYPE_AUDIO, os.first);
-             bConnAudio = true;
+            DavWave::connect(demux.get(), audioDecode.get(), os.first);
+            // DavWave::connect(demux.get(), mux.get(), AVMEDIA_TYPE_AUDIO, os.first);
+            bConnAudio = true;
         }
-        if (bConnVideo && bConnAudio)
-            break;
+        if (bConnVideo && bConnAudio) break;
     }
     std::cout << "connect demux  " << std::endl;
 
@@ -137,25 +138,26 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    if (!bConnAudio)
-        LOG(WARNING) << " no audio stream found, will process video only";
+    if (!bConnAudio) LOG(WARNING) << " no audio stream found, will process video only";
 
-    DavWave::connect(videoDecode.get(), videoEncode.get());
-    DavWave::connect(videoEncode.get(), mux.get());
-    DavWave::connect(videoEncode.get(), mux2.get());
+    DavWave::subscribeData(videoDecode, videoFilter);
+    DavWave::subscribeData(videoDecode, videoEncode);
+    DavWave::subscribeData(videoEncode, mux);
+    DavWave::subscribeData(videoEncode, mux2);
     if (bConnAudio) {
-        //DavWave::connect(audioDecode.get(), audioFilter.get(), AVMEDIA_TYPE_AUDIO);
-        //DavWave::connect(audioFilter.get(), audioEncode.get(), AVMEDIA_TYPE_AUDIO);
-        DavWave::connect(audioDecode.get(), audioEncode.get());
-        DavWave::connect(audioEncode.get(), mux.get());
-        DavWave::connect(audioEncode.get(), mux2.get());
+        // DavWave::subscribeData(audioDecode.get(), audioFilter.get(),
+        // AVMEDIA_TYPE_AUDIO); DavWave::subscribeData(audioFilter.get(),
+        // audioEncode.get(), AVMEDIA_TYPE_AUDIO);
+        DavWave::subscribeData(audioDecode, audioEncode);
+        DavWave::subscribeData(audioEncode, mux);
+        DavWave::subscribeData(audioEncode, mux2);
     }
 
     // start
     DavStreamlet streamlet;
     /*videoFilter, audioFilter,  */
-    streamlet.setWaves(vector<shared_ptr<DavWave>>({demux, videoDecode, videoEncode,
-                    audioDecode, audioEncode, mux, mux2}));
+    streamlet.setWaves(vector<shared_ptr<DavWave>>(
+        {demux, videoDecode, videoEncode, audioDecode, audioEncode, mux, mux2}));
 
     streamlet.start();
     testRun(streamlet);

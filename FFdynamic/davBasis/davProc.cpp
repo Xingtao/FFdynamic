@@ -1,4 +1,3 @@
-#include <sstream>
 #include "davProc.h"
 
 namespace ff_dynamic {
@@ -8,12 +7,14 @@ using ::std::mutex;
 /* static functions: generate an unique DavProc index for log reading convnience */
 mutex DavProc::s_idxMutex;
 int DavProc::s_autoIdx = 1;
-DavMsgCollector & DavProc::s_msgCollector = DavMsgCollector::getInstance();
+DavMsgCollector& DavProc::s_msgCollector = DavMsgCollector::getInstance();
 
 /////////////////////////////////////////////////////////////////////////////////////////
-DavProc::DavProc (const DavWaveOption & options) noexcept
-    : m_idx([](){std::lock_guard<mutex> lock(s_idxMutex); return s_autoIdx++;}()) {
-
+DavProc::DavProc(const DavWaveOption& options) noexcept
+    : m_idx([]() {
+          std::lock_guard<mutex> lock(s_idxMutex);
+          return s_autoIdx++;
+      }()) {
     if (options.isCategoryOptionsEmpty()) {
         ERROR(DAV_ERROR_BASE_EMPTY_OPTION, "please check creation ClassCategory options");
         return;
@@ -36,7 +37,8 @@ DavProc::DavProc (const DavWaveOption & options) noexcept
     LOG(INFO) << m_logtag << m_procInfo;
 
     m_dataTransmitor = make_shared<DavTransmitor<DavProcBuf, DavProcFrom>>(m_logtag);
-    m_pubsubTransmitor = make_shared<DavTransmitor<DavPeerEvent, DavProcFrom>>(m_logtag + "[Event]");
+    m_pubsubTransmitor =
+        make_shared<DavTransmitor<DavPeerEvent, DavProcFrom>>(m_logtag + "[Event]");
     m_outbufLimiter = make_shared<DavProcBufLimiter>();
 
     DavProcFrom selfAddreess(this);
@@ -46,8 +48,7 @@ DavProc::DavProc (const DavWaveOption & options) noexcept
 }
 
 DavProc::~DavProc() {
-    if (m_processThread)
-        m_processThread->join();
+    if (m_processThread) m_processThread->join();
     const auto inputStat = m_dataTransmitor->getReceiveCountStat();
     const auto outputStat = m_dataTransmitor->getSendCountStat();
     INFO(DAV_INFO_BASE_DESTRUCT_DONE,
@@ -61,13 +62,12 @@ DavProc::~DavProc() {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // prerocess. could be overrided
-int DavProc::preProcess(shared_ptr<DavProcBuf> & inBuf) {
+int DavProc::preProcess(shared_ptr<DavProcBuf>& inBuf) {
     /* sub-pub event process and input data get */
     int ret = 0;
     bool bGet = false;
     do {
-        if (!m_bAlive)
-            return AVERROR_EOF;
+        if (!m_bAlive) return AVERROR_EOF;
         shared_ptr<DavPeerEvent> event = m_pubsubTransmitor->retrive();
         if (event) {
             ret = m_impl->processPeerEvent(*event);
@@ -82,49 +82,50 @@ int DavProc::preProcess(shared_ptr<DavProcBuf> & inBuf) {
     return 0;
 }
 
-int DavProc::process(DavProcCtx & ctx) {
+int DavProc::process(DavProcCtx& ctx) {
     if (m_impl) {
         /* do data prefilter here */
         int ret = 0;
-        for (auto & prefilter : m_prefilters) {
+        for (auto& prefilter : m_prefilters) {
             // TODO: preserve data from and other bookkeepings
             // shared_ptr<DavProcBuf> inBuf = ;
             // auto filterrdInBuf = prefilter(ctx.m_inBuf);
         }
         ret = m_impl->process(ctx);
-        if (ret < 0)
-            m_procInfo = m_impl->getImplErr();
+        if (ret < 0) m_procInfo = m_impl->getImplErr();
         return ret;
     }
-    ERROR(DAV_ERROR_BASE_EMPTY_IMPL, m_logtag + "DavProcBase encounters empty implementation");
+    ERROR(DAV_ERROR_BASE_EMPTY_IMPL,
+          m_logtag + "DavProcBase encounters empty implementation");
     return DAV_ERROR_BASE_EMPTY_IMPL;
 }
 
-int DavProc::postProcess(DavProcCtx & ctx) {
+int DavProc::postProcess(DavProcCtx& ctx) {
     /* post process */
     if (ctx.m_bInputFlush) {
         m_dataTransmitor->deleteSender(ctx.m_inBuf->getAddress());
-        INFO(DAV_INFO_BASE_DELETE_ONE_RECEIVER, m_logtag + "one input end " + toStringViaOss(*ctx.m_inBuf));
+        INFO(DAV_INFO_BASE_DELETE_ONE_RECEIVER,
+             m_logtag + "one input end " + toStringViaOss(*ctx.m_inBuf));
     }
     m_dataTransmitor->farwell(ctx.m_inBuf); /* with 100ms timeout */
-    m_expectInput = ctx.m_expect; /* next process expected input */
+    m_expectInput = ctx.m_expect;           /* next process expected input */
 
     /* post process for event */
-    for (const auto & e : ctx.m_pubEvents) {
+    for (const auto& e : ctx.m_pubEvents) {
         /* impl only know event's streamIndex, so we fill other fields here */
         e->getAddress().setGroupFrom(this, m_groupId);
         m_pubsubTransmitor->broadcast(e);
     }
 
     /* post process for output */
-    for (auto & buf : ctx.m_outBufs) {
-        for (auto & prefilter : m_postfilters) {
+    for (auto& buf : ctx.m_outBufs) {
+        for (auto& prefilter : m_postfilters) {
             // TODO: preserve data from and other bookkeepings
             // shared_ptr<DavProcBuf> inBuf = ;
             // auto filterrdInBuf = prefilter(ctx.m_inBuf);
         }
         buf->getAddress().setGroupFrom(this, m_groupId);
-        for (int k=0; k < ctx.m_outputTimes; k++) {
+        for (int k = 0; k < ctx.m_outputTimes; k++) {
             m_dataTransmitor->delivery(buf);
             auto r = m_dataTransmitor->getRecipients();
         }
@@ -142,15 +143,17 @@ int DavProc::runDavProcThread() {
     while (m_bAlive) {
         shared_ptr<DavProcBuf> inBuf;
         ret = preProcess(inBuf);
-        if (ret == AVERROR(EAGAIN)) /* check after pre-process to make sure we would like to continue process */
+        if (ret == AVERROR(EAGAIN)) /* check after pre-process to make sure we would like
+                                       to continue process */
             continue;
         else if (ret == AVERROR_EOF)
             break;
 
         DavProcCtx ctx(m_dataTransmitor->getSenders());
-        {   /* unique_lock with cv */
+        { /* unique_lock with cv */
             std::unique_lock<mutex> lock(m_runLock);
-            m_runCondVar.wait(lock, [this](){return (this->m_bOnFire ? true : false);});
+            m_runCondVar.wait(lock,
+                              [this]() { return (this->m_bOnFire ? true : false); });
             getProcessStartTime();
             /*
             if (inBuf && !m_dataTransmitor->isSenderStillValid(inBuf->getAddress())) {
@@ -163,7 +166,8 @@ int DavProc::runDavProcThread() {
             if (ret == AVERROR_EOF) {
                 m_bImplProcessEof = true;
             } else if (ret == DAV_ERROR_IMPL_DYNAMIC_INIT) {
-                ERROR(ret, "Fail with proc's process, quit proc thread. " + m_procInfo.m_msgDetail);
+                ERROR(ret, "Fail with proc's process, quit proc thread. " +
+                               m_procInfo.m_msgDetail);
                 m_bImplProcessEof = true;
                 break;
             } else if (ret < 0 && ret != AVERROR(EAGAIN))
@@ -174,7 +178,8 @@ int DavProc::runDavProcThread() {
 
         /* impl process finish */
         if (m_bImplProcessEof) {
-            INFO(DAV_INFO_BASE_END_PROCESS, m_logtag + "self process done, will quit run process");
+            INFO(DAV_INFO_BASE_END_PROCESS,
+                 m_logtag + "self process done, will quit run process");
             break;
         }
     }
@@ -219,7 +224,8 @@ int DavProc::start() noexcept {
     if (!m_processThread) {
         m_bAlive = false;
         m_bOnFire = false;
-        ERROR(DAV_ERROR_BASE_CREATE_PROC_THREAD, m_logtag + " fail creating impl process thread");
+        ERROR(DAV_ERROR_BASE_CREATE_PROC_THREAD,
+              m_logtag + " fail creating impl process thread");
         return DAV_ERROR_BASE_CREATE_PROC_THREAD;
     }
     return 0;

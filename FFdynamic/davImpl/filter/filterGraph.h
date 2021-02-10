@@ -5,21 +5,21 @@
 #include <string>
 #include <vector>
 
-#include "davUtil.h"
+#include <glog/logging.h>
 #include "ffmpegHeaders.h"
-#include "glog/logging.h"
-
 extern "C" {
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
 }
+
+#include "davUtil.h"
 
 namespace ff_dynamic {
 using ::std::shared_ptr;
 using ::std::string;
 using ::std::vector;
 
-struct FilterGeneralParams {
+struct FilterGraphParams {
     enum AVMediaType m_inMediaType = AVMEDIA_TYPE_UNKNOWN;
     enum AVMediaType m_outMediaType = AVMEDIA_TYPE_UNKNOWN;
     shared_ptr<AVBufferSrcParameters> m_bufsrcParams;
@@ -30,13 +30,13 @@ struct FilterGeneralParams {
 };
 
 extern std::ostream &operator<<(std::ostream &os, const AVBufferSrcParameters &p);
-extern std::ostream &operator<<(std::ostream &os, const FilterGeneralParams &p);
+extern std::ostream &operator<<(std::ostream &os, const FilterGraphParams &p);
 
-class FilterGeneral {
+class FilterGraph {
    public:
-    FilterGeneral() = default;
-    virtual ~FilterGeneral() { close(); }
-    int initFilter(const FilterGeneralParams &fgp);
+    FilterGraph() = default;
+    virtual ~FilterGraph() { close(); }
+    int initFilter(const FilterGraphParams &fgp);
     int close();
     int sendFilterFrame(AVFrame *frame, int srcFlags = AV_BUFFERSRC_FLAG_KEEP_REF);
     int receiveFilterFrames(vector<shared_ptr<AVFrame>> &filterFrames, int sinkFlags = 0);
@@ -47,8 +47,8 @@ class FilterGeneral {
     int prepareFilter();
 
    protected:
-    string m_logtag = "[FilterGeneral] ";
-    FilterGeneralParams m_fgp;
+    string m_logtag = "[FilterGraph] ";
+    FilterGraphParams m_fgp;
 
    private:
     AVFilterGraph *m_filterGraph = nullptr;

@@ -13,6 +13,10 @@
 #include <utility>
 #include <vector>
 
+// third
+#include <glog/logging.h>
+#include "ffmpegHeaders.h"
+// project
 #include "davDict.h"
 #include "davDynamicEvent.h"
 #include "davImplEventProcess.h"
@@ -22,7 +26,6 @@
 #include "davPeerEvent.h"
 #include "davProcCtx.h"
 #include "davUtil.h"
-#include "ffmpegHeaders.h"
 
 namespace ff_dynamic {
 using ::std::deque;

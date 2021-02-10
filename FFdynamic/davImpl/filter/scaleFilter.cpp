@@ -1,9 +1,8 @@
-#include "scaleFilter.h"
-
 #include <iostream>
 #include <sstream>
 
 #include "davMessager.h"
+#include "scaleFilter.h"
 
 namespace ff_dynamic {
 
@@ -32,7 +31,7 @@ int ScaleFilter::initScaleFilter(const ScaleFilterParams &sfp) {
     m_logtag = m_sfp.m_logtag.empty() ? "[ScaleFilter] " : m_sfp.m_logtag;
     LOG(INFO) << m_sfp;
 
-    FilterGeneralParams fgp;
+    FilterGraphParams fgp;
     // 1. filter base parameters settings
     fgp.m_inMediaType = AVMEDIA_TYPE_VIDEO;
     fgp.m_outMediaType = AVMEDIA_TYPE_VIDEO;

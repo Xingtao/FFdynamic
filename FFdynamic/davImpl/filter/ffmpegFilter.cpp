@@ -1,6 +1,5 @@
-#include "ffmpegFilter.h"
-
 #include "davDict.h"
+#include "ffmpegFilter.h"
 
 namespace ff_dynamic {
 
@@ -28,7 +27,7 @@ const DavRegisterProperties &FFmpegFilter::getRegisterProperties() const noexcep
 
 //////////////////////////////////////////////////////////////////////////////////////////
 int FFmpegFilter::onDynamicallyInitializeViaTravelStatic(DavProcCtx &ctx) {
-    if (m_filterGraph) return onDestruct();
+    // if (m_filterGraph) return onDestruct();
     return 0;
 }
 

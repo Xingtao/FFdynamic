@@ -245,8 +245,8 @@ class DavDict {
    private:
     AVDictionary *m_d = nullptr;         /* ffmpeg's options passing structure */
     map<DavOption, string> m_davOptions; /* primitives: int double string */
-    map<DavOption, DavOption>
-        m_categoryOptions; /* DavOption derived class as category (enum) */
+    /* DavOption derived class as category (enum) */
+    map<DavOption, DavOption> m_categoryOptions;
     map<string, vector<int>> m_intArrayOptions;
     map<string, vector<double>> m_doubleArrayOptions;
     std::mutex m_mutex; /* TODO: mutex needed ? Not right now */

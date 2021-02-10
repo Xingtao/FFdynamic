@@ -2,9 +2,10 @@
 
 #include <iostream>
 #include <memory>
-#include "glog/logging.h"
-#include "ffmpegHeaders.h"
+
 #include "davDict.h"
+#include "ffmpegHeaders.h"
+#include "glog/logging.h"
 
 namespace ff_dynamic {
 using ::std::ostream;
@@ -12,11 +13,11 @@ using ::std::shared_ptr;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* DavImplTravel:
-   Passing impl's two types of exported info to its connected peer (static and dynamic export info)
-   Normally, 'static' exports impl's peroperties, such as codecpar, timebase, format, etc.., and
-   'static' info is alway outputed;
-   'dynamic' is event driven, such as object detection, ROIs region, etc...,
-   which is generated and output only in one specific process call.
+   Passing impl's two types of exported info to its connected peer (static and dynamic
+   export info) Normally, 'static' exports impl's peroperties, such as codecpar, timebase,
+   format, etc.., and 'static' info is alway outputed; 'dynamic' is event driven, such as
+   object detection, ROIs region, etc..., which is generated and output only in one
+   specific process call.
 */
 
 struct DavTravelStatic {
@@ -30,7 +31,7 @@ struct DavTravelStatic {
     int m_width = 0;
     int m_height = 0;
     AVRational m_sar = {0, 1};
-    AVRational m_framerate = {0, 1}; /* this field also used if codecpar exists */
+    AVRational m_framerate = {0, 1};      /* this field also used if codecpar exists */
     AVBufferRef *m_hwFramesCtx = nullptr; /* this field also used if codecpar exists */
 
     /* audio specific */
@@ -40,36 +41,39 @@ struct DavTravelStatic {
     uint64_t m_channelLayout = 0;
 
     /////////////////////////////////////////////////////////////////////////////////////////
-    /* merge/setup part: use videopar/audiopar when options not exist, normally used by encoders */
-    int mergeVideoDavTravelStaticToDict(DavWaveOption & options);
-    int mergeAudioDavTravelStaticToDict(DavWaveOption & options);
+    /* merge/setup part: use videopar/audiopar when options not exist, normally used by
+     * encoders */
+    int mergeVideoDavTravelStaticToDict(DavWaveOption &options);
+    int mergeAudioDavTravelStaticToDict(DavWaveOption &options);
     /* */
-    int setupVideoStatic(AVCodecContext *codecCtx, const AVRational & timebase,
-                             const AVRational & framerate = {0, 1},
-                             AVBufferRef *hwFramesCtx = nullptr) noexcept;
-    int setupVideoStatic(AVCodecParameters *codecpar, const AVRational & timebase,
-                             const AVRational & framerate = {0, 1},
-                             AVBufferRef *hwFramesCtx = nullptr) noexcept;
+    int setupVideoStatic(AVCodecContext *codecCtx, const AVRational &timebase,
+                         const AVRational &framerate = {0, 1},
+                         AVBufferRef *hwFramesCtx = nullptr) noexcept;
+    int setupVideoStatic(AVCodecParameters *codecpar, const AVRational &timebase,
+                         const AVRational &framerate = {0, 1},
+                         AVBufferRef *hwFramesCtx = nullptr) noexcept;
     int setupVideoStatic(enum AVPixelFormat pixfmt, int width, int height,
-                             const AVRational & timebase, const AVRational & framerate = {0, 1},
-                             const AVRational & sampleAspectRatio = {0, 1},
-                             AVBufferRef *hwFramesCtx = nullptr) noexcept;
+                         const AVRational &timebase, const AVRational &framerate = {0, 1},
+                         const AVRational &sampleAspectRatio = {0, 1},
+                         AVBufferRef *hwFramesCtx = nullptr) noexcept;
     /* */
-    int setupAudioStatic(AVCodecContext *codecCtx, const AVRational & timebase) noexcept;
-    int setupAudioStatic(AVCodecParameters *codecpar, const AVRational & timebase) noexcept;
-    int setupAudioStatic(enum AVSampleFormat samplefmt, const AVRational & timebase,
-                             int samplerate, int channels, uint64_t channelLayout) noexcept;
+    int setupAudioStatic(AVCodecContext *codecCtx, const AVRational &timebase) noexcept;
+    int setupAudioStatic(AVCodecParameters *codecpar,
+                         const AVRational &timebase) noexcept;
+    int setupAudioStatic(enum AVSampleFormat samplefmt, const AVRational &timebase,
+                         int samplerate, int channels, uint64_t channelLayout) noexcept;
 };
 
-extern ostream & operator<<(ostream & os, const DavTravelStatic & s);
+extern ostream &operator<<(ostream &os, const DavTravelStatic &s);
 
-/* base class for travel dynamic: take advantage of covariant return type to do polymorphism */
+/* base class for travel dynamic: take advantage of covariant return type to do
+ * polymorphism */
 struct DavTravelDynamic {
-    virtual const DavTravelDynamic & getSelf() const = 0;
+    virtual const DavTravelDynamic &getSelf() const = 0;
 };
 
 struct DavTravelROI : DavTravelDynamic {
-    virtual const DavTravelROI & getSelf() const {return *this;}
+    virtual const DavTravelROI &getSelf() const { return *this; }
     struct ROI {
         int x = 0;
         int y = 0;
@@ -85,4 +89,4 @@ struct FFmpegAVPacketSideDataEvent {
     AVPacketSideData m_avPacketSideData;
 };
 
-} // namespace ff_dynamic
+}  // namespace ff_dynamic

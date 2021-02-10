@@ -1,7 +1,7 @@
 #include "ffmpegVideoEncode.h"
 
 namespace ff_dynamic {
-///////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
 // [Register - auto, ffmpegVideoEncode]
 static DavImplRegister s_videoEncodeReg(
     DavWaveClassVideoEncode(), vector<string>({"auto", "ffmpeg"}), {},
@@ -28,9 +28,7 @@ int FFmpegVideoEncode::dynamicallyInitialize(const DavTravelStatic &in) {
         enc = avcodec_find_encoder_by_name("libx264");
         if (!enc) {
             ERRORIT(DAV_ERROR_IMPL_CODEC_NOT_FOUND,
-                    m_logtag +
-                        "default libx264 encoder not found, create ffmpeg video encoder "
-                        "fail");
+                    m_logtag + ": default libx264 not found, create encoder fail");
             return DAV_ERROR_IMPL_CODEC_NOT_FOUND;
         }
     }
@@ -38,11 +36,11 @@ int FFmpegVideoEncode::dynamicallyInitialize(const DavTravelStatic &in) {
     m_encCtx = avcodec_alloc_context3(enc);
     CHECK(m_encCtx != nullptr) << (m_logtag + " fail alloate encode context");
     // m_encCtx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER; /* TODO: always output this one ?*/
-
     /* before open, some other parameters need be set */
     /* calculate encode aspect ratio */
     /* policy: change encode aspect ratio to keep display aspect ratio and without padding
      */
+
     int outWidth = 0;
     int outHeight = 0;
     ret = m_options.getVideoSize(outWidth, outHeight);

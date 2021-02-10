@@ -1,6 +1,7 @@
-#include "filterGeneral.h"
-
 #include <iostream>
+#include <glog/logging.h>
+//
+#include "filterGraph.h"
 
 namespace ff_dynamic {
 
@@ -13,8 +14,8 @@ std::ostream &operator<<(std::ostream &os, const AVBufferSrcParameters &p) {
     return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const FilterGeneralParams &p) {
-    os << p.m_logtag << " of FilterGeneral Params: \nin-format "
+std::ostream &operator<<(std::ostream &os, const FilterGraphParams &p) {
+    os << p.m_logtag << " of FilterGraph Params: \nin-format "
        << av_get_media_type_string(p.m_inMediaType) << ", out-format "
        << av_get_media_type_string(p.m_outMediaType)
        << ", buffersrc: " << (*p.m_bufsrcParams.get())
@@ -22,10 +23,10 @@ std::ostream &operator<<(std::ostream &os, const FilterGeneralParams &p) {
     return os;
 }
 
-int FilterGeneral::initFilter(const FilterGeneralParams &fgp) {
+int FilterGraph::initFilter(const FilterGraphParams &fgp) {
     int ret = 0;
     m_fgp = fgp;
-    LOG(INFO) << m_logtag << "FilterGeneral incoming params: " << m_fgp;
+    LOG(INFO) << m_logtag << "FilterGraph incoming params: " << m_fgp;
     if (!fgp.m_logtag.empty()) m_logtag = fgp.m_logtag;
 
     if (!fgp.m_bufsrcParams) {
@@ -100,7 +101,7 @@ int FilterGeneral::initFilter(const FilterGeneralParams &fgp) {
     return ret;
 }
 
-int FilterGeneral::close() {
+int FilterGraph::close() {
     if (m_filterGraph) {
         avfilter_graph_free(&m_filterGraph);  // related filters will be set null
     }
@@ -110,7 +111,7 @@ int FilterGeneral::close() {
     return 0;
 }
 
-int FilterGeneral::prepareBufferSrc() {
+int FilterGraph::prepareBufferSrc() {
     // m_bufsrcParams
     char srcArgs[512] = {0};
     if (m_fgp.m_inMediaType == AVMEDIA_TYPE_VIDEO) {
@@ -144,7 +145,7 @@ int FilterGeneral::prepareBufferSrc() {
     return 0;
 }
 
-int FilterGeneral::prepareBufferSink() {
+int FilterGraph::prepareBufferSink() {
     const char *bufsinkName =
         m_fgp.m_outMediaType == AVMEDIA_TYPE_VIDEO ? "buffersink" : "abuffersink";
     const AVFilter *bufsink = avfilter_get_by_name(bufsinkName);
@@ -181,7 +182,7 @@ int FilterGeneral::prepareBufferSink() {
 ////////////////////////////
 // [process: send - receive]
 
-int FilterGeneral::sendFilterFrame(AVFrame *frame, int srcFlags) {
+int FilterGraph::sendFilterFrame(AVFrame *frame, int srcFlags) {
     /* push input frame into the filtergraph. null frame input means EOF */
     int ret = av_buffersrc_add_frame_flags(m_srcCtx, frame, srcFlags);
     if (ret < 0) return ret;
@@ -190,8 +191,8 @@ int FilterGeneral::sendFilterFrame(AVFrame *frame, int srcFlags) {
     return ret;
 }
 
-int FilterGeneral::receiveFilterFrames(vector<shared_ptr<AVFrame>> &filterFrames,
-                                       int sinkFlags) {
+int FilterGraph::receiveFilterFrames(vector<shared_ptr<AVFrame>> &filterFrames,
+                                     int sinkFlags) {
     int ret = 0;
     /* pull filtered frames from the filtergraph */
     do {
@@ -219,6 +220,7 @@ AVBufferSrcParameters *par = av_buffersrc_parameters_alloc();
         return AVERROR(ENOMEM);
     memset(par, 0, sizeof(*par));
     par->format = AV_PIX_FMT_NONE;
+
     if (ist->dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
         av_log(NULL, AV_LOG_ERROR, "Cannot connect video filter to audio input\n");
         ret = AVERROR(EINVAL);

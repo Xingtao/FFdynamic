@@ -10,8 +10,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-# require a c++14
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -42,7 +41,7 @@ set(FFdynamicSrc
   davImpl/davImplTravel.cpp
   davImpl/dataRelay/dataRelay.cpp
   davImpl/filter/ffmpegFilter.cpp
-  davImpl/filter/filterGeneral.cpp
+  davImpl/filter/filterGraph.cpp
   davImpl/filter/scaleFilter.cpp
   davImpl/demux/ffmpegDemux.cpp
   davImpl/mux/ffmpegMux.cpp

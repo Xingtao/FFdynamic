@@ -37,7 +37,7 @@ We start with a simple scenario, transcoding, to take a flavor of FFdynamic.
     river.start();
     ......
 ```
-The source code is [here](FFdynamic/davTests/simpleTranscode.cpp).
+The source code is [here](../FFdynamic/davTests/simpleTranscode.cpp).
 
 This example read an input (local or online stream) then encode it to the format you required (it is just what  transcoding does).
 

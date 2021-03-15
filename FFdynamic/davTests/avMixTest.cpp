@@ -17,29 +17,21 @@
 #include "davStreamlet.h"
 #include "testCommon.h"
 
-using std::string;
-using std::vector;
 using std::shared_ptr;
+using std::string;
 using std::type_index;
+using std::vector;
 using namespace test_common;
 using namespace ff_dynamic;
 
 int main(int argc, char **argv) {
     testInit(argv[0]);
-
-    string inUrl1 = "http://118.89.196.57/nba_ad.mp4";
-    string inUrl2 = "http://118.89.196.57/sd.flv";;
-    if (argc >= 2) {
-        int theTestType = std::stoi(argv[1]);
-        if (theTestType == 1) {
-            inUrl1 = "rtmp://live.hkstv.hk.lxdns.com/live/hks"; // 480x288 sar,16:15
-            inUrl2 = "rtmp://202.69.69.180:443/webcast/bshdlive-pc"; // 1027x576 sar,1:1
-        } else if (theTestType == 2) {
-            // inUrl2 = "rtmp://live.hkstv.hk.lxdns.com/live/hks"; // 480x288 sar,16:15
-            inUrl2 = "rtmp://202.69.69.180:443/webcast/bshdlive-pc"; // 1027x576 sar,1:1
-        }
+    if (argc != 3) {
+        LOG(ERROR) << "Usage: url1 url2";
+        return -1;
     }
-
+    string inUrl1(argv[1]);
+    string inUrl2(argv[1]);
     LOG(INFO) << "starting test: " << inUrl1 << " & " << inUrl2;
 
     // 1. create demux and get stream info
@@ -136,8 +128,10 @@ int main(int argc, char **argv) {
     ////////////////////////////////////////////////////////////////////////////
     // gropu them and then connect
     // before we go further, set group for each
-    auto streamletInput1 = std::make_shared<DavStreamlet>(DavDefaultInputStreamletTag(inUrl1));
-    auto streamletInput2 = std::make_shared<DavStreamlet>(DavDefaultInputStreamletTag(inUrl2));
+    auto streamletInput1 =
+        std::make_shared<DavStreamlet>(DavDefaultInputStreamletTag(inUrl1));
+    auto streamletInput2 =
+        std::make_shared<DavStreamlet>(DavDefaultInputStreamletTag(inUrl2));
     // input group 1 & 2
     streamletInput1->setWaves({demux1, videoDecode1, audioDecode1});
     streamletInput2->setWaves({demux2, videoDecode2, audioDecode2});
@@ -157,17 +151,16 @@ int main(int argc, char **argv) {
 
     bool bConnVideo = false;
     bool bConnAudio = false;
-    for (auto & os : demuxOutStreams1) {
+    for (auto &os : demuxOutStreams1) {
         if (os.second == AVMEDIA_TYPE_VIDEO && !bConnVideo) {
             DavWave::connect(demux1.get(), videoDecode1.get(), os.first);
             bConnVideo = true;
         }
         if (os.second == AVMEDIA_TYPE_AUDIO && !bConnAudio) {
-             DavWave::connect(demux1.get(), audioDecode1.get(), os.first);
-             bConnAudio = true;
+            DavWave::connect(demux1.get(), audioDecode1.get(), os.first);
+            bConnAudio = true;
         }
-        if (bConnVideo && bConnAudio)
-            break;
+        if (bConnVideo && bConnAudio) break;
     }
     if (!bConnVideo || !bConnAudio) {
         LOG(ERROR) << "no audio/video stream found";
@@ -176,17 +169,16 @@ int main(int argc, char **argv) {
 
     bConnVideo = false;
     bConnAudio = false;
-    for (auto & os : demuxOutStreams2) {
+    for (auto &os : demuxOutStreams2) {
         if (os.second == AVMEDIA_TYPE_VIDEO && !bConnVideo) {
             DavWave::connect(demux2.get(), videoDecode2.get(), os.first);
             bConnVideo = true;
         }
         if (os.second == AVMEDIA_TYPE_AUDIO && !bConnAudio) {
-             DavWave::connect(demux2.get(), audioDecode2.get(), os.first);
-             bConnAudio = true;
+            DavWave::connect(demux2.get(), audioDecode2.get(), os.first);
+            bConnAudio = true;
         }
-        if (bConnVideo && bConnAudio)
-            break;
+        if (bConnVideo && bConnAudio) break;
     }
     if (!bConnVideo || !bConnAudio) {
         LOG(ERROR) << "no audio/video stream found";

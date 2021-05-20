@@ -260,7 +260,7 @@ class DavTransmitor : public std::enable_shared_from_this<DavTransmitor<Load, Ad
    private:
     string m_logtag;
     Address m_selfAddress;
-    std::mutex m_mutex;
+    mutable std::mutex m_mutex;
     std::condition_variable m_expectCV;
     vector<Address> m_senderAddrs;
     std::multimap<Address, shared_ptr<Transmitor>> m_senderTransmitor;
